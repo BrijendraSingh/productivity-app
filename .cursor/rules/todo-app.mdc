@@ -1,0 +1,133 @@
+# Productivity App — Coding Conventions
+
+## Monorepo Structure
+
+This is a monorepo with three packages. **Build order matters**: `shared` → `backend` → `frontend`.
+
+```
+productivity-app/
+├── shared/       # @productivity-app/shared — types, constants, utilities
+├── backend/      # Express 4 API server (port 3001)
+├── frontend/     # Vite + React 18 SPA (port 3000)
+├── data/         # SQLite database files (gitignored)
+├── package.json  # Root workspace config & scripts
+└── tsconfig.json # Base TypeScript config (extended by each package)
+```
+
+Every package has its own `package.json` and `tsconfig.json` that extends the root config. Do not hoist package-specific dependencies to the root.
+
+---
+
+## Shared Package (`@productivity-app/shared`)
+
+- **All type definitions live here.** Never duplicate types in `frontend/` or `backend/`. Both packages must import from `@productivity-app/shared`.
+- Exports: types, constants (bullet symbols, quadrants, priorities, moods, API endpoints, date formats, defaults), and utility classes (`DateUtils`, `EisenhowerUtils`, `TextUtils`, `ValidationUtils`).
+- When adding a new entity, update `shared/src/types/index.ts` first, then consume the type in backend and frontend.
+
+---
+
+## Backend Conventions
+
+### Framework & Runtime
+- **Express 4.x** (NOT Express 5). Use callback-style middleware.
+- **SQLite** via the `sqlite3` package. Database file lives in `data/productivity_app.db`.
+- **TypeScript** compiled with `ts-node` in dev (via nodemon) and `tsc` for production build.
+
+### Authentication & Route Protection
+- All routes require auth middleware **except** these four:
+  - `GET /health`
+  - `GET /api`
+  - `POST /api/auth/register`
+  - `POST /api/auth/login`
+- Auth uses custom API tokens (Bearer token in `Authorization` header), with bcryptjs (12 salt rounds) for password hashing.
+
+### Database Schema Rules
+- Every user-scoped table **must** have a `user_id INTEGER REFERENCES users(id) ON DELETE CASCADE` column.
+- Add an index on `user_id` for each user-scoped table.
+- The `categories` and `tags` tables must have a `UNIQUE(user_id, name)` constraint.
+
+### API Response Envelope
+All API responses use the standard envelope:
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "optional string",
+  "meta": { "page": 1, "limit": 20, "total": 100 }
+}
+```
+
+Never return raw data — always wrap in `{ success, data?, message?, meta? }`.
+
+### Controller Pattern
+- One controller file per resource (e.g., `todoController.ts`, `diaryController.ts`).
+- Controllers receive `(req, res)` and handle DB queries. Business logic that is non-trivial should be extracted to service functions or shared utilities.
+- Always scope queries by `req.user.id` (from auth middleware) for user-owned resources.
+
+### Error Handling
+- Use `express-validator` for input validation; return 400 with validation errors.
+- Map SQLite constraint errors to appropriate HTTP status codes (409 for UNIQUE violations, etc.).
+- Central error handler as the last middleware in the stack.
+
+---
+
+## Frontend Conventions
+
+### Framework & Tooling
+- **Vite** as the build tool and dev server (NOT Create React App).
+- **React 18.x** (NOT React 19). Use functional components and hooks exclusively.
+- **TypeScript** for all source files (`.tsx` / `.ts`).
+
+### UI Library
+- **MUI (Material-UI)** as the component library — `@mui/material`, `@mui/icons-material`, `@mui/lab`, `@mui/x-date-pickers`.
+- **Emotion** (`@emotion/react`, `@emotion/styled`) for custom styling. Do not use `styled-components` or plain CSS files.
+
+### State & Data Fetching
+- Use React Context for global state: `AuthContext` (authentication) and `ThemeContext` (dark/light mode).
+- Custom hooks per feature (`useTodos`, `useDiary`, `useBlog`, `useBulletJournal`, `useAnalytics`) encapsulate API calls and local state.
+- API calls go through `services/api.ts`, which sets the Bearer token header and handles 401 auto-logout.
+
+### Routing
+- **React Router DOM** (v6+). Wrap the app in `BrowserRouter`.
+- Use `ProtectedRoute` wrapper for all authenticated routes — redirect to `LandingPage` when unauthenticated.
+
+### Component Organization
+- Group components by feature domain: `Auth/`, `Todo/`, `Diary/`, `Blog/`, `BulletJournal/`, `Matrix/`, `Analytics/`, `Dashboard/`, `Landing/`, `Layout/`.
+- Each domain folder should contain its view component and any sub-components it needs.
+- `ErrorBoundary` wraps major sections.
+
+### Theme
+- Light/dark mode toggle with system preference fallback.
+- Persist theme choice in `localStorage` key `productivity_app_theme`.
+- Custom color palettes for: Eisenhower quadrants, bullet symbols, todo statuses, priority levels.
+
+---
+
+## Phase Boundaries
+
+Implement features in strict phase order. **Phase 1 must be fully working before starting Phase 2.**
+
+| Phase | Scope |
+|-------|-------|
+| **Phase 1 — Core** | Auth, Todos, Categories, Tags, Eisenhower Matrix, Dashboard, Landing Page, Shared package, Theme system, Layout |
+| **Phase 2 — Journaling** | Digital Diary, Bullet Journal |
+| **Phase 3 — Content** | Blog system, Blog categories, Writing sessions |
+| **Phase 4 — Insights** | Full Analytics dashboard, Charts, Trends |
+
+Do not stub Phase 2+ features during Phase 1 — keep the codebase focused on what is currently being built.
+
+---
+
+## General Rules
+
+- **No `any` types.** Use proper types from `@productivity-app/shared`. If a type is missing, add it to the shared package first.
+- **Eisenhower quadrant** is auto-computed from urgency/importance levels (both 1–10 scale):
+  - urgency ≥ 7 AND importance ≥ 7 → Q1 (Do First)
+  - urgency < 7 AND importance ≥ 7 → Q2 (Schedule)
+  - urgency ≥ 7 AND importance < 7 → Q3 (Delegate)
+  - urgency < 7 AND importance < 7 → Q4 (Eliminate)
+- Use `date-fns` for all date operations — no raw `Date` manipulation or moment.js.
+- Docker base image: `node:20-alpine`.
+- Port assignments: backend = 3001, frontend dev server = 3000.
+- Environment variables via `dotenv` — never commit `.env` files.

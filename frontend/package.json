@@ -1,0 +1,38 @@
+{
+  "name": "@productivity-app/frontend",
+  "version": "1.0.0",
+  "description": "React frontend for the Productivity App",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@productivity-app/shared": "1.0.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "7.13.0",
+    "@mui/material": "6.5.0",
+    "@mui/icons-material": "6.5.0",
+    "@mui/lab": "6.0.1-beta.36",
+    "@mui/x-date-pickers": "7.23.6",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "recharts": "3.7.0",
+    "framer-motion": "12.34.1",
+    "date-fns": "4.1.0",
+    "@date-io/date-fns": "3.2.1"
+  },
+  "devDependencies": {
+    "vite": "7.3.1",
+    "@vitejs/plugin-react": "5.1.4",
+    "typescript": "5.9.3",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/node": "^22.0.0"
+  }
+}

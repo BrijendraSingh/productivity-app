@@ -1,0 +1,38 @@
+{
+  "name": "@productivity-app/backend",
+  "version": "1.0.0",
+  "description": "Express 4 API server for the Productivity App",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@productivity-app/shared": "1.0.0",
+    "express": "4.22.1",
+    "sqlite3": "5.1.7",
+    "bcryptjs": "3.0.3",
+    "helmet": "8.1.0",
+    "cors": "2.8.6",
+    "express-rate-limit": "8.2.1",
+    "express-validator": "7.3.1",
+    "morgan": "1.10.1",
+    "compression": "1.8.1",
+    "dotenv": "16.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "3.1.11",
+    "ts-node": "10.9.2",
+    "typescript": "5.9.3",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/morgan": "^1.9.9",
+    "@types/compression": "^1.7.5",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.0.0"
+  }
+}

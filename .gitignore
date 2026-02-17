@@ -7,6 +7,12 @@ build/
 
 # Database files
 data/*.db
+data/*.db-shm
+data/*.db-wal
+data/*.db-journal
+
+# Cursor plans (auto-generated)
+.cursor/plans/
 
 # Environment variables
 .env

@@ -1,0 +1,37 @@
+{
+  "name": "productivity-app",
+  "version": "1.0.0",
+  "description": "A comprehensive personal productivity application combining todo management, digital diary, blog authoring, bullet journaling, Eisenhower Matrix prioritization, and analytics.",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n shared,backend,frontend -c blue,green,cyan \"npm run dev:shared\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:shared": "npm run build --workspace=shared",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "build": "npm run build --workspace=shared && npm run build --workspace=backend && npm run build --workspace=frontend",
+    "build:shared": "npm run build --workspace=shared",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:backend": "npm run build --workspace=backend",
+    "start": "npm run start --workspace=backend",
+    "install-all": "npm install",
+    "clean": "rm -rf node_modules shared/node_modules backend/node_modules frontend/node_modules shared/dist backend/dist frontend/dist",
+    "test": "npm run test --workspaces --if-present",
+    "test:frontend": "npm run test --workspace=frontend --if-present",
+    "test:backend": "npm run test --workspace=backend --if-present",
+    "docker:build": "docker build -t productivity-app .",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "concurrently": "9.2.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
