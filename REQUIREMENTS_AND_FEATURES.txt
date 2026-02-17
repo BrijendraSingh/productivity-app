@@ -1,0 +1,939 @@
+================================================================================
+            PRODUCTIVITY APP — COMPLETE REQUIREMENTS & FEATURES DOCUMENT
+================================================================================
+Generated: February 18, 2026
+Source: Full codebase analysis of todoapp monorepo
+Purpose: Blueprint to rebuild this application from scratch
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+Name:           Productivity App (productivity-app)
+Version:        1.0.0
+License:        MIT
+Architecture:   Monorepo (frontend/ + backend/ + shared/)
+Description:    A comprehensive personal productivity application combining
+                todo management, digital diary, blog authoring, bullet
+                journaling, Eisenhower Matrix prioritization, and analytics
+                — all with Material Design theming and authentication.
+
+================================================================================
+2. TECH STACK & DEPENDENCIES
+================================================================================
+
+2.1 FRONTEND
+─────────────────────────────────────────
+  Framework:          React 19.1.1 (Create React App)
+  Language:           TypeScript 4.9.5
+  UI Library:         Material-UI (MUI) v7.3.1
+    - @mui/material, @mui/icons-material, @mui/lab, @mui/x-date-pickers
+  Styling:            Emotion (@emotion/react, @emotion/styled)
+  Routing:            React Router DOM v7.8.1
+  Rich Text Editor:   @uiw/react-md-editor v4.0.8 (React 19 compatible)
+  Charts:             Recharts v3.1.2
+  Animations:         Framer Motion v12.23.12
+  Date Handling:      date-fns v4.1.0, @date-io/date-fns v3.2.1
+  Testing:            React Testing Library, Jest
+  Dev Server Port:    3000
+
+2.2 BACKEND
+─────────────────────────────────────────
+  Runtime:            Node.js
+  Framework:          Express.js v5.1.0
+  Language:           TypeScript 5.9.2
+  Database:           SQLite 3 (sqlite3 v5.1.7), local file storage
+  Authentication:     bcryptjs v3.0.2 (password hashing), custom API tokens
+  Security:           helmet v8.1.0, cors v2.8.5, express-rate-limit v8.0.1
+  Validation:         express-validator v7.2.1
+  Logging:            morgan v1.10.1
+  Compression:        compression v1.8.1
+  Environment:        dotenv v17.2.1
+  Dev Tools:          nodemon v3.1.10, ts-node v10.9.2
+  Server Port:        3001
+
+2.3 SHARED PACKAGE
+─────────────────────────────────────────
+  Name:               @productivity-app/shared
+  Contains:           TypeScript type definitions, constants, utility classes
+  Exports:            Types, constants (bullet symbols, quadrants, priorities,
+                      moods, API endpoints, date formats, defaults), utilities
+                      (DateUtils, EisenhowerUtils, TextUtils, ValidationUtils)
+
+2.4 INFRASTRUCTURE
+─────────────────────────────────────────
+  Containerization:   Docker (multi-stage build, node:18-alpine)
+  Orchestration:      Docker Compose v3.8
+  Dev Tools:          concurrently v8.2.2 (root), sqlite-web (Docker)
+  Build:              Root workspace scripts for dev/build/test/docker
+
+================================================================================
+3. PROJECT STRUCTURE
+================================================================================
+
+todoapp/
+├── package.json                    # Root workspace config & scripts
+├── tsconfig.json                   # Base TypeScript config
+├── .cursorrules                    # AI coding assistant rules
+├── .env                            # Environment variables
+├── env.example                     # Environment template
+├── Dockerfile                      # Multi-stage Docker build
+├── docker-compose.yml              # Dev/prod/tools services
+├── data/
+│   └── productivity_app.db         # SQLite database file
+├── frontend/
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── src/
+│       ├── index.tsx               # Entry point (BrowserRouter)
+│       ├── App.tsx                  # Routes, providers, layout
+│       ├── components/
+│       │   ├── Analytics/          # Charts & dashboards
+│       │   ├── Auth/               # Login, signup, protected routes
+│       │   ├── Blog/               # Blog posts & rich editor
+│       │   ├── BulletJournal/      # Rapid logging & journal views
+│       │   ├── Dashboard/          # Main overview dashboard
+│       │   ├── Diary/              # Digital diary with mood tracking
+│       │   ├── Landing/            # Public landing page
+│       │   ├── Layout/             # AppLayout, AppHeader
+│       │   ├── Matrix/             # Eisenhower Matrix visualization
+│       │   ├── Todo/               # Todo CRUD & lists
+│       │   └── ErrorBoundary.tsx   # Error boundary component
+│       ├── contexts/
+│       │   ├── ThemeContext.tsx     # Dark/light mode
+│       │   └── AuthContext.tsx      # Authentication state
+│       ├── hooks/
+│       │   ├── useTodos.ts
+│       │   ├── useDiary.ts
+│       │   ├── useBlog.ts
+│       │   ├── useBulletJournal.ts
+│       │   └── useAnalytics.ts
+│       ├── services/
+│       │   └── api.ts              # All API calls & interfaces
+│       └── theme/
+│           └── theme.ts            # MUI theme configuration
+├── backend/
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── src/
+│       ├── index.ts                # Express server entry point
+│       ├── config/
+│       │   └── database.ts         # SQLite init & schema
+│       ├── controllers/
+│       │   ├── todoController.ts
+│       │   ├── categoryController.ts
+│       │   ├── tagController.ts
+│       │   ├── diaryController.ts
+│       │   ├── blogController.ts
+│       │   ├── bulletController.ts
+│       │   └── analyticsController.ts
+│       ├── middleware/
+│       │   ├── auth.ts             # Auth, hashing, token
+│       │   └── validation.ts       # Validation, errors, CORS
+│       └── routes/
+│           ├── todos.ts
+│           ├── categories.ts
+│           ├── tags.ts
+│           ├── diary.ts
+│           ├── blog.ts
+│           ├── auth.ts
+│           ├── bullet.ts
+│           └── analytics.ts
+└── shared/
+    ├── package.json
+    ├── tsconfig.json
+    └── src/
+        ├── index.ts
+        ├── types/index.ts
+        ├── constants/index.ts
+        └── utils/index.ts
+
+================================================================================
+4. DATABASE SCHEMA (SQLite)
+================================================================================
+
+4.1 TABLES (13 total)
+
+TABLE: users
+────────────────────────────────────────────────────────────────
+  id              INTEGER PRIMARY KEY AUTOINCREMENT
+  username        TEXT UNIQUE NOT NULL
+  email           TEXT UNIQUE NOT NULL
+  password_hash   TEXT NOT NULL
+  api_token       TEXT
+  is_active       INTEGER DEFAULT 1
+  profile_data    TEXT (JSON)
+  preferences     TEXT (JSON)
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+
+TABLE: categories
+────────────────────────────────────────────────────────────────
+  id              INTEGER PRIMARY KEY AUTOINCREMENT
+  name            TEXT NOT NULL
+  color           TEXT DEFAULT '#1976d2'
+  icon            TEXT
+  description     TEXT
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+
+TABLE: tags
+────────────────────────────────────────────────────────────────
+  id              INTEGER PRIMARY KEY AUTOINCREMENT
+  name            TEXT UNIQUE NOT NULL
+  color           TEXT DEFAULT '#757575'
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+
+TABLE: todos
+────────────────────────────────────────────────────────────────
+  id                    INTEGER PRIMARY KEY AUTOINCREMENT
+  title                 TEXT NOT NULL
+  description           TEXT
+  status                TEXT DEFAULT 'pending'
+                        (pending | in_progress | completed | cancelled | deferred)
+  priority              TEXT DEFAULT 'medium'
+                        (low | medium | high)
+  due_date              TEXT
+  category_id           INTEGER → categories(id) ON DELETE SET NULL
+  urgency_level         INTEGER DEFAULT 5 (1-10)
+  importance_level      INTEGER DEFAULT 5 (1-10)
+  eisenhower_quadrant   TEXT (Q1 | Q2 | Q3 | Q4)
+  quadrant_auto_assigned INTEGER DEFAULT 1
+  bullet_symbol         TEXT DEFAULT '•'
+  time_estimate         INTEGER (minutes)
+  energy_required       TEXT (low | medium | high)
+  completed_at          DATETIME
+  created_at            DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at            DATETIME DEFAULT CURRENT_TIMESTAMP
+
+TABLE: todo_tags (junction)
+────────────────────────────────────────────────────────────────
+  todo_id         INTEGER → todos(id) ON DELETE CASCADE
+  tag_id          INTEGER → tags(id) ON DELETE CASCADE
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+  PRIMARY KEY (todo_id, tag_id)
+
+TABLE: diary_entries
+────────────────────────────────────────────────────────────────
+  id              INTEGER PRIMARY KEY AUTOINCREMENT
+  date            TEXT UNIQUE NOT NULL (YYYY-MM-DD)
+  content         TEXT
+  mood            TEXT (great | good | neutral | bad | terrible)
+  weather         TEXT (sunny | cloudy | rainy | snowy | stormy)
+  energy_level    INTEGER (1-10)
+  gratitude       TEXT
+  highlights      TEXT
+  challenges      TEXT
+  tomorrow_focus  TEXT
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+
+TABLE: events
+────────────────────────────────────────────────────────────────
+  id              INTEGER PRIMARY KEY AUTOINCREMENT
+  title           TEXT NOT NULL
+  description     TEXT
+  event_date      TEXT NOT NULL (YYYY-MM-DD)
+  event_time      TEXT
+  duration        INTEGER (minutes)
+  location        TEXT
+  category_id     INTEGER → categories(id) ON DELETE SET NULL
+  bullet_symbol   TEXT DEFAULT '○'
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+
+TABLE: bullet_logs
+────────────────────────────────────────────────────────────────
+  id              INTEGER PRIMARY KEY AUTOINCREMENT
+  date            TEXT NOT NULL (YYYY-MM-DD)
+  type            TEXT NOT NULL (daily | weekly | monthly | yearly | future)
+  content         TEXT
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+
+TABLE: blog_categories
+────────────────────────────────────────────────────────────────
+  id              INTEGER PRIMARY KEY AUTOINCREMENT
+  name            TEXT NOT NULL
+  slug            TEXT UNIQUE NOT NULL
+  description     TEXT
+  color           TEXT
+  icon            TEXT
+  parent_id       INTEGER → blog_categories(id) ON DELETE SET NULL
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+
+TABLE: blog_posts
+────────────────────────────────────────────────────────────────
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT
+  title               TEXT NOT NULL
+  slug                TEXT UNIQUE NOT NULL
+  content             TEXT
+  content_type        TEXT DEFAULT 'markdown' (markdown | html)
+  status              TEXT DEFAULT 'draft' (draft | published | archived)
+  excerpt             TEXT
+  featured_image_path TEXT
+  category_id         INTEGER → blog_categories(id) ON DELETE SET NULL
+  reading_time        INTEGER (minutes, auto-calculated)
+  word_count          INTEGER (auto-calculated)
+  seo_title           TEXT
+  seo_description     TEXT
+  seo_keywords        TEXT
+  view_count          INTEGER DEFAULT 0
+  published_at        DATETIME
+  created_at          DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at          DATETIME DEFAULT CURRENT_TIMESTAMP
+
+TABLE: blog_post_tags (junction)
+────────────────────────────────────────────────────────────────
+  blog_post_id    INTEGER → blog_posts(id) ON DELETE CASCADE
+  tag_id          INTEGER → tags(id) ON DELETE CASCADE
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+  PRIMARY KEY (blog_post_id, tag_id)
+
+TABLE: writing_sessions
+────────────────────────────────────────────────────────────────
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT
+  blog_post_id        INTEGER → blog_posts(id) ON DELETE CASCADE
+  start_time          DATETIME
+  end_time            DATETIME
+  words_written       INTEGER
+  productivity_score  REAL
+  notes               TEXT
+  session_type        TEXT
+  created_at          DATETIME DEFAULT CURRENT_TIMESTAMP
+
+TABLE: quadrant_analytics
+────────────────────────────────────────────────────────────────
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT
+  date                TEXT NOT NULL (YYYY-MM-DD)
+  quadrant            TEXT NOT NULL (Q1 | Q2 | Q3 | Q4)
+  tasks_completed     INTEGER DEFAULT 0
+  time_spent          INTEGER DEFAULT 0 (minutes)
+  productivity_score  REAL
+  created_at          DATETIME DEFAULT CURRENT_TIMESTAMP
+
+================================================================================
+5. FEATURE SPECIFICATIONS
+================================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.1  AUTHENTICATION & USER MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • User registration with username, email, password
+  • User login with username/password
+  • Dev shortcut login (username: dev, password: dev → token: dev-token)
+  • API token-based authentication (Bearer token in headers)
+  • Password hashing with bcryptjs (12 salt rounds)
+  • Token verification endpoint
+  • User profile retrieval
+  • Logout (clears API token on server)
+  • Protected routes (redirect to landing page when unauthenticated)
+  • Auto-verify token on app load (session persistence via localStorage)
+  • Login/Signup dialog with tabbed UI (Login | Sign Up)
+  • Password validation (min 6 characters, confirm password match)
+  • Show/hide password toggle
+
+UI COMPONENTS:
+  • LoginDialog — tabbed login/signup form
+  • ProtectedRoute — guards authenticated routes, shows LandingPage if not logged in
+
+API ENDPOINTS:
+  POST   /api/auth/register   — create account
+  POST   /api/auth/login      — authenticate
+  POST   /api/auth/logout     — clear token (auth required)
+  GET    /api/auth/verify     — validate token (auth required)
+  GET    /api/auth/profile    — get user info (auth required)
+
+STORAGE:
+  • localStorage keys: auth_token, user (JSON)
+  • 401 responses auto-clear stored credentials
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.2  TODO MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • Create, read, update, delete todos
+  • Todo fields: title, description, priority, due date, category,
+    urgency level (1-10 slider), importance level (1-10 slider),
+    time estimate, energy required
+  • Status management: pending, in_progress, completed, cancelled, deferred
+  • Priority levels: low, medium, high
+  • Automatic Eisenhower quadrant calculation from urgency/importance
+  • Category assignment (from categories list)
+  • Tag support (many-to-many via todo_tags)
+  • Bullet symbol assignment for journal integration
+  • Search by title/description
+  • Filter by: status, priority, quadrant, category
+  • Pagination with page/limit controls
+  • Quick stats chips (total, completed, pending counts)
+  • Toggle todo completion (checkbox)
+  • Status change via context menu
+  • Quadrant preview in add/edit dialog based on slider values
+
+UI COMPONENTS:
+  • TodoView — main page with search, filters, stats, list, FAB
+  • TodoList — renders list of TodoItem cards
+  • AddTodoDialog — create/edit form with all fields and quadrant preview
+
+API ENDPOINTS:
+  GET    /api/todos           — list with filters & pagination (auth)
+  GET    /api/todos/:id       — single todo (auth)
+  POST   /api/todos           — create (auth)
+  PUT    /api/todos/:id       — update (auth)
+  DELETE /api/todos/:id       — delete (auth)
+
+BUSINESS LOGIC:
+  • Eisenhower quadrant auto-computed:
+    - urgency >= 7 AND importance >= 7 → Q1 (Do First)
+    - urgency < 7 AND importance >= 7  → Q2 (Schedule)
+    - urgency >= 7 AND importance < 7  → Q3 (Delegate)
+    - urgency < 7 AND importance < 7   → Q4 (Eliminate)
+  • completed_at timestamp set when status changes to 'completed'
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.3  CATEGORY MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • Create, read, update, delete categories
+  • Category fields: name, color, icon, description
+  • Automatic todo count per category
+  • Used by: todos, events
+
+API ENDPOINTS:
+  GET    /api/categories       — list all with todo count
+  GET    /api/categories/:id   — single category with todo count
+  POST   /api/categories       — create
+  PUT    /api/categories/:id   — update
+  DELETE /api/categories/:id   — delete (sets todos category_id to NULL)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.4  TAG MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • Create, read, update, delete tags
+  • Tag fields: name, color
+  • Usage count per tag
+  • Search tags by name
+  • Get all todos for a specific tag
+  • Shared across todos and blog posts
+
+API ENDPOINTS:
+  GET    /api/tags             — list all with usage count
+  GET    /api/tags/:id         — single tag with usage count
+  GET    /api/tags/:id/todos   — todos associated with tag
+  POST   /api/tags             — create
+  PUT    /api/tags/:id         — update
+  DELETE /api/tags/:id         — delete (cascades junction tables)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.5  EISENHOWER MATRIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • 4-quadrant visual grid display:
+    - Q1: Do First (Urgent + Important) — Red-toned
+    - Q2: Schedule (Not Urgent + Important) — Blue-toned
+    - Q3: Delegate (Urgent + Not Important) — Orange-toned
+    - Q4: Eliminate (Not Urgent + Not Important) — Gray-toned
+  • Todos automatically sorted into quadrants by urgency/importance levels
+  • Read-only matrix view (todos grouped and displayed per quadrant)
+  • Task count per quadrant
+  • Color-coded quadrant cards with descriptions
+  • Legend explaining the matrix concept
+
+UI COMPONENTS:
+  • EisenhowerMatrixView — 2x2 grid layout with tasks listed in each quadrant
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.6  DIGITAL DIARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • One entry per day (date-based, upsert pattern)
+  • Date picker to navigate between days
+  • Entry fields:
+    - Content (main diary text, multiline)
+    - Mood: great, good, neutral, bad, terrible
+    - Weather: sunny, cloudy, rainy, snowy, stormy
+    - Energy level: 1-10 scale
+    - Gratitude notes
+    - Highlights of the day
+    - Challenges faced
+    - Tomorrow's focus/goals
+  • View and edit modes for existing entries
+  • Create new entries for dates without one
+  • Filter entries by: date, date range, mood
+  • Pagination support
+  • Delete entry
+
+UI COMPONENTS:
+  • DiaryView — date picker, entry card (view/edit), mood/weather/energy chips,
+    full form with all fields, loading/error states
+
+API ENDPOINTS:
+  GET    /api/diary            — list entries with filters (auth)
+  GET    /api/diary/:date      — entry for specific date (auth)
+  PUT    /api/diary/:date      — create or update entry for date (auth)
+  DELETE /api/diary/:date      — delete entry (auth)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.7  BLOG SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • Create, read, update, delete blog posts
+  • Post fields:
+    - Title (auto-generates URL slug)
+    - Content (markdown or HTML)
+    - Content type (markdown | html)
+    - Status: draft, published, archived
+    - Excerpt (summary)
+    - Featured image path
+    - Category (from blog_categories)
+    - SEO fields: seo_title, seo_description, seo_keywords
+  • Rich Markdown editor with 3 modes: Edit, Preview, Live (side-by-side)
+  • Auto-calculated: word count, reading time (minutes)
+  • View count tracking (incremented on slug-based access)
+  • Publish action (sets status + published_at timestamp)
+  • Post cards showing: title, excerpt, status badge, category, word count,
+    reading time
+  • Filter by: status, category, search text
+  • Sort options
+  • Pagination
+  • Blog categories (separate from todo categories) with hierarchical support
+
+UI COMPONENTS:
+  • BlogView — post list, create/edit dialog, publish/delete actions
+  • RichTextEditor — tabbed markdown editor (Edit/Preview/Live),
+    markdown help section, uses @uiw/react-md-editor
+
+API ENDPOINTS:
+  GET    /api/blog             — list posts with filters & pagination
+  GET    /api/blog/:id         — post by ID or slug (slug increments view_count)
+  POST   /api/blog             — create post
+  PUT    /api/blog/:id         — update post
+  DELETE /api/blog/:id         — delete post
+  PATCH  /api/blog/:id/publish — publish draft post
+
+BUSINESS LOGIC:
+  • Slug auto-generated from title (lowercase, hyphenated)
+  • Word count computed from content
+  • Reading time = word_count / 200 (rounded up)
+  • View count incremented only on slug-based access (not ID)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.8  BULLET JOURNAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • Multiple journal views via tabs:
+    - Daily Log — entries for a specific day
+    - Weekly Overview — 7-day grid view
+    - Monthly Calendar — month-at-a-glance
+    - Yearly Overview — year summary
+    - Future Log — long-term goals and plans
+  • Rapid logging system with bullet symbols:
+    - • (bullet) = Task
+    - × (cross) = Completed
+    - → (arrow) = Migrated
+    - ○ (circle) = Event
+    - – (dash) = Note
+    - ! (exclamation) = Priority/Inspiration
+  • Date picker for navigation
+  • Log entries stored by date + type (daily/weekly/monthly/yearly/future)
+  • Event management (title, description, date, time, duration, location)
+  • Symbol legend display
+  • Integration with todos (update bullet symbol on todos)
+
+UI COMPONENTS:
+  • BulletJournalView — tabbed interface (Daily/Weekly/Monthly/Yearly/Future),
+    date picker, rapid logging input, symbol legend, event list
+
+API ENDPOINTS:
+  GET    /api/bullet/logs              — list logs with filters (auth)
+  PUT    /api/bullet/logs/:date/:type  — upsert log for date+type (auth)
+  GET    /api/bullet/events            — list events with filters (auth)
+  POST   /api/bullet/events            — create event (auth)
+  PATCH  /api/bullet/todos/:id/symbol  — update todo's bullet symbol (auth)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.9  ANALYTICS & INSIGHTS DASHBOARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • Time range selector for analytics period
+  • Productivity score card
+  • Eisenhower Matrix analytics:
+    - Task distribution across quadrants (pie chart)
+    - Tasks completed per quadrant
+    - Time spent per quadrant
+  • Priority distribution (bar chart)
+  • Completion trends over time (line chart)
+  • Writing metrics:
+    - Blog writing productivity
+    - Words written over time
+    - Writing session tracking
+  • Diary insights:
+    - Mood patterns and distribution
+    - Energy level trends
+    - Entry frequency
+  • Productivity dashboard summary (configurable day range)
+  • Metric cards with linear progress indicators
+
+UI COMPONENTS:
+  • AnalyticsDashboard — full dashboard with time range selector,
+    Recharts pie/bar/line charts, metric cards
+  • SimpleAnalytics — lightweight analytics widget for dashboard page
+    (productivity score, matrix distribution, writing stats, diary insights)
+
+API ENDPOINTS:
+  GET    /api/analytics/matrix     — Eisenhower matrix stats (auth)
+  GET    /api/analytics/trends     — completion trends (auth)
+  GET    /api/analytics/writing    — writing metrics (auth)
+  GET    /api/analytics/diary      — diary insights (auth)
+  GET    /api/analytics/dashboard  — productivity summary (auth)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.10  MAIN DASHBOARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • Overview stat cards: Todos count, Matrix items, Journal entries, Blog posts
+  • SimpleAnalytics widget (embedded analytics summary)
+  • Recent Activity feed
+  • Today's Focus section with chips
+  • Quick navigation to all features
+
+UI COMPONENTS:
+  • Dashboard — stat cards, SimpleAnalytics, activity feed, focus area
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5.11  LANDING PAGE (PUBLIC)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FEATURES:
+  • Hero section with app title and tagline
+  • Feature cards showcasing main capabilities
+  • Stats section
+  • Tech stack display (chips)
+  • Call-to-action buttons: "Get Started", "Sign In", "Start Your Journey"
+  • Theme toggle (dark/light mode available on landing page)
+  • Opens LoginDialog on CTA clicks
+
+UI COMPONENTS:
+  • LandingPage — hero, features grid, stats, tech stack, CTAs
+
+================================================================================
+6. UI/UX SPECIFICATIONS
+================================================================================
+
+6.1 THEME SYSTEM
+─────────────────────────────────────────
+  • Light mode: background #fafafa, paper #ffffff
+  • Dark mode: background #121212, paper #1e1e1e
+  • Primary color: #1976d2 (Material Blue)
+  • Secondary color: #dc004e (Material Pink)
+  • Typography: Roboto font family
+  • Theme persistence: localStorage key 'productivity_app_theme'
+  • System preference fallback: prefers-color-scheme media query
+  • Custom color palettes for:
+    - Eisenhower quadrants (doFirst, schedule, delegate, eliminate)
+    - Bullet journal symbols (task, completed, migrated, event, note, priority)
+    - Todo statuses (pending, inProgress, completed, cancelled, deferred)
+    - Priority levels (low, medium, high)
+  • Component overrides:
+    - MuiCard: hover shadow effect
+    - MuiButton: no text transform, borderRadius 8px
+
+6.2 RESPONSIVE LAYOUT
+─────────────────────────────────────────
+  • Desktop: Permanent side drawer navigation
+  • Mobile: Temporary (swipeable) drawer navigation
+  • Floating Action Button (FAB) for quick add actions (context-aware)
+  • Container-based content area with proper padding
+  • Responsive grid layouts for dashboard and matrix views
+
+6.3 NAVIGATION
+─────────────────────────────────────────
+  React Router v7 routes:
+    /              → Dashboard
+    /dashboard     → Dashboard
+    /todos         → TodoView
+    /todos/:id     → TodoView (with ID)
+    /diary         → DiaryView
+    /diary/:date   → DiaryView (specific date)
+    /blog          → BlogView
+    /blog/:slug    → BlogView (specific post)
+    /matrix        → EisenhowerMatrixView
+    /journal       → BulletJournalView
+    /journal/:date → BulletJournalView (specific date)
+
+  Navigation items in drawer:
+    Dashboard, Todos, Diary, Matrix, Journal, Blog
+
+6.4 ERROR HANDLING
+─────────────────────────────────────────
+  • ErrorBoundary component wrapping major sections
+  • Error state display with message and retry button
+  • Loading states with CircularProgress spinners
+  • Alert components for inline error/success messages
+  • 401 auto-logout on API responses
+
+6.5 APP HEADER
+─────────────────────────────────────────
+  • Menu button (mobile drawer toggle)
+  • App title
+  • Theme toggle button (sun/moon icon)
+  • User avatar/chip when authenticated (with dropdown menu → Logout)
+  • Login button when unauthenticated
+
+================================================================================
+7. API SPECIFICATIONS
+================================================================================
+
+7.1 BASE CONFIGURATION
+─────────────────────────────────────────
+  Base URL:         http://localhost:3001 (configurable via REACT_APP_API_URL)
+  Content-Type:     application/json
+  Body limit:       10MB
+  Auth header:      Authorization: Bearer <token>
+  Response format:  { success: boolean, data?: any, message?: string,
+                      meta?: { page, limit, total }, pagination?: {...} }
+
+7.2 MIDDLEWARE STACK (order)
+─────────────────────────────────────────
+  1. helmet (security headers)
+  2. CORS (localhost:3000 + FRONTEND_URL)
+  3. Rate limiting (production only: 100 req / 15 min)
+  4. JSON body parser (10MB limit)
+  5. compression
+  6. morgan (HTTP logging)
+  7. Custom request logger
+
+7.3 HEALTH CHECK
+─────────────────────────────────────────
+  GET /health → { status: 'ok', timestamp, uptime, environment }
+  GET /api    → { message, version, endpoints[] }
+
+7.4 ERROR HANDLING
+─────────────────────────────────────────
+  • express-validator for input validation (400 on failure)
+  • Central error handler maps SQLite errors to HTTP status codes
+  • 404 handler for unknown routes
+  • Request logging with method, URL, status, duration
+
+7.5 COMPLETE ENDPOINT SUMMARY (38 endpoints)
+─────────────────────────────────────────
+
+  AUTH (5):
+    POST   /api/auth/register
+    POST   /api/auth/login
+    POST   /api/auth/logout            [auth]
+    GET    /api/auth/verify             [auth]
+    GET    /api/auth/profile            [auth]
+
+  TODOS (5):
+    GET    /api/todos                   [auth]
+    GET    /api/todos/:id               [auth]
+    POST   /api/todos                   [auth]
+    PUT    /api/todos/:id               [auth]
+    DELETE /api/todos/:id               [auth]
+
+  CATEGORIES (5):
+    GET    /api/categories
+    GET    /api/categories/:id
+    POST   /api/categories
+    PUT    /api/categories/:id
+    DELETE /api/categories/:id
+
+  TAGS (6):
+    GET    /api/tags
+    GET    /api/tags/:id
+    GET    /api/tags/:id/todos
+    POST   /api/tags
+    PUT    /api/tags/:id
+    DELETE /api/tags/:id
+
+  DIARY (4):
+    GET    /api/diary                   [auth]
+    GET    /api/diary/:date             [auth]
+    PUT    /api/diary/:date             [auth]
+    DELETE /api/diary/:date             [auth]
+
+  BLOG (6):
+    GET    /api/blog
+    GET    /api/blog/:id
+    POST   /api/blog
+    PUT    /api/blog/:id
+    DELETE /api/blog/:id
+    PATCH  /api/blog/:id/publish
+
+  BULLET JOURNAL (5):
+    GET    /api/bullet/logs             [auth]
+    PUT    /api/bullet/logs/:date/:type [auth]
+    GET    /api/bullet/events           [auth]
+    POST   /api/bullet/events           [auth]
+    PATCH  /api/bullet/todos/:id/symbol [auth]
+
+  ANALYTICS (5):
+    GET    /api/analytics/matrix        [auth]
+    GET    /api/analytics/trends        [auth]
+    GET    /api/analytics/writing       [auth]
+    GET    /api/analytics/diary         [auth]
+    GET    /api/analytics/dashboard     [auth]
+
+  SYSTEM (2):
+    GET    /health
+    GET    /api
+
+================================================================================
+8. ENVIRONMENT CONFIGURATION
+================================================================================
+
+  PORT                    = 3001
+  NODE_ENV                = development | production
+  FRONTEND_URL            = http://localhost:3000
+  DATABASE_PATH           = ../data/productivity_app.db
+  JWT_SECRET              = <secret-key> (change in production)
+  LOG_LEVEL               = info
+  RATE_LIMIT_WINDOW_MS    = 900000 (15 minutes)
+  RATE_LIMIT_MAX_REQUESTS = 100
+  REACT_APP_API_URL       = http://localhost:3001 (frontend)
+
+================================================================================
+9. DOCKER CONFIGURATION
+================================================================================
+
+9.1 DOCKERFILE (Multi-stage)
+─────────────────────────────────────────
+  Stage 1: frontend-build (node:18-alpine) — build React app
+  Stage 2: backend-build  (node:18-alpine) — compile TypeScript backend
+  Stage 3: production     (node:18-alpine) — runtime
+    - Installs sqlite system package
+    - Copies compiled backend + built frontend
+    - Creates non-root user (nodeuser, UID 1001)
+    - Exposes port 3001
+    - Health check: curl http://localhost:3001/health (30s interval)
+    - CMD: npm start
+
+9.2 DOCKER COMPOSE
+─────────────────────────────────────────
+  Services:
+    app-dev     — development mode, ports 3001+3000, volume mounts for hot reload
+    app-prod    — production mode, port 80→3001, named volume for data
+    sqlite-web  — SQLite web UI (coleifer/sqlite-web), port 8080
+
+  Network:       productivity-network (bridge driver)
+  Named Volume:  productivity_data (production DB persistence)
+
+================================================================================
+10. SHARED PACKAGE SPECIFICATIONS
+================================================================================
+
+10.1 TYPE DEFINITIONS
+─────────────────────────────────────────
+  BaseEntity:           id, created_at, updated_at
+  Todo:                 extends BaseEntity + all todo fields
+  TodoStatus:           'pending' | 'in_progress' | 'completed' | 'cancelled' | 'deferred'
+  Priority:             'low' | 'medium' | 'high'
+  EnergyLevel:          'low' | 'medium' | 'high'
+  EisenhowerQuadrant:   'Q1' | 'Q2' | 'Q3' | 'Q4'
+  BulletSymbol:         '•' | '×' | '→' | '○' | '–' | '!'
+  BulletSymbolInfo:     symbol + name + description
+  Category:             extends BaseEntity + name, color, icon, description
+  Tag:                  id, name, color, created_at
+  DiaryEntry:           extends BaseEntity + all diary fields
+  Mood:                 'great' | 'good' | 'neutral' | 'bad' | 'terrible'
+  Event:                extends BaseEntity + all event fields
+  BlogPost:             extends BaseEntity + all blog fields
+  BlogPostStatus:       'draft' | 'published' | 'archived'
+  BlogCategory:         extends BaseEntity + name, slug, description, etc.
+  WritingSession:       extends BaseEntity + session tracking fields
+  QuadrantAnalytics:    extends BaseEntity + quadrant metrics
+  ProductivityMetrics:  aggregate metrics type
+  ApiResponse<T>:       generic { success, data?, message?, meta? }
+  CreateTodoRequest:    todo creation payload
+  UpdateTodoRequest:    todo update payload (partial)
+  CreateBlogPostRequest:blog creation payload
+  CreateDiaryEntryRequest: diary creation payload
+
+10.2 CONSTANTS
+─────────────────────────────────────────
+  BULLET_SYMBOLS:       Array of { symbol, name, description } for all 6 symbols
+  EISENHOWER_QUADRANTS: Quadrant definitions with names and descriptions
+  PRIORITY_LEVELS:      Priority level definitions
+  ENERGY_LEVELS:        Energy level definitions
+  MOOD_LEVELS:          Mood level definitions
+  API_ENDPOINTS:        All API path strings
+  DATE_FORMATS:         Standard date format strings
+  DEFAULT_CATEGORIES:   Pre-defined category list
+  DEFAULT_TAGS:         Pre-defined tag list
+
+10.3 UTILITY CLASSES
+─────────────────────────────────────────
+  DateUtils:            Date formatting, comparison, range operations
+  EisenhowerUtils:      Quadrant calculation from urgency/importance
+  TextUtils:            Reading time, word count, slug generation, excerpt
+  ValidationUtils:      Email, slug, date, todo title, blog slug validation
+
+================================================================================
+11. DEVELOPMENT SCRIPTS
+================================================================================
+
+  npm run dev              — Start both frontend (3000) and backend (3001)
+  npm run dev:frontend     — Start frontend only
+  npm run dev:backend      — Start backend only (nodemon + ts-node)
+  npm run build            — Build both frontend and backend
+  npm run build:frontend   — Build React production bundle
+  npm run build:backend    — Compile TypeScript to JavaScript
+  npm run start            — Start production backend
+  npm run install-all      — Install all workspace dependencies
+  npm run clean            — Remove all node_modules
+  npm run docker:build     — Build Docker images
+  npm run docker:up        — Start Docker containers
+  npm run docker:down      — Stop Docker containers
+  npm run test             — Run all tests
+  npm run test:frontend    — Run frontend tests (React Testing Library)
+  npm run test:backend     — Run backend tests
+
+================================================================================
+12. KNOWN ISSUES & IMPROVEMENT AREAS
+================================================================================
+
+  1. BlogView component has syntax errors (lines 89-100, 331) — app-breaking
+  2. Some DB tables lack user_id column in schema but controllers query by user_id
+     (potential runtime errors for multi-user scenarios)
+  3. Dashboard stats are currently hardcoded (not fetched from API)
+  4. FAB click handler logs to console (not wired to add dialogs)
+  5. Shared package types are defined but not imported by frontend/backend
+     (both define their own types independently)
+  6. Category and Tag endpoints lack authentication middleware
+  7. Blog endpoints lack authentication middleware
+  8. No data export/import functionality implemented
+  9. No testing suite implemented (test scripts exist but no test files)
+  10. Writing sessions table exists but no UI for session tracking
+  11. user_id not present in several table schemas that need it for multi-user
+
+================================================================================
+13. COMPONENT COUNT SUMMARY
+================================================================================
+
+  Frontend Components:     18
+  Custom Hooks:            5
+  React Contexts:          2
+  API Service Modules:     8 (in single api.ts)
+  Backend Routes:          8
+  Backend Controllers:     7
+  Middleware Modules:       2
+  Database Tables:         13
+  API Endpoints:           38 + 2 system
+  React Router Routes:     11
+
+================================================================================
+END OF DOCUMENT
+================================================================================
