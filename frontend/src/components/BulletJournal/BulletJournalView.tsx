@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Box,
   Card,
@@ -86,6 +86,11 @@ const INITIAL_EVENT_FORM: EventFormState = {
   bullet_symbol: '○',
 };
 
+const SHORTCUT_MAP: Record<string, string> = {
+  '/t': '• ', '/d': '× ', '/m': '→ ',
+  '/e': '○ ', '/n': '– ', '/p': '! ',
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function BulletJournalView() {
@@ -110,6 +115,7 @@ export function BulletJournalView() {
   const [dirty, setDirty] = useState(false);
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [eventForm, setEventForm] = useState<EventFormState>(INITIAL_EVENT_FORM);
+  const textFieldRef = useRef<HTMLTextAreaElement>(null);
 
   // Listen for FAB click
   useJournalDialogEvent(useCallback(() => {
@@ -200,6 +206,51 @@ export function BulletJournalView() {
     setEventForm((prev) => ({ ...prev, ...partial }));
   };
 
+  // ─── Symbol insertion helpers ───────────────────────────────────────────
+
+  const handleInsertSymbol = (symbol: string) => {
+    const el = textFieldRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? logContent.length;
+    const before = logContent.slice(0, start);
+    const after = logContent.slice(start);
+    const atLineStart = start === 0 || before.endsWith('\n');
+    const prefix = atLineStart ? '' : '\n';
+    const insertion = `${prefix}${symbol} `;
+    const newContent = before + insertion + after;
+    setLogContent(newContent);
+    setDirty(true);
+    requestAnimationFrame(() => {
+      el.focus();
+      const cursorPos = start + insertion.length;
+      el.setSelectionRange(cursorPos, cursorPos);
+    });
+  };
+
+  const handleLogChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    let value = e.target.value;
+    const pos = e.target.selectionStart ?? value.length;
+    if (pos >= 2) {
+      const twoChars = value.slice(pos - 2, pos);
+      const replacement = SHORTCUT_MAP[twoChars];
+      if (replacement) {
+        const charBefore = pos > 2 ? value[pos - 3] : '\n';
+        if (charBefore === '\n' || pos - 2 === 0) {
+          value = value.slice(0, pos - 2) + replacement + value.slice(pos);
+          requestAnimationFrame(() => {
+            const el = textFieldRef.current;
+            if (el) {
+              const newPos = pos - 2 + replacement.length;
+              el.setSelectionRange(newPos, newPos);
+            }
+          });
+        }
+      }
+    }
+    setLogContent(value);
+    setDirty(true);
+  };
+
   return (
     <Box>
       {/* ─── Tabs ─────────────────────────────────────────────────────── */}
@@ -272,7 +323,7 @@ export function BulletJournalView() {
         </Alert>
       )}
 
-      {/* ─── Symbol Legend ────────────────────────────────────────────── */}
+      {/* ─── Symbol Toolbar ──────────────────────────────────────────── */}
       <Paper
         elevation={0}
         sx={{
@@ -283,23 +334,35 @@ export function BulletJournalView() {
         }}
       >
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5, display: 'block' }}>
-          Symbol Key
+          Insert Symbol
         </Typography>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
           {BULLET_SYMBOLS.map((bs) => (
-            <Chip
-              key={bs.symbol}
-              label={`${bs.symbol} ${bs.label}`}
-              size="small"
-              sx={{
-                fontWeight: 600,
-                bgcolor: alpha(bulletSymbolColors[bs.symbol] ?? '#757575', 0.1),
-                color: bulletSymbolColors[bs.symbol] ?? '#757575',
-                fontFamily: 'monospace',
-              }}
-            />
+            <Tooltip key={bs.symbol} title={bs.description} arrow>
+              <Chip
+                label={`${bs.symbol} ${bs.label}`}
+                size="small"
+                onClick={() => handleInsertSymbol(bs.symbol)}
+                sx={{
+                  fontWeight: 600,
+                  bgcolor: alpha(bulletSymbolColors[bs.symbol] ?? '#757575', 0.1),
+                  color: bulletSymbolColors[bs.symbol] ?? '#757575',
+                  fontFamily: 'monospace',
+                  cursor: 'pointer',
+                  transition: 'transform 0.1s, box-shadow 0.1s',
+                  '&:hover': {
+                    bgcolor: alpha(bulletSymbolColors[bs.symbol] ?? '#757575', 0.2),
+                    transform: 'scale(1.05)',
+                    boxShadow: 1,
+                  },
+                }}
+              />
+            </Tooltip>
           ))}
         </Stack>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block' }}>
+          Tip: Type /t /d /m /e /n /p at the start of a line for quick entry
+        </Typography>
       </Paper>
 
       {/* ─── Main Content ─────────────────────────────────────────────── */}
@@ -347,11 +410,9 @@ export function BulletJournalView() {
                 minRows={8}
                 maxRows={20}
                 fullWidth
+                inputRef={textFieldRef}
                 value={logContent}
-                onChange={(e) => {
-                  setLogContent(e.target.value);
-                  setDirty(true);
-                }}
+                onChange={handleLogChange}
                 placeholder={getPlaceholder(activeTab)}
                 sx={{
                   '& .MuiInputBase-input': {
