@@ -271,6 +271,18 @@ export function AppLayout() {
         <Fab
           color="primary"
           aria-label={fabLabel}
+          onClick={() => {
+            const eventMap: Record<string, string> = {
+              '/todos': 'open-add-todo-dialog',
+              '/diary': 'open-add-diary-dialog',
+              '/blog': 'open-add-blog-dialog',
+              '/journal': 'open-add-journal-dialog',
+            };
+            const eventName = eventMap[location.pathname];
+            if (eventName) {
+              window.dispatchEvent(new CustomEvent(eventName));
+            }
+          }}
           sx={{
             position: 'fixed',
             bottom: 24,

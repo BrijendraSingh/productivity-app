@@ -25,6 +25,10 @@ import type {
   BulletLog,
   CreateBulletLogRequest,
   DashboardStats,
+  MatrixAnalyticsResponse,
+  TrendsAnalyticsResponse,
+  WritingAnalyticsResponse,
+  DiaryAnalyticsResponse,
   SafeUser,
 } from '@productivity-app/shared';
 import type { Event as AppEvent } from '@productivity-app/shared';
@@ -274,21 +278,21 @@ export const analyticsApi = {
 
   matrix: (params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return request<unknown>(`${API_ENDPOINTS.ANALYTICS_MATRIX}${qs}`);
+    return request<MatrixAnalyticsResponse>(`${API_ENDPOINTS.ANALYTICS_MATRIX}${qs}`);
   },
 
   trends: (params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return request<unknown>(`${API_ENDPOINTS.ANALYTICS_TRENDS}${qs}`);
+    return request<TrendsAnalyticsResponse>(`${API_ENDPOINTS.ANALYTICS_TRENDS}${qs}`);
   },
 
   writing: (params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return request<unknown>(`${API_ENDPOINTS.ANALYTICS_WRITING}${qs}`);
+    return request<WritingAnalyticsResponse>(`${API_ENDPOINTS.ANALYTICS_WRITING}${qs}`);
   },
 
   diary: (params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return request<unknown>(`${API_ENDPOINTS.ANALYTICS_DIARY}${qs}`);
+    return request<DiaryAnalyticsResponse>(`${API_ENDPOINTS.ANALYTICS_DIARY}${qs}`);
   },
 };

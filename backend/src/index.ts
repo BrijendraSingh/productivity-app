@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
 
+import path from 'path';
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -13,6 +14,9 @@ import authRoutes from './routes/auth';
 import todoRoutes from './routes/todos';
 import categoryRoutes from './routes/categories';
 import tagRoutes from './routes/tags';
+import diaryRoutes from './routes/diary';
+import bulletRoutes from './routes/bullet';
+import blogRoutes from './routes/blog';
 import analyticsRoutes from './routes/analytics';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -126,7 +130,23 @@ async function startServer(): Promise<void> {
   app.use('/api/todos', todoRoutes);
   app.use('/api/categories', categoryRoutes);
   app.use('/api/tags', tagRoutes);
+  app.use('/api/diary', diaryRoutes);
+  app.use('/api/bullet', bulletRoutes);
+  app.use('/api/blog', blogRoutes);
   app.use('/api/analytics', analyticsRoutes);
+
+  // ─── Production SPA serving ──────────────────────────────────────────────
+
+  if (NODE_ENV === 'production') {
+    const publicDir = path.join(__dirname, 'public');
+    app.use(express.static(publicDir));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path === '/health') {
+        return next();
+      }
+      res.sendFile(path.join(publicDir, 'index.html'));
+    });
+  }
 
   // ─── 404 handler ──────────────────────────────────────────────────────────
 

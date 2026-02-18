@@ -457,3 +457,108 @@ export interface DashboardStats {
     draft: number;
   };
 }
+
+// ─── Analytics Response Types ────────────────────────────────────────────────
+
+export interface QuadrantBreakdown {
+  quadrant: EisenhowerQuadrant;
+  label: string;
+  color: string;
+  total: number;
+  completed: number;
+  pending: number;
+  avg_urgency: number;
+  avg_importance: number;
+  time_spent: number;
+}
+
+export interface MatrixAnalyticsResponse {
+  distribution: QuadrantBreakdown[];
+  total_tasks: number;
+  total_completed: number;
+  completion_rate: number;
+  daily_completions: Array<{
+    date: string;
+    quadrant: EisenhowerQuadrant;
+    tasks_completed: number;
+    time_spent: number;
+    productivity_score: number | null;
+  }>;
+  productivity_score: number;
+}
+
+export interface TrendsAnalyticsResponse {
+  priority_distribution: Array<{
+    priority: Priority;
+    label: string;
+    color: string;
+    total: number;
+    completed: number;
+    pending: number;
+  }>;
+  completion_trends: Array<{
+    date: string;
+    created: number;
+    completed: number;
+    net: number;
+  }>;
+  status_breakdown: Array<{
+    status: TodoStatus;
+    count: number;
+  }>;
+  avg_completion_time_hours: number | null;
+  overdue_count: number;
+  on_track_count: number;
+}
+
+export interface WritingAnalyticsResponse {
+  total_posts: number;
+  published_posts: number;
+  draft_posts: number;
+  total_words: number;
+  total_reading_time: number;
+  avg_words_per_post: number;
+  total_views: number;
+  sessions: {
+    total_sessions: number;
+    total_time_minutes: number;
+    total_words_written: number;
+    avg_productivity_score: number | null;
+  };
+  words_over_time: Array<{
+    date: string;
+    words_written: number;
+    sessions: number;
+  }>;
+  posts_by_status: Array<{
+    status: BlogPostStatus;
+    count: number;
+  }>;
+}
+
+export interface DiaryAnalyticsResponse {
+  total_entries: number;
+  streak: number;
+  mood_distribution: Array<{
+    mood: Mood;
+    label: string;
+    emoji: string;
+    color: string;
+    count: number;
+  }>;
+  energy_trends: Array<{
+    date: string;
+    energy_level: number;
+  }>;
+  entry_frequency: Array<{
+    date: string;
+    has_entry: boolean;
+  }>;
+  avg_energy: number | null;
+  most_common_mood: Mood | null;
+  entries_with_gratitude: number;
+  weather_distribution: Array<{
+    weather: Weather;
+    count: number;
+  }>;
+}

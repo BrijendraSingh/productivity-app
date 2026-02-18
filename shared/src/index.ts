@@ -38,6 +38,11 @@ export type {
   // Analytics
   ProductivityMetrics,
   DashboardStats,
+  QuadrantBreakdown,
+  MatrixAnalyticsResponse,
+  TrendsAnalyticsResponse,
+  WritingAnalyticsResponse,
+  DiaryAnalyticsResponse,
 
   // Info types
   BulletSymbolInfo,

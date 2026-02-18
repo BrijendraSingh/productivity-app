@@ -1,44 +1,16 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Typography, Box } from '@mui/material';
 import { AppLayout } from './components/Layout/AppLayout';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LandingPage } from './components/Landing/LandingPage';
 import { Dashboard } from './components/Dashboard/Dashboard';
-
-// Placeholder for features not yet implemented (Steps 7-8+)
-function Placeholder({ title }: { title: string }) {
-  return (
-    <Box sx={{ py: 4, textAlign: 'center' }}>
-      <Typography variant="h4" color="text.secondary">
-        {title}
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-        Coming soon...
-      </Typography>
-    </Box>
-  );
-}
-
-function TodoPlaceholder() {
-  return <Placeholder title="Todo Management" />;
-}
-function MatrixPlaceholder() {
-  return <Placeholder title="Eisenhower Matrix" />;
-}
-function DiaryPlaceholder() {
-  return <Placeholder title="Digital Diary" />;
-}
-function JournalPlaceholder() {
-  return <Placeholder title="Bullet Journal" />;
-}
-function BlogPlaceholder() {
-  return <Placeholder title="Blog" />;
-}
-function AnalyticsPlaceholder() {
-  return <Placeholder title="Analytics Dashboard" />;
-}
+import { TodoView } from './components/Todo/TodoView';
+import { EisenhowerMatrixView } from './components/Matrix/EisenhowerMatrixView';
+import { DiaryView } from './components/Diary/DiaryView';
+import { BulletJournalView } from './components/BulletJournal/BulletJournalView';
+import { BlogView } from './components/Blog/BlogView';
+import { AnalyticsDashboard } from './components/Analytics/AnalyticsDashboard';
 
 export default function App() {
   return (
@@ -63,7 +35,7 @@ export default function App() {
             path="/todos"
             element={
               <ProtectedRoute>
-                <TodoPlaceholder />
+                <TodoView />
               </ProtectedRoute>
             }
           />
@@ -71,7 +43,7 @@ export default function App() {
             path="/todos/:id"
             element={
               <ProtectedRoute>
-                <TodoPlaceholder />
+                <TodoView />
               </ProtectedRoute>
             }
           />
@@ -80,7 +52,7 @@ export default function App() {
             path="/matrix"
             element={
               <ProtectedRoute>
-                <MatrixPlaceholder />
+                <EisenhowerMatrixView />
               </ProtectedRoute>
             }
           />
@@ -89,7 +61,7 @@ export default function App() {
             path="/diary"
             element={
               <ProtectedRoute>
-                <DiaryPlaceholder />
+                <DiaryView />
               </ProtectedRoute>
             }
           />
@@ -97,7 +69,7 @@ export default function App() {
             path="/diary/:date"
             element={
               <ProtectedRoute>
-                <DiaryPlaceholder />
+                <DiaryView />
               </ProtectedRoute>
             }
           />
@@ -106,7 +78,7 @@ export default function App() {
             path="/journal"
             element={
               <ProtectedRoute>
-                <JournalPlaceholder />
+                <BulletJournalView />
               </ProtectedRoute>
             }
           />
@@ -114,7 +86,7 @@ export default function App() {
             path="/journal/:date"
             element={
               <ProtectedRoute>
-                <JournalPlaceholder />
+                <BulletJournalView />
               </ProtectedRoute>
             }
           />
@@ -123,7 +95,7 @@ export default function App() {
             path="/blog"
             element={
               <ProtectedRoute>
-                <BlogPlaceholder />
+                <BlogView />
               </ProtectedRoute>
             }
           />
@@ -131,7 +103,7 @@ export default function App() {
             path="/blog/:slug"
             element={
               <ProtectedRoute>
-                <BlogPlaceholder />
+                <BlogView />
               </ProtectedRoute>
             }
           />
@@ -140,7 +112,7 @@ export default function App() {
             path="/analytics"
             element={
               <ProtectedRoute>
-                <AnalyticsPlaceholder />
+                <AnalyticsDashboard />
               </ProtectedRoute>
             }
           />
