@@ -4,15 +4,19 @@ Last updated: 2026-04-04
 
 ## Open Issues
 
-| # | Issue | Severity | Component | Details |
-|---|-------|----------|-----------|---------|
-| 1 | `blog_categories` table has no CRUD API | Medium | Backend | Table exists with FK from `blog_posts`, blog queries join it, but no routes/controller expose CRUD. Blog category assignment via API is impossible. |
-| 2 | `writing_sessions` never populated | Medium | Backend | Table exists and analytics queries read it, but no controller action creates writing session records. Writing analytics will always return empty data. |
-| 3 | `quadrant_analytics` never populated | Medium | Backend | Table stores daily per-quadrant completion stats. Matrix analytics reads it, but no scheduled or on-demand aggregation writes to it. |
-| 4 | `/todos/:id` route param not consumed | Low | Frontend | Route is defined in `App.tsx`, `Dashboard` navigates to `/todos/${id}`, but `TodoView` doesn't call `useParams()` — no single-todo focus from URL. |
-| 5 | `/diary/:date` route param not synced | Low | Frontend | Route exists but `useDiary` hook only tracks date via internal state. URL param is ignored. |
-| 6 | `/blog/:slug` treated as numeric ID | Low | Frontend | `BlogView` uses `parseInt(slug, 10)` — the URL param is named "slug" but actually holds a numeric post ID. Naming mismatch. |
-| 7 | Dev credentials hardcoded | Low | Backend | `DEV_USERNAME = 'dev'`, `DEV_PASSWORD = 'dev'`, `DEV_TOKEN = 'dev-token'` in `authController.ts`. Intentional for local dev but should not reach production. |
+No open issues at this time. All 7 original issues have been resolved (see below).
+
+## Resolved Issues
+
+| # | Issue | Severity | Component | Resolution | Date |
+|---|-------|----------|-----------|------------|------|
+| 1 | `blog_categories` table has no CRUD API | Medium | Backend | Created `blogCategoryController.ts` + `blogCategories.ts` routes with full CRUD. Added `CreateBlogCategoryRequest`/`UpdateBlogCategoryRequest` DTOs, `API_ENDPOINTS` entries, and `blogCategoriesApi` in frontend. Mounted at `/api/blog-categories`. | 2026-04-04 |
+| 2 | `writing_sessions` never populated | Medium | Backend | Created `writingSessionController.ts` + `writingSessions.ts` routes with `POST` (start session) and `PATCH :id` (end session with auto-computed productivity score). Added DTOs, endpoints, and frontend API. Mounted at `/api/writing-sessions`. | 2026-04-04 |
+| 3 | `quadrant_analytics` never populated | Medium | Backend | Added upsert logic in `todoController.update()` — when status transitions to `completed`, upserts into `quadrant_analytics` for the current date and quadrant, incrementing `tasks_completed` and adding `time_spent`. | 2026-04-04 |
+| 4 | `/todos/:id` route param not consumed | Low | Frontend | `TodoView` now reads `:id` via `useParams()` and passes `highlightId` to `TodoList`. `TodoList` scrolls to and visually highlights the matching card with a focus ring. | 2026-04-04 |
+| 5 | `/diary/:date` route param not synced | Low | Frontend | `DiaryView` now reads `:date` via `useParams()`, parses it with `parseISO()`, and syncs with `setSelectedDate`. Date navigation updates the URL via `navigate()` with `replace: true`. | 2026-04-04 |
+| 6 | `/blog/:slug` treated as numeric ID | Low | Frontend | Renamed route param from `:slug` to `:id` in `App.tsx`. Updated `BlogView` to destructure `{ id }` instead of `{ slug }`. Matches the existing numeric ID navigation pattern. | 2026-04-04 |
+| 7 | Dev credentials hardcoded | Low | Backend | Gated dev-login shortcut behind `NODE_ENV !== 'production'` check in `authController.ts`. Added startup warning log when dev credentials are active. | 2026-04-04 |
 
 ## Technical Debt
 
@@ -44,6 +48,6 @@ Last updated: 2026-04-04
 | 1 | Set up ESLint + Prettier | Enforces consistent code style, catches common errors | Medium | Proposed — use `code-quality-infra` specialist |
 | 2 | Set up Vitest for unit testing | Enables testable controllers and utility functions | Medium | Proposed — use `playwright-qa` specialist for initial Vitest config |
 | 3 | Write E2E specs for core features | Catches regressions in auth, todos, diary, blog flows | High | Proposed — use `playwright-qa` specialist |
-| 4 | Wire up `blog_categories` API | Completes the blog feature as designed in schema | Medium | Proposed — use `fullstack-feature-dev` specialist |
-| 5 | Implement `writing_sessions` tracking | Makes writing analytics functional | Medium | Proposed — use `fullstack-feature-dev` specialist |
+| 4 | Wire up `blog_categories` API | Completes the blog feature as designed in schema | Medium | **Done** — resolved 2026-04-04 |
+| 5 | Implement `writing_sessions` tracking | Makes writing analytics functional | Medium | **Done** — resolved 2026-04-04 |
 | 6 | Create GitHub Actions CI pipeline | Automates lint, type-check, test, build on every push | Medium | Proposed — use `code-quality-infra` specialist |

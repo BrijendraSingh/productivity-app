@@ -52,8 +52,8 @@ The app is structured as an npm workspaces monorepo with three packages forming 
 | Database config | `backend/src/config/database.ts` | SQLite connection, 13-table schema DDL, promise wrappers |
 | Auth middleware | `backend/src/middleware/auth.ts` | Bearer token verification, user attachment to request |
 | Validation middleware | `backend/src/middleware/validation.ts` | express-validator batch runner |
-| Controllers | `backend/src/controllers/*.ts` | 8 controllers: auth, todo, category, tag, diary, bullet, blog, analytics |
-| Routes | `backend/src/routes/*.ts` | 8 route files mapping HTTP methods to controllers |
+| Controllers | `backend/src/controllers/*.ts` | 10 controllers: auth, todo, category, tag, diary, bullet, blog, analytics, blogCategory, writingSession |
+| Routes | `backend/src/routes/*.ts` | 10 route files mapping HTTP methods to controllers |
 | API service | `frontend/src/services/api.ts` | Typed fetch wrapper with Bearer auth and 401 handler |
 | Feature hooks | `frontend/src/hooks/*.ts` | 5 hooks: useTodos, useDiary, useBulletJournal, useBlog, useAnalytics |
 | Auth context | `frontend/src/contexts/AuthContext.tsx` | User state, login/register/logout, token verify on mount |
@@ -78,6 +78,9 @@ Architectural decisions and their rationale. Never remove entries — history is
 | 2026-04-04 | Fat controllers without service layer | Acceptable at current scale (~20 backend files). Introducing a service layer would add indirection without clear benefit for a single-dev project | Service layer extraction, repository pattern |
 | 2026-04-04 | Custom API tokens instead of JWT | Simpler implementation, tokens stored in DB for easy revocation. JWT would be better for distributed systems but unnecessary here | JWT with refresh tokens, session-based auth |
 | 2026-04-04 | SQLite instead of PostgreSQL | Single-file database, zero server setup, ideal for personal productivity app. WAL mode handles concurrent reads well | PostgreSQL, MongoDB |
+| 2026-04-04 | Renamed `/blog/:slug` route to `/blog/:id` | Blog posts use numeric IDs throughout the codebase; slug-based URLs would require adding a slug column and unique index | True slug-based URLs with DB migration |
+| 2026-04-04 | Quadrant analytics populated on todo completion (event-driven upsert) | Avoids a scheduled job or separate analytics pipeline; stats stay consistent because they're computed at the moment of status transition | Scheduled cron aggregation, frontend-triggered analytics call |
+| 2026-04-04 | Writing sessions as explicit start/end API calls | Gives users control over session boundaries; server computes productivity score on end | Auto-track via frontend activity detection, periodic heartbeat |
 
 ## Lessons Learned
 
@@ -90,12 +93,17 @@ Edge cases, failure patterns, and discoveries. Append new entries; update status
 
 - **Finding**: Three database tables exist with no write path — `blog_categories`, `writing_sessions`, `quadrant_analytics`
   **Impact**: Analytics features referencing these tables will show empty data. Blog category assignment via API is not possible.
-  **Status**: Open — documented in remaining-issues.md
+  **Status**: Fixed — 2026-04-04. `blog_categories` has full CRUD API, `writing_sessions` has start/end endpoints, `quadrant_analytics` auto-populates on todo completion.
   **Date**: 2026-04-04
 
 - **Finding**: Route params `/todos/:id`, `/diary/:date`, `/blog/:slug` are defined in React Router but not consumed by their view components
   **Impact**: Deep links to specific items don't work as expected — URL changes but view doesn't respond to the param
-  **Status**: Open
+  **Status**: Fixed — 2026-04-04. All three params now wired: `TodoView` scrolls to `:id`, `DiaryView` syncs to `:date`, `BlogView` reads `:id` (renamed from `:slug`).
+  **Date**: 2026-04-04
+
+- **Finding**: Coordinator bypassed specialist delegation during plan execution — self-implemented code changes instead of delegating to `fullstack-feature-dev`
+  **Impact**: Bypasses specialist domain knowledge, accumulated learnings, and the learning write-back loop. User had to manually intervene.
+  **Status**: Fixed — 2026-04-04. Added "Pre-Implementation Checkpoint", "Plan Execution Rules" to `subagent-router.mdc`, and "Plan-Driven Delegation" to `delegation-protocol.md`.
   **Date**: 2026-04-04
 
 - **Finding**: `shared/` package must be built before backend or frontend can use new types
@@ -125,11 +133,11 @@ Track what's missing or incomplete. Check items off as they're resolved.
 - [ ] Inconsistent error handling across controllers (some 409, some generic 500)
 
 ### Features
-- [ ] `blog_categories` table has no CRUD API
-- [ ] `writing_sessions` table is never written to
-- [ ] `quadrant_analytics` table is never populated
-- [ ] Route params not wired: `/todos/:id`, `/diary/:date`, `/blog/:slug`
-- [ ] Dev credentials hardcoded in authController.ts
+- [x] `blog_categories` table has no CRUD API — resolved 2026-04-04, full CRUD at `/api/blog-categories`
+- [x] `writing_sessions` table is never written to — resolved 2026-04-04, start/end endpoints at `/api/writing-sessions`
+- [x] `quadrant_analytics` table is never populated — resolved 2026-04-04, auto-upserts on todo completion
+- [x] Route params not wired: `/todos/:id`, `/diary/:date`, `/blog/:slug` — resolved 2026-04-04, all params consumed by views
+- [x] Dev credentials hardcoded in authController.ts — resolved 2026-04-04, gated behind `DEV_LOGIN_ENABLED` env check
 
 ### Documentation
 - [x] ~~Fill in all `{{placeholder}}` fields in this document~~

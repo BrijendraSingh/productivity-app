@@ -2,6 +2,18 @@
 
 Detailed instructions for how the main agent delegates to specialist subagents. This document is referenced by `subagent-router.mdc` and only needs to be read when delegation is actually happening.
 
+## Plan-Driven Delegation
+
+When executing a confirmed plan (`.plan.md` file attached, or user says "implement the plan"):
+
+1. **Read the plan's Execution Strategy** — it explicitly maps task groups to specialists. These mappings are authoritative.
+2. **Extract domain keywords from plan content**, not just the user's message. "Implement the plan" contains no domain keywords, but the plan body does.
+3. **Group plan items by specialist** — batch all items that map to the same specialist into a single delegation prompt.
+4. **Sequence by tier** — if the plan defines tiers with dependencies, respect the ordering.
+5. **The coordinator handles only**: trivial single-file changes the plan marks as "handle directly", documentation updates, and learning-store delegations.
+
+**Anti-pattern (caught 2026-04-04)**: Reading the plan, then self-implementing code changes that belong to a specialist domain. This bypasses the specialist's domain knowledge, accumulated learnings, and learning write-back loop.
+
 ## Full Delegation Steps
 
 When a task matches a specialist domain in the Routing Table:
