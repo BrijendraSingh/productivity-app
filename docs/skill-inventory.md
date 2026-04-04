@@ -8,46 +8,46 @@ Generated: 2026-04-04
 
 ## Available Skills
 
-| Skill | Access Tier | Description | Example Invocation |
-|---|---|---|---|
-| continuous-learner | unspecified | Maintains the engineering memory in docs/agent.md — capturing architectural decisions, lessons learned, edge cases, and known gaps | "Use continuous-learner" |
-| git-commit | unspecified | Guide the full git commit workflow — staging, crafting Conventional Commit messages, post-commit verification | "Use git-commit" |
-| manage-learnings | unspecified | Operates on the _learnings/ JSON knowledge store — compacting, promoting, auditing, summarizing | "Use manage-learnings" |
-| project-scanner | unspecified | Analyzes a repository to discover its domains, architecture, and repeatable workflows | "Use project-scanner" |
-| skill-factory | unspecified | Creates, tests, and iterates on specialist skills and agent definitions | "Use skill-factory" |
-| fullstack-feature-dev | unspecified | End-to-end feature development across shared/backend/frontend monorepo packages | "Add a new entity", "Wire up blog categories" |
-| playwright-qa | unspecified | Playwright E2E tests, unit test infrastructure (Vitest), QA coverage improvement | "Write E2E tests for todos", "Set up Vitest" |
-| bug-investigator | unspecified | Cross-stack debugging from React components through Express API to SQLite queries | "Debug why analytics shows empty", "Fix 401 errors" |
-| code-quality-infra | unspecified | ESLint, Prettier, Vitest, CI/CD, Docker, pre-commit hooks, error standardization | "Set up ESLint", "Create CI pipeline" |
+| Skill                 | Access Tier | Description                                                                                                                        | Example Invocation                                  |
+| --------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| continuous-learner    | unspecified | Maintains the engineering memory in docs/agent.md — capturing architectural decisions, lessons learned, edge cases, and known gaps | "Use continuous-learner"                            |
+| git-commit            | unspecified | Guide the full git commit workflow — staging, crafting Conventional Commit messages, post-commit verification                      | "Use git-commit"                                    |
+| manage-learnings      | unspecified | Operates on the \_learnings/ JSON knowledge store — compacting, promoting, auditing, summarizing                                   | "Use manage-learnings"                              |
+| project-scanner       | unspecified | Analyzes a repository to discover its domains, architecture, and repeatable workflows                                              | "Use project-scanner"                               |
+| skill-factory         | unspecified | Creates, tests, and iterates on specialist skills and agent definitions                                                            | "Use skill-factory"                                 |
+| fullstack-feature-dev | unspecified | End-to-end feature development across shared/backend/frontend monorepo packages                                                    | "Add a new entity", "Wire up blog categories"       |
+| playwright-qa         | unspecified | Playwright E2E tests, unit test infrastructure (Vitest), QA coverage improvement                                                   | "Write E2E tests for todos", "Set up Vitest"        |
+| bug-investigator      | unspecified | Cross-stack debugging from React components through Express API to SQLite queries                                                  | "Debug why analytics shows empty", "Fix 401 errors" |
+| code-quality-infra    | unspecified | ESLint, Prettier, Vitest, CI/CD, Docker, pre-commit hooks, error standardization                                                   | "Set up ESLint", "Create CI pipeline"               |
 
 ## Available Subagents
 
-| Agent | Owned Files | Description |
-|---|---|---|
-| continuous-learner | .cursor/skills/continuous-learner/ | Maintains the engineering memory in docs/agent.md. Use proactively after code changes. |
-| manage-learnings-specialist | .cursor/skills/manage-learnings/ | Maintains the _learnings/ knowledge store — compacting, promoting, auditing. |
-| project-scanner | .cursor/skills/project-scanner/ | Analyzes a repository to discover its domains, workflows, architecture patterns. |
-| skill-factory | .cursor/skills/skill-factory/ | Creates, tests, and iterates on specialist skills using the /skill-creator methodology. |
-| fullstack-feature-dev-specialist | .cursor/skills/fullstack-feature-dev/ | End-to-end feature development across the productivity-app monorepo. |
-| playwright-qa-specialist | .cursor/skills/playwright-qa/ | Testing and QA — Playwright E2E specs, unit test infrastructure, coverage improvement. |
-| bug-investigator-specialist | .cursor/skills/bug-investigator/ | Cross-stack debugging: tracing issues from frontend through API to database. |
-| code-quality-infra-specialist | .cursor/skills/code-quality-infra/ | Code quality tooling: linting, formatting, CI/CD, Docker, error standardization. |
+| Agent                            | Owned Files                           | Description                                                                             |
+| -------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------- |
+| continuous-learner               | .cursor/skills/continuous-learner/    | Maintains the engineering memory in docs/agent.md. Use proactively after code changes.  |
+| manage-learnings-specialist      | .cursor/skills/manage-learnings/      | Maintains the \_learnings/ knowledge store — compacting, promoting, auditing.           |
+| project-scanner                  | .cursor/skills/project-scanner/       | Analyzes a repository to discover its domains, workflows, architecture patterns.        |
+| skill-factory                    | .cursor/skills/skill-factory/         | Creates, tests, and iterates on specialist skills using the /skill-creator methodology. |
+| fullstack-feature-dev-specialist | .cursor/skills/fullstack-feature-dev/ | End-to-end feature development across the productivity-app monorepo.                    |
+| playwright-qa-specialist         | .cursor/skills/playwright-qa/         | Testing and QA — Playwright E2E specs, unit test infrastructure, coverage improvement.  |
+| bug-investigator-specialist      | .cursor/skills/bug-investigator/      | Cross-stack debugging: tracing issues from frontend through API to database.            |
+| code-quality-infra-specialist    | .cursor/skills/code-quality-infra/    | Code quality tooling: linting, formatting, CI/CD, Docker, error standardization.        |
 
 ## MCP Integrations
 
 | MCP Server | Tools Used | Skills That Use It |
-|---|---|---|
+| ---------- | ---------- | ------------------ |
 
 ## Workspace-Level Skills (inherited)
 
 These skills are defined at the workspace level and available to all repos:
 
-| Skill | Description | How to Invoke |
-|---|---|---|
-| jira-workflow | JIRA issue operations | "Get JIRA issue IO-1234" |
-| repo-lookup | Find repo location and metadata | "Where is error-management repo?" |
-| service-dependency-map | Trace @celigo/* dependencies | "What depends on integrator-common-util?" |
-| sync-upstream | Sync fork with upstream | "Sync this repo with upstream" |
-| celigo-knowledge-advisor | Celigo platform knowledge | "How do flows work in integrator.io?" |
-| celigo-connector-advisor | Connector catalog context | "Which adaptors does the Shopify connector use?" |
-| skill-propagator | Cross-repo skill management | "Check for applicable skills from other repos" |
+| Skill                    | Description                     | How to Invoke                                    |
+| ------------------------ | ------------------------------- | ------------------------------------------------ |
+| jira-workflow            | JIRA issue operations           | "Get JIRA issue IO-1234"                         |
+| repo-lookup              | Find repo location and metadata | "Where is error-management repo?"                |
+| service-dependency-map   | Trace @celigo/\* dependencies   | "What depends on integrator-common-util?"        |
+| sync-upstream            | Sync fork with upstream         | "Sync this repo with upstream"                   |
+| celigo-knowledge-advisor | Celigo platform knowledge       | "How do flows work in integrator.io?"            |
+| celigo-connector-advisor | Connector catalog context       | "Which adaptors does the Shopify connector use?" |
+| skill-propagator         | Cross-repo skill management     | "Check for applicable skills from other repos"   |

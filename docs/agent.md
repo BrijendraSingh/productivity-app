@@ -44,22 +44,22 @@ The app is structured as an npm workspaces monorepo with three packages forming 
 
 ## Key Modules
 
-| Module | Path | Purpose |
-|--------|------|---------|
-| Shared types | `shared/src/types/index.ts` | All entity interfaces, DTOs, and API response types |
-| Shared constants | `shared/src/constants/index.ts` | API endpoints, config values, display metadata |
-| Shared utils | `shared/src/utils/*.ts` | DateUtils, EisenhowerUtils, TextUtils, ValidationUtils |
-| Database config | `backend/src/config/database.ts` | SQLite connection, 13-table schema DDL, promise wrappers |
-| Auth middleware | `backend/src/middleware/auth.ts` | Bearer token verification, user attachment to request |
-| Validation middleware | `backend/src/middleware/validation.ts` | express-validator batch runner |
-| Controllers | `backend/src/controllers/*.ts` | 10 controllers: auth, todo, category, tag, diary, bullet, blog, analytics, blogCategory, writingSession |
-| Routes | `backend/src/routes/*.ts` | 10 route files mapping HTTP methods to controllers |
-| API service | `frontend/src/services/api.ts` | Typed fetch wrapper with Bearer auth and 401 handler |
-| Feature hooks | `frontend/src/hooks/*.ts` | 5 hooks: useTodos, useDiary, useBulletJournal, useBlog, useAnalytics |
-| Auth context | `frontend/src/contexts/AuthContext.tsx` | User state, login/register/logout, token verify on mount |
-| Theme context | `frontend/src/contexts/ThemeContext.tsx` | MUI dark/light mode with localStorage persistence |
-| Components | `frontend/src/components/` | 12 components across 8 feature directories |
-| Playwright E2E | `frontend/bullet-journal.spec.ts` | E2E tests for bullet journal symbol toolbar |
+| Module                | Path                                     | Purpose                                                                                                 |
+| --------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Shared types          | `shared/src/types/index.ts`              | All entity interfaces, DTOs, and API response types                                                     |
+| Shared constants      | `shared/src/constants/index.ts`          | API endpoints, config values, display metadata                                                          |
+| Shared utils          | `shared/src/utils/*.ts`                  | DateUtils, EisenhowerUtils, TextUtils, ValidationUtils                                                  |
+| Database config       | `backend/src/config/database.ts`         | SQLite connection, 13-table schema DDL, promise wrappers                                                |
+| Auth middleware       | `backend/src/middleware/auth.ts`         | Bearer token verification, user attachment to request                                                   |
+| Validation middleware | `backend/src/middleware/validation.ts`   | express-validator batch runner                                                                          |
+| Controllers           | `backend/src/controllers/*.ts`           | 10 controllers: auth, todo, category, tag, diary, bullet, blog, analytics, blogCategory, writingSession |
+| Routes                | `backend/src/routes/*.ts`                | 10 route files mapping HTTP methods to controllers                                                      |
+| API service           | `frontend/src/services/api.ts`           | Typed fetch wrapper with Bearer auth and 401 handler                                                    |
+| Feature hooks         | `frontend/src/hooks/*.ts`                | 5 hooks: useTodos, useDiary, useBulletJournal, useBlog, useAnalytics                                    |
+| Auth context          | `frontend/src/contexts/AuthContext.tsx`  | User state, login/register/logout, token verify on mount                                                |
+| Theme context         | `frontend/src/contexts/ThemeContext.tsx` | MUI dark/light mode with localStorage persistence                                                       |
+| Components            | `frontend/src/components/`               | 12 components across 8 feature directories                                                              |
+| Playwright E2E        | `frontend/bullet-journal.spec.ts`        | E2E tests for bullet journal symbol toolbar                                                             |
 
 ## System Boundaries
 
@@ -71,16 +71,16 @@ The app is structured as an npm workspaces monorepo with three packages forming 
 
 Architectural decisions and their rationale. Never remove entries — history is permanent.
 
-| Date | Decision | Rationale | Alternatives Considered |
-|------|----------|-----------|------------------------|
-| 2026-04-04 | Applied cursor-agent-bootstrap | Establish self-learning subagent architecture for development workflow | Manual agent setup, no agents |
-| 2026-04-04 | Created 4 domain specialists: fullstack-feature-dev, playwright-qa, bug-investigator, code-quality-infra | Project scan revealed zero app-development skills; all 5 existing skills were meta/bootstrap only | Fewer specialists (combined dev+debug), more specialists (split frontend/backend dev) |
-| 2026-04-04 | Fat controllers without service layer | Acceptable at current scale (~20 backend files). Introducing a service layer would add indirection without clear benefit for a single-dev project | Service layer extraction, repository pattern |
-| 2026-04-04 | Custom API tokens instead of JWT | Simpler implementation, tokens stored in DB for easy revocation. JWT would be better for distributed systems but unnecessary here | JWT with refresh tokens, session-based auth |
-| 2026-04-04 | SQLite instead of PostgreSQL | Single-file database, zero server setup, ideal for personal productivity app. WAL mode handles concurrent reads well | PostgreSQL, MongoDB |
-| 2026-04-04 | Renamed `/blog/:slug` route to `/blog/:id` | Blog posts use numeric IDs throughout the codebase; slug-based URLs would require adding a slug column and unique index | True slug-based URLs with DB migration |
-| 2026-04-04 | Quadrant analytics populated on todo completion (event-driven upsert) | Avoids a scheduled job or separate analytics pipeline; stats stay consistent because they're computed at the moment of status transition | Scheduled cron aggregation, frontend-triggered analytics call |
-| 2026-04-04 | Writing sessions as explicit start/end API calls | Gives users control over session boundaries; server computes productivity score on end | Auto-track via frontend activity detection, periodic heartbeat |
+| Date       | Decision                                                                                                 | Rationale                                                                                                                                         | Alternatives Considered                                                               |
+| ---------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 2026-04-04 | Applied cursor-agent-bootstrap                                                                           | Establish self-learning subagent architecture for development workflow                                                                            | Manual agent setup, no agents                                                         |
+| 2026-04-04 | Created 4 domain specialists: fullstack-feature-dev, playwright-qa, bug-investigator, code-quality-infra | Project scan revealed zero app-development skills; all 5 existing skills were meta/bootstrap only                                                 | Fewer specialists (combined dev+debug), more specialists (split frontend/backend dev) |
+| 2026-04-04 | Fat controllers without service layer                                                                    | Acceptable at current scale (~20 backend files). Introducing a service layer would add indirection without clear benefit for a single-dev project | Service layer extraction, repository pattern                                          |
+| 2026-04-04 | Custom API tokens instead of JWT                                                                         | Simpler implementation, tokens stored in DB for easy revocation. JWT would be better for distributed systems but unnecessary here                 | JWT with refresh tokens, session-based auth                                           |
+| 2026-04-04 | SQLite instead of PostgreSQL                                                                             | Single-file database, zero server setup, ideal for personal productivity app. WAL mode handles concurrent reads well                              | PostgreSQL, MongoDB                                                                   |
+| 2026-04-04 | Renamed `/blog/:slug` route to `/blog/:id`                                                               | Blog posts use numeric IDs throughout the codebase; slug-based URLs would require adding a slug column and unique index                           | True slug-based URLs with DB migration                                                |
+| 2026-04-04 | Quadrant analytics populated on todo completion (event-driven upsert)                                    | Avoids a scheduled job or separate analytics pipeline; stats stay consistent because they're computed at the moment of status transition          | Scheduled cron aggregation, frontend-triggered analytics call                         |
+| 2026-04-04 | Writing sessions as explicit start/end API calls                                                         | Gives users control over session boundaries; server computes productivity score on end                                                            | Auto-track via frontend activity detection, periodic heartbeat                        |
 
 ## Lessons Learned
 
@@ -111,28 +111,47 @@ Edge cases, failure patterns, and discoveries. Append new entries; update status
   **Status**: By design — npm workspaces link to `dist/` output
   **Date**: 2026-04-04
 
+- **Finding**: ESLint 10 is incompatible with `eslint-plugin-react-hooks` v7 — must pin ESLint to v9
+  **Impact**: Installing latest ESLint breaks the lint setup
+  **Status**: By design — pinned to ESLint 9 until plugin ecosystem catches up
+  **Date**: 2026-04-04
+
+- **Finding**: Vitest root config picks up compiled `.test.js` files in `shared/dist/` and Playwright `.spec.ts` files in `frontend/`
+  **Impact**: `npm run test:unit` fails with CommonJS import errors and Playwright context errors
+  **Status**: Fixed — root `vitest.config.ts` uses explicit `include` patterns (`shared/src/**/*.test.ts`, `backend/src/**/*.test.ts`) and excludes `dist/` and `*.spec.ts`
+  **Date**: 2026-04-04
+
+- **Finding**: All 10 backend controllers refactored from inline `res.status().json()` error responses to `AppError` class with `next(err)` delegation
+  **Impact**: Consistent error responses, better testability, and all errors flow through the global handler
+  **Status**: Resolved — 48 handlers updated, TypeScript compilation clean
+  **Date**: 2026-04-04
+
 ## Known Gaps
 
 Track what's missing or incomplete. Check items off as they're resolved.
 
 ### Architecture
+
 - [ ] No service layer — controllers contain inline SQL (acceptable at current scale)
 - [ ] No WebSocket support for real-time updates
 - [ ] No data export/import functionality
 
 ### Testing
-- [ ] Zero unit tests — no Vitest/Jest configured
-- [ ] Only 1 E2E spec (bullet journal symbols) — all other features untested
+
+- [x] Zero unit tests — resolved 2026-04-04, Vitest configured with 173 unit tests across shared utils and backend AppError
+- [x] Only 1 E2E spec — resolved 2026-04-04, 7 Playwright specs with 48 test cases covering auth, todos, diary, blog, matrix, analytics, bullet journal
 - [ ] No test data seeding or fixture system
-- [ ] No CI/CD pipeline to run tests automatically
+- [x] No CI/CD pipeline — resolved 2026-04-04, GitHub Actions CI with quality, unit-tests, and e2e-tests jobs
 
 ### Code Quality
-- [ ] No ESLint configured
-- [ ] No Prettier configured
-- [ ] No pre-commit hooks
-- [ ] Inconsistent error handling across controllers (some 409, some generic 500)
+
+- [x] No ESLint configured — resolved 2026-04-04, ESLint 9 flat config with TypeScript + React hooks + Prettier integration
+- [x] No Prettier configured — resolved 2026-04-04, `.prettierrc` with consistent style rules, all files formatted
+- [x] No pre-commit hooks — resolved 2026-04-04, Husky + lint-staged running ESLint fix + Prettier on staged files
+- [x] Inconsistent error handling — resolved 2026-04-04, `AppError` class + all 10 controllers refactored to use `next(err)`
 
 ### Features
+
 - [x] `blog_categories` table has no CRUD API — resolved 2026-04-04, full CRUD at `/api/blog-categories`
 - [x] `writing_sessions` table is never written to — resolved 2026-04-04, start/end endpoints at `/api/writing-sessions`
 - [x] `quadrant_analytics` table is never populated — resolved 2026-04-04, auto-upserts on todo completion
@@ -140,6 +159,7 @@ Track what's missing or incomplete. Check items off as they're resolved.
 - [x] Dev credentials hardcoded in authController.ts — resolved 2026-04-04, gated behind `DEV_LOGIN_ENABLED` env check
 
 ### Documentation
+
 - [x] ~~Fill in all `{{placeholder}}` fields in this document~~
 - [x] ~~Complete the scan report via project-scanner~~
 
@@ -147,15 +167,16 @@ Track what's missing or incomplete. Check items off as they're resolved.
 
 Track config schema changes so agents understand current vs historical config shapes.
 
-| Version | Date | Change | Migration Notes |
-|---------|------|--------|----------------|
-| 1.0.0 | 2026-04-04 | Initial configuration — `.env.example` with PORT, DATABASE_PATH, JWT_SECRET, FRONTEND_URL, LOG_LEVEL, rate limiting vars | Copy `.env.example` to `.env` and fill in values |
+| Version | Date       | Change                                                                                                                   | Migration Notes                                  |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
+| 1.0.0   | 2026-04-04 | Initial configuration — `.env.example` with PORT, DATABASE_PATH, JWT_SECRET, FRONTEND_URL, LOG_LEVEL, rate limiting vars | Copy `.env.example` to `.env` and fill in values |
 
 ## Feedback Protocol
 
 How to write back to this document:
 
 **Lessons Learned** — use this format:
+
 ```
 - **Finding**: [What you observed]
   **Impact**: [What breaks or degrades]
@@ -174,6 +195,7 @@ How to write back to this document:
 For the full directory listing, see the "Where to Find More" section in [`AGENTS.md`](../AGENTS.md).
 
 Key links for this document:
+
 - [`AGENTS.md`](../AGENTS.md) — agent conventions, specialist registry, architecture diagram
 - [`docs/cursor-setup.md`](cursor-setup.md) — setup guide, troubleshooting, knowledge promotion workflow
 - [`docs/scan-report.md`](scan-report.md) — full codebase scan results and domain proposals

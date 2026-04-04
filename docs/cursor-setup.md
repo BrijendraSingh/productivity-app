@@ -59,21 +59,27 @@ Skills improve in two ways:
 ## Troubleshooting
 
 ### Agent isn't delegating to specialists
+
 Check that `.cursor/rules/subagent-router.mdc` has `alwaysApply: true` and the routing table has an entry for the relevant keywords.
 
 ### Specialist doesn't use accumulated knowledge
+
 Make sure the specialist's `_learnings` files exist (even as empty `[]`) and the Learning Protocol section in its SKILL.md correctly lists them.
 
 ### Skill-factory can't test skills
+
 Ensure the /skill-creator is installed. Without it, the skill-factory falls back to lightweight testing (manual prompt execution without the full eval/benchmark pipeline).
 
 ### Bootstrap script says files already exist
+
 The bootstrap script never overwrites existing files. To upgrade to a newer template version, use `scripts/upgrade.sh`. For a fresh start, back up `.cursor/skills/_learnings/` first, then delete `.cursor/` and re-run bootstrap.
 
 ### A `_learnings` JSON file is corrupted
+
 Run `scripts/validate.sh` to identify invalid JSON files. Manually fix the JSON syntax or restore from git history.
 
 ### Template seems partially applied
+
 Run `scripts/validate.sh` to verify all expected files exist, check JSON validity, and count remaining `{{placeholder}}` tokens.
 
 ## Knowledge Promotion Workflow
