@@ -10,6 +10,7 @@ import compression from 'compression';
 import morgan from 'morgan';
 import { APP_CONFIG, API_ENDPOINTS } from '@productivity-app/shared';
 import { initializeDatabase, closeDatabase } from './config/database';
+import { AppError } from './utils/AppError';
 import authRoutes from './routes/auth';
 import todoRoutes from './routes/todos';
 import categoryRoutes from './routes/categories';
@@ -38,7 +39,7 @@ async function startServer(): Promise<void> {
     cors({
       origin: ['http://localhost:3000', FRONTEND_URL],
       credentials: true,
-    }),
+    })
   );
 
   // 3. Rate limiting — production only (100 requests per 15 min window)
@@ -56,7 +57,7 @@ async function startServer(): Promise<void> {
           success: false,
           message: 'Too many requests. Please try again later.',
         },
-      }),
+      })
     );
   }
 
@@ -75,9 +76,7 @@ async function startServer(): Promise<void> {
     res.on('finish', () => {
       const duration = Date.now() - start;
       if (NODE_ENV === 'development') {
-        console.log(
-          `[${req.method}] ${req.originalUrl} → ${res.statusCode} (${duration}ms)`,
-        );
+        console.log(`[${req.method}] ${req.originalUrl} → ${res.statusCode} (${duration}ms)`);
       }
     });
     next();
@@ -118,7 +117,8 @@ async function startServer(): Promise<void> {
           categories: 'GET|POST /api/categories, GET|PUT|DELETE /api/categories/:id',
           tags: 'GET|POST /api/tags, GET|PUT|DELETE /api/tags/:id, GET /api/tags/:id/todos',
           diary: 'GET /api/diary, GET|PUT|DELETE /api/diary/:date',
-          bullet: 'GET|PUT /api/bullet/logs, GET|POST /api/bullet/events, PATCH /api/bullet/todos/:id/symbol',
+          bullet:
+            'GET|PUT /api/bullet/logs, GET|POST /api/bullet/events, PATCH /api/bullet/todos/:id/symbol',
           blog: 'GET|POST /api/blog, GET|PUT|DELETE /api/blog/:id, PATCH /api/blog/:id/publish',
           analytics: 'GET /api/analytics/dashboard|matrix|trends|writing|diary',
         },
@@ -164,12 +164,23 @@ async function startServer(): Promise<void> {
   // ─── Global error handler ────────────────────────────────────────────────
 
   app.use(
-    (
-      err: Error,
-      _req: express.Request,
-      res: express.Response,
-      _next: express.NextFunction,
-    ) => {
+    (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      if (err instanceof AppError) {
+        return res.status(err.statusCode).json({
+          success: false,
+          message: err.message,
+          code: err.code,
+        });
+      }
+
+      if (err.message?.includes('UNIQUE constraint failed')) {
+        return res.status(409).json({
+          success: false,
+          message: 'Resource already exists.',
+          code: 'CONFLICT',
+        });
+      }
+
       console.error('Unhandled error:', err);
 
       const errObj = err as unknown as Record<string, unknown>;
@@ -182,7 +193,7 @@ async function startServer(): Promise<void> {
             ? 'Internal server error.'
             : err.message || 'Internal server error.',
       });
-    },
+    }
   );
 
   // ─── Start listening ─────────────────────────────────────────────────────
