@@ -49,7 +49,10 @@ COPY shared/package.json shared/
 COPY backend/package.json backend/
 COPY frontend/package.json frontend/
 
-RUN npm install --omit=dev
+RUN apk add --no-cache python3 make g++ && \
+    npm pkg delete scripts.prepare && \
+    npm install --omit=dev && \
+    apk del python3 make g++
 
 COPY --from=backend-build /app/shared/dist shared/dist/
 COPY --from=backend-build /app/backend/dist backend/dist/
