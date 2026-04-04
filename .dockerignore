@@ -7,10 +7,12 @@ shared/dist/
 backend/dist/
 frontend/dist/
 
-data/*.db
-data/*.db-shm
-data/*.db-wal
-data/*.db-journal
+data/
+
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
 
 .env
 .env.local
@@ -34,3 +36,12 @@ temp/
 
 .DS_Store
 Thumbs.db
+
+test-results/
+playwright-report/
+_learnings/
+docs/
+.husky/
+podman-compose.yml
+docker-compose.yml
+run.sh
