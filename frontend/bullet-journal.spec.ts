@@ -3,50 +3,13 @@
  * Run: npx playwright test bullet-journal.spec.ts --project=chromium
  */
 import { test, expect } from '@playwright/test';
+import { BASE_URL, ensureAuthenticated } from './e2e/helpers';
 
-const BASE_URL = 'http://localhost:3000';
-const TEST_USER = { username: 'bulletjournaltest', email: 'test@test.com', password: 'Test1234!' };
-
-async function ensureAuthenticated(page: import('@playwright/test').Page) {
-  await page.goto(BASE_URL);
-  await page.waitForLoadState('networkidle');
-
-  // If we're on welcome, need to auth
-  if (page.url().includes('/welcome')) {
-    // Click Sign In in the top bar (banner) to open the dialog
-    await page.getByRole('banner').getByRole('button', { name: 'Sign In' }).click();
-    await page.waitForSelector('[role="dialog"]', { state: 'visible' });
-
-    // Try login first (user may already exist)
-    const dialog = page.locator('[role="dialog"]');
-    await dialog.getByRole('tab', { name: 'Sign In' }).click();
-    await dialog.getByLabel('Username').fill(TEST_USER.username);
-    await dialog.getByLabel('Password').first().fill(TEST_USER.password);
-    await dialog.getByRole('button', { name: 'Sign In' }).click();
-
-    // Wait for dialog to close - if error appears, try signup
-    await page.waitForTimeout(1500);
-    const errorAlert = page.locator('[role="alert"]');
-    if (await errorAlert.isVisible()) {
-      await dialog.getByRole('tab', { name: 'Sign Up' }).click();
-      await dialog.getByLabel('Username').fill(TEST_USER.username);
-      await dialog.getByLabel('Email').fill(TEST_USER.email);
-      await dialog.getByLabel('Password').first().fill(TEST_USER.password);
-      await dialog.getByLabel('Confirm Password').fill(TEST_USER.password);
-      await dialog.getByRole('button', { name: 'Sign Up' }).click();
-      await page.waitForTimeout(2000);
-    }
-
-    // After auth, dialog closes. Navigate to dashboard to ensure we're in the app
-    await page.goto(BASE_URL + '/');
-    await page.waitForLoadState('networkidle');
-    // Should now be on dashboard (or welcome if auth failed - then we can't proceed)
-  }
-}
+const TEST_USER = 'bulletjournaltest';
 
 test.describe('Bullet Journal - Symbol Toolbar and Shortcuts', () => {
   test.beforeEach(async ({ page }) => {
-    await ensureAuthenticated(page);
+    await ensureAuthenticated(page, TEST_USER);
     // Navigate to Journal
     await page.goto(BASE_URL + '/journal');
     await page.waitForLoadState('networkidle');
@@ -106,7 +69,10 @@ test.describe('Bullet Journal - Symbol Toolbar and Shortcuts', () => {
       await textField.press('Enter');
       await textField.type(shortcut, { delay: 50 });
       const value = await textField.inputValue();
-      expect(value.endsWith(expected), `Shortcut ${shortcut} should expand to "${expected}", got: "${value.slice(-10)}"`).toBeTruthy();
+      expect(
+        value.endsWith(expected),
+        `Shortcut ${shortcut} should expand to "${expected}", got: "${value.slice(-10)}"`
+      ).toBeTruthy();
     }
 
     await page.screenshot({ path: 'test-results/03-shortcuts-expanded.png' });

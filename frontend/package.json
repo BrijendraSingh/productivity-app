@@ -9,7 +9,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@date-io/date-fns": "3.2.1",

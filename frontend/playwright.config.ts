@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: '.',
-  testMatch: 'bullet-journal.spec.ts',
+  testMatch: '*.spec.ts',
   timeout: 30000,
   use: {
     baseURL: 'http://localhost:3000',
