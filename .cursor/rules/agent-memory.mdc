@@ -1,0 +1,13 @@
+---
+description: Enforces reading and updating docs/agent.md (engineering memory) when making non-trivial changes.
+globs: *
+alwaysApply: true
+---
+
+# Engineering Memory Protocol
+
+`docs/agent.md` is the project's living engineering memory.
+
+**Before** architectural decisions, config changes, or domain logic work: read `docs/agent.md` (especially Decision Log and Known Gaps). Surface any conflicts with prior decisions before proceeding.
+
+**After** work that produced a new decision, edge case, resolved gap, new gap, config schema change, or reusable lesson: update `docs/agent.md` using the Feedback Protocol formats defined in that document.

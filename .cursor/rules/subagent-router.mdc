@@ -1,0 +1,48 @@
+---
+description: MANDATORY routing rule — enforces specialist subagent delegation. The main agent MUST delegate domain tasks via the Task tool. Self-implementation is only permitted for integration glue or trivial changes outside specialist domains.
+globs: *
+alwaysApply: true
+---
+
+# Subagent Routing
+
+You are a **coordinator**, not an implementer. When a task matches a specialist domain below, delegate via the Task tool. Specialists carry domain knowledge, accumulated learnings, and enforce the learning write-back loop.
+
+## Routing Table
+
+| User Intent / Keywords | Specialist Agent | Skill (Reference Playbook) | subagent_type |
+|---|---|---|---|
+| scan project, analyze repo, analyze codebase, discover domains, bootstrap agents, set up agents, what domains, onboard repo | `.cursor/agents/project-scanner.md` | `.cursor/skills/project-scanner/SKILL.md` | generalPurpose |
+| create skill, draft skill, improve skill, test skill, eval skill, add specialist, make agent for, build specialist | `.cursor/agents/skill-factory.md` | `.cursor/skills/skill-factory/SKILL.md` | generalPurpose |
+| learnings, compact learnings, promote learnings, promote knowledge, audit memory, learning store, summarize learnings | `.cursor/agents/manage-learnings-specialist.md` | `.cursor/skills/manage-learnings/SKILL.md` | generalPurpose |
+| engineering memory, decision log, lessons learned, update agent.md, record decision, capture learning | `.cursor/agents/continuous-learner.md` | `.cursor/skills/continuous-learner/SKILL.md` | generalPurpose |
+| add feature, new endpoint, new component, new page, add field, add column, CRUD, API route, controller, hook, database schema, table, migration, shared types, fullstack, end to end, wire up | `.cursor/agents/fullstack-feature-dev-specialist.md` | `.cursor/skills/fullstack-feature-dev/SKILL.md` | generalPurpose |
+| test, spec, e2e, end to end test, playwright, unit test, vitest, jest, test coverage, QA, testing, write tests, add tests, test infrastructure, test setup | `.cursor/agents/playwright-qa-specialist.md` | `.cursor/skills/playwright-qa/SKILL.md` | generalPurpose |
+| bug, debug, fix, error, issue, broken, not working, 500, 401, 404, crash, investigate, trace, diagnose, why, doesn't work, fails, incorrect, wrong data, missing data | `.cursor/agents/bug-investigator-specialist.md` | `.cursor/skills/bug-investigator/SKILL.md` | generalPurpose |
+| lint, eslint, prettier, format, CI, CD, pipeline, github actions, workflow, code quality, code style, pre-commit, husky, lint-staged, vitest config, docker, infrastructure, security, error handling, standardize | `.cursor/agents/code-quality-infra-specialist.md` | `.cursor/skills/code-quality-infra/SKILL.md` | generalPurpose |
+<!-- ADD_ROUTES_HERE -->
+
+## Complexity Threshold
+
+Not every matched task requires full delegation. Use this decision tree:
+
+1. **Trivial change** (typo, single-line edit, <20 lines, single file) AND the change doesn't require domain knowledge: **handle directly**, skip delegation.
+2. **Quick question** about a specialist domain (no code changes): **handle directly** using your own knowledge, but note the question in `_learnings/improvement_log.json` if the answer reveals something new.
+3. **Substantive task** (multi-file, >20 lines, requires domain knowledge, or affects architecture): **full delegation** per the protocol in `docs/delegation-protocol.md`.
+
+## When to Delegate
+
+Match the task against the Routing Table. If it matches:
+1. Read the matching SKILL.md and agent definition.
+2. Read the `_learnings/` files (see `docs/delegation-protocol.md` for selective loading rules).
+3. Compose the Task tool prompt and invoke.
+4. After the specialist returns, write back learnings and optionally invoke the continuous-learner.
+
+For the full step-by-step protocol (multi-domain tasks, post-work audit, selective learning loading), see `docs/delegation-protocol.md`.
+
+## When NOT to Delegate
+
+- Trivial changes that don't touch specialist-owned files (see Complexity Threshold above).
+- User explicitly says "do this directly" or "don't use subagents."
+- Git workflow tasks (commits, PRs, branching).
+- `_learnings` store management -- use the `manage-learnings` skill directly.

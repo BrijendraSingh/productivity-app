@@ -1,0 +1,37 @@
+---
+description: Code quality and safety conventions for all agent modifications.
+globs: *
+alwaysApply: true
+---
+
+# Code Conventions
+
+## Safety
+
+- All external API tools must be **read-only** unless explicitly designed for mutation with approval gates.
+- Never hardcode domain knowledge (service names, mappings, config values) in source code — use config files.
+- Never transmit project data to external services without explicit user approval.
+- Handle secrets via environment variables, never in source code or config files committed to git.
+
+## Quality
+
+- When adding or modifying a module, update or add corresponding tests.
+- Prefer deterministic logic over AI inference where correctness is critical.
+- Keep functions focused — one concern per function.
+- Use meaningful variable and function names that reflect the domain.
+
+## Learning Store
+
+- `_learnings/*.json` files are **append-oriented**. Never bulk-delete entries.
+- Every entry must include a timestamp (`discovered_at` or `date` field).
+- Every entry should include a `tags` array with 1-3 domain keywords for filtering.
+- If a file doesn't exist yet, create it with an initial entry — don't fail silently.
+- If a file exceeds ~500 entries, use the `manage-learnings` skill to compact it.
+
+## Routing Miss Logging
+
+When the main agent handles a substantive task (not a trivial edit or question) without delegating to a specialist, append an entry to `_learnings/improvement_log.json`:
+```json
+{ "type": "routing_miss", "task_summary": "...", "reason": "no matching specialist", "discovered_at": "ISO-8601", "tags": ["routing", "gap"] }
+```
+This helps identify patterns where new specialists or expanded routing keywords are needed.
