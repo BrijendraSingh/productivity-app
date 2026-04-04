@@ -34,6 +34,17 @@ Stop and confirm with the user if:
 
 ## Workflow
 
+### Step 0: Check for Pre-Diagnosed Context
+
+If the delegation prompt includes a **Diagnostic Context Handoff** (root cause summary, files investigated, proposed fix approach), start here instead of Step 1:
+
+1. Read and verify the coordinator's diagnosis — check the cited files and confirm the root cause.
+2. Cross-reference against `_learnings/debug_log.json` for similar past bugs.
+3. If the diagnosis is correct, skip to Step 5 (Fix and Verify) using the proposed approach as a starting point.
+4. If the diagnosis is incomplete or incorrect, proceed to Step 1 for a fresh investigation.
+
+This avoids redundant re-investigation while ensuring specialist-grade validation.
+
 ### Step 1: Reproduce and Classify
 
 Understand the symptom:

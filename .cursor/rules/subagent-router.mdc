@@ -32,6 +32,14 @@ Before writing ANY code — even a single line — you MUST:
 
 If you find yourself about to call `StrReplace`, `Write`, or any file-editing tool for code in a specialist-owned file, **STOP** and re-check whether delegation is required. Self-implementation of specialist work is a routing violation.
 
+## Per-Turn Re-evaluation (MANDATORY)
+
+Re-run the Pre-Implementation Checkpoint **on every new user message**, not just the first one. Common bypass patterns to guard against:
+
+1. **Diagnostic-to-fix shift**: Turn 1 is a question ("why does X happen?") — handled directly per Complexity Threshold. Turn 2 requests action ("fix it"). The coordinator already has full context and is tempted to self-implement. **You MUST still re-scan and delegate on Turn 2.** Having context does not waive the routing rules.
+2. **Accumulated context bias**: After deep investigation, the fix feels obvious and delegation feels wasteful. This is the exact situation where delegation is most important — the specialist will apply accumulated learnings, validate the fix approach, and write back to the learning store.
+3. **Context handoff**: When delegating after prior diagnostic work, include your findings in the delegation prompt (root cause, affected files, proposed fix approach). This prevents the specialist from re-doing investigation you already completed. See `docs/delegation-protocol.md` § Diagnostic Context Handoff.
+
 ## Plan Execution Rules
 
 When executing a confirmed plan (the user says "implement the plan", "execute the plan", or a `.plan.md` file is attached):

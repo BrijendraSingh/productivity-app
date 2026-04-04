@@ -14,6 +14,24 @@ When executing a confirmed plan (`.plan.md` file attached, or user says "impleme
 
 **Anti-pattern (caught 2026-04-04)**: Reading the plan, then self-implementing code changes that belong to a specialist domain. This bypasses the specialist's domain knowledge, accumulated learnings, and learning write-back loop.
 
+## Diagnostic Context Handoff
+
+When the coordinator has already performed diagnostic work before delegation (e.g., the user asked "why is X broken?" and you investigated, then the user says "fix it"), include the prior findings in the delegation prompt:
+
+1. **Root cause summary**: What you determined is wrong and why.
+2. **Files investigated**: Which files you read and what you found.
+3. **Proposed fix approach**: Your assessment of what needs to change (the specialist can accept, refine, or reject this).
+4. **Relevant data**: Any specific values, configurations, or data states observed.
+
+This prevents the specialist from re-running Steps 1-4 of its investigation workflow. The specialist should:
+
+- Verify the coordinator's diagnosis (don't blindly trust it)
+- Apply its own domain knowledge and accumulated learnings
+- Implement the fix following its skill's quality standards
+- Write back to `_learnings/` as normal
+
+**Anti-pattern (caught 2026-04-05)**: Having full diagnostic context → feeling delegation is wasteful → self-implementing. The value of delegation is not just investigation — it's the specialist's domain knowledge, learning store, and write-back loop.
+
 ## Full Delegation Steps
 
 When a task matches a specialist domain in the Routing Table:

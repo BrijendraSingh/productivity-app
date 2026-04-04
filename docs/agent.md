@@ -126,6 +126,11 @@ Edge cases, failure patterns, and discoveries. Append new entries; update status
   **Status**: Resolved — 48 handlers updated, TypeScript compilation clean
   **Date**: 2026-04-04
 
+- **Finding**: Routing bypass recurred in diagnostic-to-fix pattern — same violation class as 2026-04-04 plan-execution bypass, different shape. Coordinator diagnosed a Recharts chart issue (correctly handled as a question), then self-implemented the fix instead of delegating to bug-investigator when the user asked to "fix it."
+  **Impact**: Bypasses specialist's accumulated learnings, learning write-back loop, and domain validation. Prior fix (Pre-Implementation Checkpoint) only addressed plan-execution variant, proving single-shape patches don't prevent the underlying pattern.
+  **Status**: Fixed — 2026-04-05. Added "Per-Turn Re-evaluation" rule to `subagent-router.mdc` (mandatory re-scan on every user message). Added "Diagnostic Context Handoff" to `delegation-protocol.md`. Added "Step 0" to bug-investigator SKILL.md for accepting pre-diagnosed context.
+  **Date**: 2026-04-05
+
 ## Known Gaps
 
 Track what's missing or incomplete. Check items off as they're resolved.

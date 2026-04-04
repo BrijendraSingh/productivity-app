@@ -10,5 +10,15 @@
     "tags": ["routing", "gap", "delegation", "plan-execution"],
     "finding": "Routing bypass during plan execution: the coordinator self-implemented code changes instead of delegating to fullstack-feature-dev. Root cause was threefold: (1) no rule to scan plan content for domain keywords when user says 'implement the plan', (2) no pre-implementation checkpoint to verify delegation before editing files, (3) plan execution strategy was advisory with no enforcement. Fixed by adding 'Pre-Implementation Checkpoint' and 'Plan Execution Rules' sections to subagent-router.mdc, and 'Plan-Driven Delegation' section to delegation-protocol.md.",
     "context": "User asked 'why are you not using special skills and subagents for the fixes' after observing the coordinator directly editing TodoView.tsx and TodoList.tsx instead of delegating."
+  },
+  {
+    "type": "routing_miss",
+    "discovered_at": "2026-04-05T00:00:00Z",
+    "tags": ["routing", "gap", "delegation", "diagnostic-to-fix", "per-turn-re-evaluation"],
+    "task_summary": "Fix Recharts Quadrant Distribution pie chart label overlap on Analytics page",
+    "reason": "Coordinator diagnosed the issue on Turn 1 (handled correctly as a question), then self-implemented the fix on Turn 2 instead of re-scanning routing and delegating to bug-investigator-specialist. Prior fix for routing bypass (2026-04-04) only addressed plan-execution variant, not the conversational diagnostic-to-fix pattern.",
+    "finding": "Same class of routing violation as 2026-04-04, different shape. Root cause: (1) no per-turn re-evaluation rule — checkpoint was only applied once, not on each user message; (2) no diagnostic-to-fix handoff pattern — accumulated context made delegation feel redundant; (3) prior fix was too narrow — Plan Execution Rules didn't generalize to other bypass shapes.",
+    "fix_applied": "Added 'Per-Turn Re-evaluation' section to subagent-router.mdc (mandatory re-scan on every user message, with three bypass patterns to guard against). Added 'Diagnostic Context Handoff' section to delegation-protocol.md. Added 'Step 0: Check for Pre-Diagnosed Context' to bug-investigator SKILL.md.",
+    "context": "User asked 'why did Quadrant Distribution chart look messed up?' — coordinator correctly handled as question. User then asked 'fix the issue with best possible way' — coordinator self-implemented ~50 lines of Recharts fixes instead of delegating."
   }
 ]
