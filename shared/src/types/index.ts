@@ -398,6 +398,33 @@ export interface UpdateBlogPostRequest {
   tag_ids?: number[];
 }
 
+export interface CreateBlogCategoryRequest {
+  name: string;
+  slug?: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  parent_id?: number;
+}
+
+export interface UpdateBlogCategoryRequest {
+  name?: string;
+  slug?: string;
+  description?: string | null;
+  color?: string | null;
+  icon?: string | null;
+  parent_id?: number | null;
+}
+
+export interface CreateWritingSessionRequest {
+  blog_post_id: number;
+}
+
+export interface UpdateWritingSessionRequest {
+  words_written?: number;
+  notes?: string;
+}
+
 export interface CreateEventRequest {
   title: string;
   description?: string;

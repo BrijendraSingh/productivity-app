@@ -174,6 +174,14 @@ export const API_ENDPOINTS = {
   BLOG_BY_ID: (id: number | string) => `/api/blog/${id}`,
   BLOG_PUBLISH: (id: number | string) => `/api/blog/${id}/publish`,
 
+  // Blog Categories
+  BLOG_CATEGORIES: '/api/blog-categories',
+  BLOG_CATEGORY_BY_ID: (id: number | string) => `/api/blog-categories/${id}`,
+
+  // Writing Sessions
+  WRITING_SESSIONS: '/api/writing-sessions',
+  WRITING_SESSION_BY_ID: (id: number | string) => `/api/writing-sessions/${id}`,
+
   // Analytics
   ANALYTICS_DASHBOARD: '/api/analytics/dashboard',
   ANALYTICS_MATRIX: '/api/analytics/matrix',

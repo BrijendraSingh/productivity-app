@@ -65,6 +65,10 @@ export type {
   CreateDiaryEntryRequest,
   CreateBlogPostRequest,
   UpdateBlogPostRequest,
+  CreateBlogCategoryRequest,
+  UpdateBlogCategoryRequest,
+  CreateWritingSessionRequest,
+  UpdateWritingSessionRequest,
   CreateEventRequest,
   CreateBulletLogRequest,
 
