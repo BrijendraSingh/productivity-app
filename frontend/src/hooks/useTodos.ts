@@ -46,6 +46,7 @@ export interface UseTodosReturn {
   resetFilters: () => void;
   setPage: (page: number) => void;
   refresh: () => Promise<void>;
+  refreshMetadata: () => Promise<void>;
 
   createTodo: (data: CreateTodoRequest) => Promise<boolean>;
   updateTodo: (id: number, data: UpdateTodoRequest) => Promise<boolean>;
@@ -238,6 +239,7 @@ export function useTodos(): UseTodosReturn {
     resetFilters,
     setPage,
     refresh: fetchTodos,
+    refreshMetadata: fetchMetadata,
     createTodo,
     updateTodo,
     deleteTodo,

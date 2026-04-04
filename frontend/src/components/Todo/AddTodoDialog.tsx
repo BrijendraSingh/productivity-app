@@ -21,8 +21,9 @@ import {
   useTheme,
   useMediaQuery,
   IconButton,
+  createFilterOptions,
 } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
+import { Close as CloseIcon, Add as AddIcon } from '@mui/icons-material';
 import type {
   CreateTodoRequest,
   Priority,
@@ -40,6 +41,18 @@ import {
   EisenhowerUtils,
 } from '@productivity-app/shared';
 import { quadrantColors, priorityColors } from '../../theme/theme';
+import { tagsApi, categoriesApi } from '../../services/api';
+
+interface TagOption extends TagWithCount {
+  inputValue?: string;
+}
+
+interface CategoryOption extends CategoryWithCount {
+  inputValue?: string;
+}
+
+const tagFilter = createFilterOptions<TagOption>();
+const categoryFilter = createFilterOptions<CategoryOption>();
 
 interface AddTodoDialogProps {
   open: boolean;
@@ -69,6 +82,18 @@ export function AddTodoDialog({ open, onClose, onSubmit, categories, tags }: Add
   const [form, setForm] = useState(INITIAL_STATE);
   const [submitting, setSubmitting] = useState(false);
   const [titleError, setTitleError] = useState('');
+  const [createdTags, setCreatedTags] = useState<TagWithCount[]>([]);
+  const [createdCategories, setCreatedCategories] = useState<CategoryWithCount[]>([]);
+
+  const allTags = useMemo(() => {
+    const propIds = new Set(tags.map((t) => t.id));
+    return [...tags, ...createdTags.filter((t) => !propIds.has(t.id))];
+  }, [tags, createdTags]);
+
+  const allCategories = useMemo(() => {
+    const propIds = new Set(categories.map((c) => c.id));
+    return [...categories, ...createdCategories.filter((c) => !propIds.has(c.id))];
+  }, [categories, createdCategories]);
 
   const quadrant: EisenhowerQuadrant = useMemo(
     () => EisenhowerUtils.calculateQuadrant(form.urgency_level, form.importance_level),
@@ -80,7 +105,70 @@ export function AddTodoDialog({ open, onClose, onSubmit, categories, tags }: Add
   const handleClose = () => {
     setForm(INITIAL_STATE);
     setTitleError('');
+    setCreatedTags([]);
+    setCreatedCategories([]);
     onClose();
+  };
+
+  const handleCreateCategory = async (name: string): Promise<CategoryWithCount | null> => {
+    try {
+      const res = await categoriesApi.create({ name });
+      if (res.success && res.data) {
+        const newCat: CategoryWithCount = { ...res.data, todo_count: 0 };
+        setCreatedCategories((prev) => [...prev, newCat]);
+        return newCat;
+      }
+    } catch {
+      /* category creation failed — silently ignore */
+    }
+    return null;
+  };
+
+  const handleCategoryChange = async (
+    _: React.SyntheticEvent,
+    newValue: string | CategoryOption | null
+  ) => {
+    if (newValue === null) {
+      setForm((prev) => ({ ...prev, category_id: '' }));
+    } else if (typeof newValue === 'string') {
+      const cat = await handleCreateCategory(newValue);
+      if (cat) setForm((prev) => ({ ...prev, category_id: cat.id }));
+    } else if (newValue.inputValue) {
+      const cat = await handleCreateCategory(newValue.inputValue);
+      if (cat) setForm((prev) => ({ ...prev, category_id: cat.id }));
+    } else {
+      setForm((prev) => ({ ...prev, category_id: newValue.id }));
+    }
+  };
+
+  const handleCreateTag = async (name: string): Promise<TagWithCount | null> => {
+    try {
+      const res = await tagsApi.create({ name });
+      if (res.success && res.data) {
+        const newTag: TagWithCount = { ...res.data, usage_count: 0 };
+        setCreatedTags((prev) => [...prev, newTag]);
+        return newTag;
+      }
+    } catch {
+      /* tag creation failed (e.g. duplicate) — silently ignore */
+    }
+    return null;
+  };
+
+  const handleTagChange = async (_: React.SyntheticEvent, newValue: (string | TagOption)[]) => {
+    const resolvedIds: number[] = [];
+    for (const item of newValue) {
+      if (typeof item === 'string') {
+        const tag = await handleCreateTag(item);
+        if (tag) resolvedIds.push(tag.id);
+      } else if (item.inputValue) {
+        const tag = await handleCreateTag(item.inputValue);
+        if (tag) resolvedIds.push(tag.id);
+      } else {
+        resolvedIds.push(item.id);
+      }
+    }
+    setForm((prev) => ({ ...prev, tag_ids: resolvedIds }));
   };
 
   const handleSubmit = async () => {
@@ -108,7 +196,8 @@ export function AddTodoDialog({ open, onClose, onSubmit, categories, tags }: Add
     if (success) handleClose();
   };
 
-  const selectedTags = tags.filter((t) => form.tag_ids.includes(t.id));
+  const selectedTags = allTags.filter((t) => form.tag_ids.includes(t.id));
+  const selectedCategory = allCategories.find((c) => c.id === form.category_id) ?? null;
 
   return (
     <Dialog
@@ -191,33 +280,63 @@ export function AddTodoDialog({ open, onClose, onSubmit, categories, tags }: Add
 
         {/* Row: Category + Energy Level */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <FormControl fullWidth>
-            <InputLabel>Category</InputLabel>
-            <Select
-              value={form.category_id}
-              label="Category"
-              onChange={(e) => setForm({ ...form, category_id: e.target.value as number | '' })}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {categories.map((cat) => (
-                <MenuItem key={cat.id} value={cat.id}>
+          <Autocomplete<CategoryOption, false, false, true>
+            freeSolo
+            selectOnFocus
+            clearOnBlur
+            handleHomeEndKeys
+            options={allCategories as CategoryOption[]}
+            value={selectedCategory as CategoryOption | null}
+            getOptionLabel={(option) => {
+              if (typeof option === 'string') return option;
+              if (option.inputValue) return option.inputValue;
+              return option.name;
+            }}
+            filterOptions={(options, params) => {
+              const filtered = categoryFilter(options, params);
+              const { inputValue } = params;
+              if (
+                inputValue !== '' &&
+                !allCategories.some((c) => c.name.toLowerCase() === inputValue.toLowerCase())
+              ) {
+                filtered.push({
+                  inputValue,
+                  name: `Add "${inputValue}"`,
+                  id: -1,
+                  user_id: 0,
+                  color: '#1976d2',
+                  icon: null,
+                  description: null,
+                  todo_count: 0,
+                  created_at: '',
+                  updated_at: '',
+                });
+              }
+              return filtered;
+            }}
+            onChange={handleCategoryChange}
+            renderInput={(params) => (
+              <TextField {...params} label="Category" placeholder="Select or create..." />
+            )}
+            renderOption={(props, option) => {
+              const { key, ...rest } = props;
+              return (
+                <li key={key} {...rest}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box
-                      sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: '50%',
-                        bgcolor: cat.color,
-                      }}
-                    />
-                    {cat.name}
+                    {option.inputValue ? (
+                      <AddIcon fontSize="small" color="primary" />
+                    ) : (
+                      <Box
+                        sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: option.color }}
+                      />
+                    )}
+                    {option.inputValue ? `Add "${option.inputValue}"` : option.name}
                   </Box>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                </li>
+              );
+            }}
+            fullWidth
+          />
 
           <FormControl fullWidth>
             <InputLabel>Energy Level</InputLabel>
@@ -280,14 +399,41 @@ export function AddTodoDialog({ open, onClose, onSubmit, categories, tags }: Add
         </Stack>
 
         {/* Tags */}
-        <Autocomplete
+        <Autocomplete<TagOption, true, false, true>
           multiple
-          options={tags}
-          getOptionLabel={(option) => option.name}
-          value={selectedTags}
-          onChange={(_, newValue) => setForm({ ...form, tag_ids: newValue.map((t) => t.id) })}
+          freeSolo
+          selectOnFocus
+          clearOnBlur
+          handleHomeEndKeys
+          options={allTags as TagOption[]}
+          value={selectedTags as TagOption[]}
+          getOptionLabel={(option) => {
+            if (typeof option === 'string') return option;
+            if (option.inputValue) return option.inputValue;
+            return option.name;
+          }}
+          filterOptions={(options, params) => {
+            const filtered = tagFilter(options, params);
+            const { inputValue } = params;
+            if (
+              inputValue !== '' &&
+              !allTags.some((t) => t.name.toLowerCase() === inputValue.toLowerCase())
+            ) {
+              filtered.push({
+                inputValue,
+                name: `Add "${inputValue}"`,
+                id: -1,
+                user_id: 0,
+                color: '#757575',
+                usage_count: 0,
+                created_at: '',
+              });
+            }
+            return filtered;
+          }}
+          onChange={handleTagChange}
           renderInput={(params) => (
-            <TextField {...params} label="Tags" placeholder="Select tags..." />
+            <TextField {...params} label="Tags" placeholder="Select or create tags..." />
           )}
           renderTags={(value, getTagProps) =>
             value.map((tag, index) => {
@@ -295,10 +441,14 @@ export function AddTodoDialog({ open, onClose, onSubmit, categories, tags }: Add
               return (
                 <Chip
                   key={key}
-                  label={tag.name}
+                  label={typeof tag === 'string' ? tag : tag.name}
                   size="small"
                   {...chipProps}
-                  sx={{ bgcolor: alpha(tag.color, 0.2), color: tag.color, fontWeight: 500 }}
+                  sx={{
+                    bgcolor: alpha(typeof tag === 'string' ? '#757575' : tag.color, 0.2),
+                    color: typeof tag === 'string' ? '#757575' : tag.color,
+                    fontWeight: 500,
+                  }}
                 />
               );
             })
@@ -308,8 +458,14 @@ export function AddTodoDialog({ open, onClose, onSubmit, categories, tags }: Add
             return (
               <li key={key} {...rest}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: option.color }} />
-                  {option.name}
+                  {option.inputValue ? (
+                    <AddIcon fontSize="small" color="primary" />
+                  ) : (
+                    <Box
+                      sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: option.color }}
+                    />
+                  )}
+                  {option.inputValue ? `Add "${option.inputValue}"` : option.name}
                 </Box>
               </li>
             );
