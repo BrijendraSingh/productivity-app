@@ -22,16 +22,43 @@
     "install-all": "npm install",
     "clean": "rm -rf node_modules shared/node_modules backend/node_modules frontend/node_modules shared/dist backend/dist frontend/dist",
     "test": "npm run test --workspaces --if-present",
+    "test:unit": "vitest run",
     "test:frontend": "npm run test --workspace=frontend --if-present",
     "test:backend": "npm run test --workspace=backend --if-present",
     "docker:build": "docker build -t productivity-app .",
     "docker:up": "docker compose up app-prod -d",
     "docker:up:all": "docker compose up app-prod sqlite-web -d",
     "docker:down": "docker compose down",
-    "docker:rebuild": "docker compose up app-prod -d --build"
+    "docker:rebuild": "docker compose up app-prod -d --build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
-    "concurrently": "9.2.1"
+    "@eslint/js": "^9.39.4",
+    "@vitest/coverage-v8": "^4.1.2",
+    "concurrently": "9.2.1",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1",
+    "typescript-eslint": "^8.58.0",
+    "vitest": "^4.1.2",
+    "wait-on": "^9.0.4"
   },
   "engines": {
     "node": ">=20.0.0"
