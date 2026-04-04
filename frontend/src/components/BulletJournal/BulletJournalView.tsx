@@ -87,8 +87,12 @@ const INITIAL_EVENT_FORM: EventFormState = {
 };
 
 const SHORTCUT_MAP: Record<string, string> = {
-  '/t': '• ', '/d': '× ', '/m': '→ ',
-  '/e': '○ ', '/n': '– ', '/p': '! ',
+  '/t': '• ',
+  '/d': '× ',
+  '/m': '→ ',
+  '/e': '○ ',
+  '/n': '– ',
+  '/p': '! ',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -118,13 +122,15 @@ export function BulletJournalView() {
   const textFieldRef = useRef<HTMLTextAreaElement>(null);
 
   // Listen for FAB click
-  useJournalDialogEvent(useCallback(() => {
-    setEventDialogOpen(true);
-    setEventForm({
-      ...INITIAL_EVENT_FORM,
-      event_date: format(selectedDate, 'yyyy-MM-dd'),
-    });
-  }, [selectedDate]));
+  useJournalDialogEvent(
+    useCallback(() => {
+      setEventDialogOpen(true);
+      setEventForm({
+        ...INITIAL_EVENT_FORM,
+        event_date: format(selectedDate, 'yyyy-MM-dd'),
+      });
+    }, [selectedDate])
+  );
 
   // Sync log content when currentLog changes
   useEffect(() => {
@@ -135,9 +141,22 @@ export function BulletJournalView() {
   // ─── Date navigation ─────────────────────────────────────────────────────
 
   const navigateDate = (direction: 'prev' | 'next') => {
-    const fn = direction === 'prev'
-      ? { daily: subDays, weekly: subWeeks, monthly: subMonths, yearly: subYears, future: subMonths }
-      : { daily: addDays, weekly: addWeeks, monthly: addMonths, yearly: addYears, future: addMonths };
+    const fn =
+      direction === 'prev'
+        ? {
+            daily: subDays,
+            weekly: subWeeks,
+            monthly: subMonths,
+            yearly: subYears,
+            future: subMonths,
+          }
+        : {
+            daily: addDays,
+            weekly: addWeeks,
+            monthly: addMonths,
+            yearly: addYears,
+            future: addMonths,
+          };
 
     setSelectedDate(fn[activeTab](selectedDate, 1));
   };
@@ -333,7 +352,11 @@ export function BulletJournalView() {
           borderRadius: 2,
         }}
       >
-        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5, display: 'block' }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ fontWeight: 600, mb: 0.5, display: 'block' }}
+        >
           Insert Symbol
         </Typography>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -373,7 +396,12 @@ export function BulletJournalView() {
           {/* Rapid Logging Area */}
           <Card>
             <CardContent sx={{ p: 3 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ mb: 2 }}
+              >
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <EventNote color="primary" />
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -382,12 +410,7 @@ export function BulletJournalView() {
                 </Stack>
                 <Stack direction="row" spacing={1}>
                   {dirty && (
-                    <Chip
-                      label="Unsaved changes"
-                      size="small"
-                      color="warning"
-                      variant="outlined"
-                    />
+                    <Chip label="Unsaved changes" size="small" color="warning" variant="outlined" />
                   )}
                   <Button
                     variant="contained"
@@ -402,7 +425,8 @@ export function BulletJournalView() {
               </Stack>
 
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                Use bullet symbols for rapid logging: • Task, × Done, → Migrated, ○ Event, – Note, ! Priority
+                Use bullet symbols for rapid logging: • Task, × Done, → Migrated, ○ Event, – Note, !
+                Priority
               </Typography>
 
               <TextField
@@ -429,18 +453,18 @@ export function BulletJournalView() {
           {(activeTab === 'daily' || activeTab === 'weekly') && (
             <Card>
               <CardContent sx={{ p: 3 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ mb: 2 }}
+                >
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <Schedule color="primary" />
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
                       Events
                     </Typography>
-                    <Chip
-                      label={events.length}
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                    />
+                    <Chip label={events.length} size="small" color="primary" variant="outlined" />
                   </Stack>
                   <Tooltip title="Add event">
                     <IconButton color="primary" onClick={handleOpenEventDialog}>
@@ -468,7 +492,11 @@ export function BulletJournalView() {
                           borderLeft: `4px solid ${bulletSymbolColors[event.bullet_symbol] ?? theme.palette.primary.main}`,
                         }}
                       >
-                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="flex-start"
+                        >
                           <Box>
                             <Stack direction="row" alignItems="center" spacing={1}>
                               <Typography
@@ -535,9 +563,7 @@ export function BulletJournalView() {
         fullWidth
         fullScreen={isMobile}
       >
-        <DialogTitle sx={{ fontWeight: 600 }}>
-          New Event
-        </DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600 }}>New Event</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField

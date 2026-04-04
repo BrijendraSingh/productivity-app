@@ -64,20 +64,20 @@ export class TextUtils {
    */
   static stripMarkdown(text: string): string {
     return text
-      .replace(/#{1,6}\s/g, '')        // headings
+      .replace(/#{1,6}\s/g, '') // headings
       .replace(/\*\*(.+?)\*\*/g, '$1') // bold
-      .replace(/\*(.+?)\*/g, '$1')     // italic
-      .replace(/__(.+?)__/g, '$1')     // bold underline
-      .replace(/_(.+?)_/g, '$1')       // italic underline
-      .replace(/~~(.+?)~~/g, '$1')     // strikethrough
-      .replace(/`(.+?)`/g, '$1')       // inline code
+      .replace(/\*(.+?)\*/g, '$1') // italic
+      .replace(/__(.+?)__/g, '$1') // bold underline
+      .replace(/_(.+?)_/g, '$1') // italic underline
+      .replace(/~~(.+?)~~/g, '$1') // strikethrough
+      .replace(/`(.+?)`/g, '$1') // inline code
       .replace(/\[(.+?)\]\(.+?\)/g, '$1') // links
-      .replace(/!\[.*?\]\(.+?\)/g, '')    // images
-      .replace(/^>\s/gm, '')              // blockquotes
-      .replace(/^[-*+]\s/gm, '')          // unordered lists
-      .replace(/^\d+\.\s/gm, '')          // ordered lists
-      .replace(/---+/g, '')               // horizontal rules
-      .replace(/\n{3,}/g, '\n\n')         // excessive newlines
+      .replace(/!\[.*?\]\(.+?\)/g, '') // images
+      .replace(/^>\s/gm, '') // blockquotes
+      .replace(/^[-*+]\s/gm, '') // unordered lists
+      .replace(/^\d+\.\s/gm, '') // ordered lists
+      .replace(/---+/g, '') // horizontal rules
+      .replace(/\n{3,}/g, '\n\n') // excessive newlines
       .trim();
   }
 
@@ -105,7 +105,7 @@ export class TextUtils {
     return text
       .toLowerCase()
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 }

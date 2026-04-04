@@ -1,9 +1,10 @@
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { APP_CONFIG } from '@productivity-app/shared';
 import type { SafeUser, AuthResponse } from '@productivity-app/shared';
 import { dbGet, dbRun } from '../config/database';
+import { AppError } from '../utils/AppError';
 
 const DEV_LOGIN_ENABLED = process.env.NODE_ENV !== 'production';
 const DEV_USERNAME = 'dev';
@@ -11,7 +12,9 @@ const DEV_PASSWORD = 'dev';
 const DEV_TOKEN = 'dev-token';
 
 if (DEV_LOGIN_ENABLED) {
-  console.warn('[AUTH] Dev login shortcut is ACTIVE (username: dev, password: dev). Disable by setting NODE_ENV=production.');
+  console.warn(
+    '[AUTH] Dev login shortcut is ACTIVE (username: dev, password: dev). Disable by setting NODE_ENV=production.'
+  );
 }
 
 function generateToken(): string {
@@ -35,7 +38,7 @@ function toSafeUser(row: Record<string, unknown>): SafeUser {
  * POST /api/auth/register
  * Creates a new user account and returns a Bearer token.
  */
-export async function register(req: Request, res: Response): Promise<void> {
+export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { username, email, password } = req.body as {
       username: string;
@@ -43,17 +46,13 @@ export async function register(req: Request, res: Response): Promise<void> {
       password: string;
     };
 
-    const existingUser = await dbGet(
-      'SELECT id FROM users WHERE username = ? OR email = ?',
-      [username, email],
-    );
+    const existingUser = await dbGet('SELECT id FROM users WHERE username = ? OR email = ?', [
+      username,
+      email,
+    ]);
 
     if (existingUser) {
-      res.status(409).json({
-        success: false,
-        message: 'Username or email already exists.',
-      });
-      return;
+      return next(AppError.conflict('Username or email already exists.'));
     }
 
     const passwordHash = await bcrypt.hash(password, APP_CONFIG.BCRYPT_SALT_ROUNDS);
@@ -62,17 +61,15 @@ export async function register(req: Request, res: Response): Promise<void> {
     const result = await dbRun(
       `INSERT INTO users (username, email, password_hash, api_token)
        VALUES (?, ?, ?, ?)`,
-      [username, email, passwordHash, apiToken],
+      [username, email, passwordHash, apiToken]
     );
 
-    const user = await dbGet<Record<string, unknown>>(
-      'SELECT * FROM users WHERE id = ?',
-      [result.lastID],
-    );
+    const user = await dbGet<Record<string, unknown>>('SELECT * FROM users WHERE id = ?', [
+      result.lastID,
+    ]);
 
     if (!user) {
-      res.status(500).json({ success: false, message: 'Failed to retrieve created user.' });
-      return;
+      throw new AppError(500, 'Failed to retrieve created user.');
     }
 
     const response: AuthResponse = {
@@ -87,17 +84,7 @@ export async function register(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Registration error:', error);
-    if (
-      error instanceof Error &&
-      error.message.includes('UNIQUE constraint failed')
-    ) {
-      res.status(409).json({
-        success: false,
-        message: 'Username or email already exists.',
-      });
-      return;
-    }
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -106,7 +93,7 @@ export async function register(req: Request, res: Response): Promise<void> {
  * Authenticates a user by username+password and returns a Bearer token.
  * Dev shortcut: username=dev, password=dev → token=dev-token.
  */
-export async function login(req: Request, res: Response): Promise<void> {
+export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { username, password } = req.body as {
       username: string;
@@ -114,36 +101,29 @@ export async function login(req: Request, res: Response): Promise<void> {
     };
 
     if (DEV_LOGIN_ENABLED && username === DEV_USERNAME && password === DEV_PASSWORD) {
-      let devUser = await dbGet<Record<string, unknown>>(
-        'SELECT * FROM users WHERE username = ?',
-        [DEV_USERNAME],
-      );
+      let devUser = await dbGet<Record<string, unknown>>('SELECT * FROM users WHERE username = ?', [
+        DEV_USERNAME,
+      ]);
 
       if (!devUser) {
         const hash = await bcrypt.hash(DEV_PASSWORD, APP_CONFIG.BCRYPT_SALT_ROUNDS);
         await dbRun(
           `INSERT INTO users (username, email, password_hash, api_token)
            VALUES (?, ?, ?, ?)`,
-          [DEV_USERNAME, 'dev@productivity.app', hash, DEV_TOKEN],
+          [DEV_USERNAME, 'dev@productivity.app', hash, DEV_TOKEN]
         );
-        devUser = await dbGet<Record<string, unknown>>(
-          'SELECT * FROM users WHERE username = ?',
-          [DEV_USERNAME],
-        );
-      } else {
-        await dbRun('UPDATE users SET api_token = ? WHERE username = ?', [
-          DEV_TOKEN,
+        devUser = await dbGet<Record<string, unknown>>('SELECT * FROM users WHERE username = ?', [
           DEV_USERNAME,
         ]);
-        devUser = await dbGet<Record<string, unknown>>(
-          'SELECT * FROM users WHERE username = ?',
-          [DEV_USERNAME],
-        );
+      } else {
+        await dbRun('UPDATE users SET api_token = ? WHERE username = ?', [DEV_TOKEN, DEV_USERNAME]);
+        devUser = await dbGet<Record<string, unknown>>('SELECT * FROM users WHERE username = ?', [
+          DEV_USERNAME,
+        ]);
       }
 
       if (!devUser) {
-        res.status(500).json({ success: false, message: 'Failed to create dev user.' });
-        return;
+        throw new AppError(500, 'Failed to create dev user.');
       }
 
       const response: AuthResponse = {
@@ -157,25 +137,17 @@ export async function login(req: Request, res: Response): Promise<void> {
 
     const user = await dbGet<Record<string, unknown>>(
       'SELECT * FROM users WHERE username = ? AND is_active = 1',
-      [username],
+      [username]
     );
 
     if (!user) {
-      res.status(401).json({
-        success: false,
-        message: 'Invalid username or password.',
-      });
-      return;
+      return next(AppError.unauthorized('Invalid username or password.'));
     }
 
     const passwordValid = await bcrypt.compare(password, user.password_hash as string);
 
     if (!passwordValid) {
-      res.status(401).json({
-        success: false,
-        message: 'Invalid username or password.',
-      });
-      return;
+      return next(AppError.unauthorized('Invalid username or password.'));
     }
 
     const newToken = generateToken();
@@ -192,7 +164,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     res.json({ success: true, data: response, message: 'Login successful.' });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -200,22 +172,20 @@ export async function login(req: Request, res: Response): Promise<void> {
  * POST /api/auth/logout
  * Invalidates the current user's API token.
  */
-export async function logout(req: Request, res: Response): Promise<void> {
+export async function logout(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     if (!req.user) {
-      res.status(401).json({ success: false, message: 'Not authenticated.' });
-      return;
+      return next(AppError.unauthorized('Not authenticated.'));
     }
 
-    await dbRun(
-      'UPDATE users SET api_token = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [req.user.id],
-    );
+    await dbRun('UPDATE users SET api_token = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
+      req.user.id,
+    ]);
 
     res.json({ success: true, message: 'Logged out successfully.' });
   } catch (error) {
     console.error('Logout error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -223,11 +193,10 @@ export async function logout(req: Request, res: Response): Promise<void> {
  * GET /api/auth/verify
  * Verifies the current Bearer token is valid.
  */
-export async function verify(req: Request, res: Response): Promise<void> {
+export async function verify(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     if (!req.user) {
-      res.status(401).json({ success: false, message: 'Not authenticated.' });
-      return;
+      return next(AppError.unauthorized('Not authenticated.'));
     }
 
     res.json({
@@ -237,7 +206,7 @@ export async function verify(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Verify error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -245,22 +214,20 @@ export async function verify(req: Request, res: Response): Promise<void> {
  * GET /api/auth/profile
  * Returns the authenticated user's full profile.
  */
-export async function profile(req: Request, res: Response): Promise<void> {
+export async function profile(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     if (!req.user) {
-      res.status(401).json({ success: false, message: 'Not authenticated.' });
-      return;
+      return next(AppError.unauthorized('Not authenticated.'));
     }
 
     const user = await dbGet<Record<string, unknown>>(
       `SELECT id, username, email, is_active, profile_data, preferences, created_at, updated_at
        FROM users WHERE id = ?`,
-      [req.user.id],
+      [req.user.id]
     );
 
     if (!user) {
-      res.status(404).json({ success: false, message: 'User not found.' });
-      return;
+      return next(AppError.notFound('User not found.'));
     }
 
     res.json({
@@ -269,6 +236,6 @@ export async function profile(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Profile error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }

@@ -1,10 +1,11 @@
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import type {
   CreateBlogCategoryRequest,
   UpdateBlogCategoryRequest,
   BlogCategory,
 } from '@productivity-app/shared';
 import { dbGet, dbAll, dbRun } from '../config/database';
+import { AppError } from '../utils/AppError';
 
 function slugify(text: string): string {
   return text
@@ -15,7 +16,7 @@ function slugify(text: string): string {
     .replace(/-+/g, '-');
 }
 
-export async function getAll(req: Request, res: Response): Promise<void> {
+export async function getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
 
@@ -27,17 +28,17 @@ export async function getAll(req: Request, res: Response): Promise<void> {
        WHERE bc.user_id = ?
        GROUP BY bc.id
        ORDER BY bc.name ASC`,
-      [userId],
+      [userId]
     );
 
     res.json({ success: true, data: categories });
   } catch (error) {
     console.error('Get blog categories error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
-export async function getById(req: Request, res: Response): Promise<void> {
+export async function getById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const categoryId = parseInt(req.params.id as string, 10);
@@ -49,22 +50,21 @@ export async function getById(req: Request, res: Response): Promise<void> {
        LEFT JOIN blog_posts bp ON bp.category_id = bc.id
        WHERE bc.id = ? AND bc.user_id = ?
        GROUP BY bc.id`,
-      [categoryId, userId],
+      [categoryId, userId]
     );
 
     if (!category) {
-      res.status(404).json({ success: false, message: 'Blog category not found.' });
-      return;
+      return next(AppError.notFound('Blog category not found.'));
     }
 
     res.json({ success: true, data: category });
   } catch (error) {
     console.error('Get blog category error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
-export async function create(req: Request, res: Response): Promise<void> {
+export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const body = req.body as CreateBlogCategoryRequest;
@@ -82,13 +82,12 @@ export async function create(req: Request, res: Response): Promise<void> {
         body.color ?? null,
         body.icon ?? null,
         body.parent_id ?? null,
-      ],
+      ]
     );
 
-    const category = await dbGet<BlogCategory>(
-      'SELECT * FROM blog_categories WHERE id = ?',
-      [result.lastID],
-    );
+    const category = await dbGet<BlogCategory>('SELECT * FROM blog_categories WHERE id = ?', [
+      result.lastID,
+    ]);
 
     res.status(201).json({
       success: true,
@@ -97,21 +96,14 @@ export async function create(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Create blog category error:', error);
-    if (
-      error instanceof Error &&
-      error.message.includes('UNIQUE constraint failed')
-    ) {
-      res.status(409).json({
-        success: false,
-        message: 'A blog category with this slug already exists.',
-      });
-      return;
+    if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+      return next(AppError.conflict('A blog category with this slug already exists.'));
     }
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
-export async function update(req: Request, res: Response): Promise<void> {
+export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const categoryId = parseInt(req.params.id as string, 10);
@@ -119,12 +111,11 @@ export async function update(req: Request, res: Response): Promise<void> {
 
     const existing = await dbGet<Record<string, unknown>>(
       'SELECT * FROM blog_categories WHERE id = ? AND user_id = ?',
-      [categoryId, userId],
+      [categoryId, userId]
     );
 
     if (!existing) {
-      res.status(404).json({ success: false, message: 'Blog category not found.' });
-      return;
+      return next(AppError.notFound('Blog category not found.'));
     }
 
     const newName = body.name ?? existing.name;
@@ -148,13 +139,12 @@ export async function update(req: Request, res: Response): Promise<void> {
         body.parent_id !== undefined ? body.parent_id : existing.parent_id,
         categoryId,
         userId,
-      ],
+      ]
     );
 
-    const updated = await dbGet<BlogCategory>(
-      'SELECT * FROM blog_categories WHERE id = ?',
-      [categoryId],
-    );
+    const updated = await dbGet<BlogCategory>('SELECT * FROM blog_categories WHERE id = ?', [
+      categoryId,
+    ]);
 
     res.json({
       success: true,
@@ -163,38 +153,30 @@ export async function update(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Update blog category error:', error);
-    if (
-      error instanceof Error &&
-      error.message.includes('UNIQUE constraint failed')
-    ) {
-      res.status(409).json({
-        success: false,
-        message: 'A blog category with this slug already exists.',
-      });
-      return;
+    if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+      return next(AppError.conflict('A blog category with this slug already exists.'));
     }
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
-export async function remove(req: Request, res: Response): Promise<void> {
+export async function remove(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const categoryId = parseInt(req.params.id as string, 10);
 
-    const result = await dbRun(
-      'DELETE FROM blog_categories WHERE id = ? AND user_id = ?',
-      [categoryId, userId],
-    );
+    const result = await dbRun('DELETE FROM blog_categories WHERE id = ? AND user_id = ?', [
+      categoryId,
+      userId,
+    ]);
 
     if (result.changes === 0) {
-      res.status(404).json({ success: false, message: 'Blog category not found.' });
-      return;
+      return next(AppError.notFound('Blog category not found.'));
     }
 
     res.json({ success: true, message: 'Blog category deleted successfully.' });
   } catch (error) {
     console.error('Delete blog category error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }

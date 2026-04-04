@@ -15,19 +15,15 @@ router.get('/', tagController.getAll);
 // GET /api/tags/:id
 router.get(
   '/:id',
-  validate([
-    param('id').isInt({ min: 1 }).withMessage('Tag ID must be a positive integer.'),
-  ]),
-  tagController.getById,
+  validate([param('id').isInt({ min: 1 }).withMessage('Tag ID must be a positive integer.')]),
+  tagController.getById
 );
 
 // GET /api/tags/:id/todos
 router.get(
   '/:id/todos',
-  validate([
-    param('id').isInt({ min: 1 }).withMessage('Tag ID must be a positive integer.'),
-  ]),
-  tagController.getTagTodos,
+  validate([param('id').isInt({ min: 1 }).withMessage('Tag ID must be a positive integer.')]),
+  tagController.getTagTodos
 );
 
 // POST /api/tags
@@ -43,7 +39,7 @@ router.post(
       .matches(/^#[0-9a-fA-F]{6}$/)
       .withMessage('Color must be a valid hex color (e.g. #757575).'),
   ]),
-  tagController.create,
+  tagController.create
 );
 
 // PUT /api/tags/:id
@@ -61,16 +57,14 @@ router.put(
       .matches(/^#[0-9a-fA-F]{6}$/)
       .withMessage('Color must be a valid hex color (e.g. #757575).'),
   ]),
-  tagController.update,
+  tagController.update
 );
 
 // DELETE /api/tags/:id
 router.delete(
   '/:id',
-  validate([
-    param('id').isInt({ min: 1 }).withMessage('Tag ID must be a positive integer.'),
-  ]),
-  tagController.remove,
+  validate([param('id').isInt({ min: 1 }).withMessage('Tag ID must be a positive integer.')]),
+  tagController.remove
 );
 
 export default router;

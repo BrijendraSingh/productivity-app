@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { EisenhowerUtils, APP_CONFIG } from '@productivity-app/shared';
 import type {
   CreateTodoRequest,
@@ -7,6 +7,7 @@ import type {
   Tag,
 } from '@productivity-app/shared';
 import { dbGet, dbAll, dbRun } from '../config/database';
+import { AppError } from '../utils/AppError';
 
 /**
  * Attach tags to a todo result row.
@@ -17,7 +18,7 @@ async function attachTags(todoId: number): Promise<Tag[]> {
      FROM tags t
      INNER JOIN todo_tags tt ON tt.tag_id = t.id
      WHERE tt.todo_id = ?`,
-    [todoId],
+    [todoId]
   );
 }
 
@@ -27,10 +28,7 @@ async function attachTags(todoId: number): Promise<Tag[]> {
 async function syncTodoTags(todoId: number, tagIds: number[]): Promise<void> {
   await dbRun('DELETE FROM todo_tags WHERE todo_id = ?', [todoId]);
   for (const tagId of tagIds) {
-    await dbRun(
-      'INSERT OR IGNORE INTO todo_tags (todo_id, tag_id) VALUES (?, ?)',
-      [todoId, tagId],
-    );
+    await dbRun('INSERT OR IGNORE INTO todo_tags (todo_id, tag_id) VALUES (?, ?)', [todoId, tagId]);
   }
 }
 
@@ -38,7 +36,7 @@ async function syncTodoTags(todoId: number, tagIds: number[]): Promise<void> {
  * GET /api/todos
  * Supports: ?search, ?status, ?priority, ?quadrant, ?category_id, ?page, ?limit
  */
-export async function getAll(req: Request, res: Response): Promise<void> {
+export async function getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const {
@@ -54,7 +52,7 @@ export async function getAll(req: Request, res: Response): Promise<void> {
     const page = Math.max(1, parseInt(pageStr as string, 10) || 1);
     const limit = Math.min(
       APP_CONFIG.MAX_PAGE_SIZE,
-      Math.max(1, parseInt(limitStr as string, 10) || APP_CONFIG.DEFAULT_PAGE_SIZE),
+      Math.max(1, parseInt(limitStr as string, 10) || APP_CONFIG.DEFAULT_PAGE_SIZE)
     );
     const offset = (page - 1) * limit;
 
@@ -87,7 +85,7 @@ export async function getAll(req: Request, res: Response): Promise<void> {
 
     const countRow = await dbGet<{ total: number }>(
       `SELECT COUNT(*) as total FROM todos t WHERE ${whereClause}`,
-      params,
+      params
     );
     const total = countRow?.total ?? 0;
 
@@ -98,10 +96,9 @@ export async function getAll(req: Request, res: Response): Promise<void> {
        WHERE ${whereClause}
        ORDER BY t.created_at DESC
        LIMIT ? OFFSET ?`,
-      [...params, limit, offset],
+      [...params, limit, offset]
     );
 
-    // Attach tags to each todo
     const todos: TodoWithRelations[] = [];
     for (const row of rows) {
       const tags = await attachTags(row.id);
@@ -115,14 +112,14 @@ export async function getAll(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Get todos error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
 /**
  * GET /api/todos/:id
  */
-export async function getById(req: Request, res: Response): Promise<void> {
+export async function getById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const todoId = parseInt(req.params.id as string, 10);
@@ -132,12 +129,11 @@ export async function getById(req: Request, res: Response): Promise<void> {
        FROM todos t
        LEFT JOIN categories c ON c.id = t.category_id
        WHERE t.id = ? AND t.user_id = ?`,
-      [todoId, userId],
+      [todoId, userId]
     );
 
     if (!todo) {
-      res.status(404).json({ success: false, message: 'Todo not found.' });
-      return;
+      return next(AppError.notFound('Todo not found.'));
     }
 
     const tags = await attachTags(todo.id);
@@ -145,7 +141,7 @@ export async function getById(req: Request, res: Response): Promise<void> {
     res.json({ success: true, data: { ...todo, tags } });
   } catch (error) {
     console.error('Get todo error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -153,7 +149,7 @@ export async function getById(req: Request, res: Response): Promise<void> {
  * POST /api/todos
  * Auto-computes eisenhower_quadrant from urgency + importance.
  */
-export async function create(req: Request, res: Response): Promise<void> {
+export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const body = req.body as CreateTodoRequest;
@@ -181,10 +177,9 @@ export async function create(req: Request, res: Response): Promise<void> {
         body.bullet_symbol ?? '•',
         body.time_estimate ?? null,
         body.energy_required ?? null,
-      ],
+      ]
     );
 
-    // Handle tag associations
     if (body.tag_ids && body.tag_ids.length > 0) {
       await syncTodoTags(result.lastID, body.tag_ids);
     }
@@ -194,7 +189,7 @@ export async function create(req: Request, res: Response): Promise<void> {
        FROM todos t
        LEFT JOIN categories c ON c.id = t.category_id
        WHERE t.id = ?`,
-      [result.lastID],
+      [result.lastID]
     );
 
     const tags = await attachTags(result.lastID);
@@ -206,7 +201,7 @@ export async function create(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Create todo error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -215,7 +210,7 @@ export async function create(req: Request, res: Response): Promise<void> {
  * Re-computes eisenhower_quadrant when urgency/importance change.
  * Sets completed_at when status transitions to 'completed'.
  */
-export async function update(req: Request, res: Response): Promise<void> {
+export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const todoId = parseInt(req.params.id as string, 10);
@@ -223,25 +218,24 @@ export async function update(req: Request, res: Response): Promise<void> {
 
     const existing = await dbGet<Record<string, unknown>>(
       'SELECT * FROM todos WHERE id = ? AND user_id = ?',
-      [todoId, userId],
+      [todoId, userId]
     );
 
     if (!existing) {
-      res.status(404).json({ success: false, message: 'Todo not found.' });
-      return;
+      return next(AppError.notFound('Todo not found.'));
     }
 
-    // Determine urgency/importance (use new values or fall back to existing)
-    const urgency = body.urgency_level !== undefined
-      ? EisenhowerUtils.clampLevel(body.urgency_level)
-      : (existing.urgency_level as number);
-    const importance = body.importance_level !== undefined
-      ? EisenhowerUtils.clampLevel(body.importance_level)
-      : (existing.importance_level as number);
+    const urgency =
+      body.urgency_level !== undefined
+        ? EisenhowerUtils.clampLevel(body.urgency_level)
+        : (existing.urgency_level as number);
+    const importance =
+      body.importance_level !== undefined
+        ? EisenhowerUtils.clampLevel(body.importance_level)
+        : (existing.importance_level as number);
 
     const quadrant = EisenhowerUtils.calculateQuadrant(urgency, importance);
 
-    // Handle completed_at logic
     let completedAt = existing.completed_at as string | null;
     if (body.status === 'completed' && existing.status !== 'completed') {
       completedAt = new Date().toISOString();
@@ -283,10 +277,9 @@ export async function update(req: Request, res: Response): Promise<void> {
         completedAt,
         todoId,
         userId,
-      ],
+      ]
     );
 
-    // Sync tags if provided
     if (body.tag_ids !== undefined) {
       await syncTodoTags(todoId, body.tag_ids);
     }
@@ -294,12 +287,15 @@ export async function update(req: Request, res: Response): Promise<void> {
     // Upsert quadrant_analytics when a todo is newly completed
     if (body.status === 'completed' && existing.status !== 'completed' && quadrant) {
       const today = new Date().toISOString().split('T')[0];
-      const timeSpent = (body.time_estimate !== undefined ? body.time_estimate : existing.time_estimate as number | null) ?? 0;
+      const timeSpent =
+        (body.time_estimate !== undefined
+          ? body.time_estimate
+          : (existing.time_estimate as number | null)) ?? 0;
 
       const analyticsRow = await dbGet<{ id: number; tasks_completed: number; time_spent: number }>(
         `SELECT id, tasks_completed, time_spent FROM quadrant_analytics
          WHERE user_id = ? AND date = ? AND quadrant = ?`,
-        [userId, today, quadrant],
+        [userId, today, quadrant]
       );
 
       if (analyticsRow) {
@@ -308,13 +304,13 @@ export async function update(req: Request, res: Response): Promise<void> {
         await dbRun(
           `UPDATE quadrant_analytics SET tasks_completed = ?, time_spent = ?, productivity_score = ?
            WHERE id = ?`,
-          [newCompleted, newTime, newCompleted, analyticsRow.id],
+          [newCompleted, newTime, newCompleted, analyticsRow.id]
         );
       } else {
         await dbRun(
           `INSERT INTO quadrant_analytics (user_id, date, quadrant, tasks_completed, time_spent, productivity_score)
            VALUES (?, ?, ?, 1, ?, 1)`,
-          [userId, today, quadrant, timeSpent],
+          [userId, today, quadrant, timeSpent]
         );
       }
     }
@@ -324,7 +320,7 @@ export async function update(req: Request, res: Response): Promise<void> {
        FROM todos t
        LEFT JOIN categories c ON c.id = t.category_id
        WHERE t.id = ?`,
-      [todoId],
+      [todoId]
     );
 
     const tags = await attachTags(todoId);
@@ -336,31 +332,27 @@ export async function update(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Update todo error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
 /**
  * DELETE /api/todos/:id
  */
-export async function remove(req: Request, res: Response): Promise<void> {
+export async function remove(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const todoId = parseInt(req.params.id as string, 10);
 
-    const result = await dbRun(
-      'DELETE FROM todos WHERE id = ? AND user_id = ?',
-      [todoId, userId],
-    );
+    const result = await dbRun('DELETE FROM todos WHERE id = ? AND user_id = ?', [todoId, userId]);
 
     if (result.changes === 0) {
-      res.status(404).json({ success: false, message: 'Todo not found.' });
-      return;
+      return next(AppError.notFound('Todo not found.'));
     }
 
     res.json({ success: true, message: 'Todo deleted successfully.' });
   } catch (error) {
     console.error('Delete todo error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }

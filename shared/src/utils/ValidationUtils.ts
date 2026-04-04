@@ -27,11 +27,7 @@ export class ValidationUtils {
 
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(year, month - 1, day);
-    return (
-      date.getFullYear() === year &&
-      date.getMonth() === month - 1 &&
-      date.getDate() === day
-    );
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
   }
 
   /**
@@ -125,7 +121,11 @@ export class ValidationUtils {
    * Return an object with all validation errors for a registration request.
    * Returns null if valid.
    */
-  static validateRegistration(data: { username: string; email: string; password: string }): Record<string, string> | null {
+  static validateRegistration(data: {
+    username: string;
+    email: string;
+    password: string;
+  }): Record<string, string> | null {
     const errors: Record<string, string> = {};
 
     if (!ValidationUtils.isValidUsername(data.username)) {

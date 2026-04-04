@@ -110,10 +110,10 @@ export const priorityColors = {
 } as const;
 
 export const bulletSymbolColors: Record<string, string> = {
-  '\u2022': '#1976d2',  // •
-  '\u00d7': '#4caf50',  // ×
-  '\u2192': '#ff9800',  // →
-  '\u25cb': '#9c27b0',  // ○
-  '\u2013': '#607d8b',  // –
+  '\u2022': '#1976d2', // •
+  '\u00d7': '#4caf50', // ×
+  '\u2192': '#ff9800', // →
+  '\u25cb': '#9c27b0', // ○
+  '\u2013': '#607d8b', // –
   '!': '#f44336',
 };

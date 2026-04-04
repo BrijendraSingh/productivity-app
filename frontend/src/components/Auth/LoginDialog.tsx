@@ -24,11 +24,7 @@ interface LoginDialogProps {
   initialTab?: number;
 }
 
-export function LoginDialog({
-  open,
-  onClose,
-  initialTab = 0,
-}: LoginDialogProps) {
+export function LoginDialog({ open, onClose, initialTab = 0 }: LoginDialogProps) {
   const { login, register } = useAuth();
   const [tab, setTab] = useState(initialTab);
   const [loading, setLoading] = useState(false);
@@ -74,8 +70,7 @@ export function LoginDialog({
       await login({ username: loginUsername, password: loginPassword });
       handleClose();
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'Login failed';
+      const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);
     } finally {
       setLoading(false);
@@ -87,9 +82,7 @@ export function LoginDialog({
     setError(null);
 
     if (signupPassword.length < APP_CONFIG.PASSWORD_MIN_LENGTH) {
-      setError(
-        `Password must be at least ${APP_CONFIG.PASSWORD_MIN_LENGTH} characters`,
-      );
+      setError(`Password must be at least ${APP_CONFIG.PASSWORD_MIN_LENGTH} characters`);
       return;
     }
     if (signupPassword !== signupConfirm) {
@@ -106,8 +99,7 @@ export function LoginDialog({
       });
       handleClose();
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'Registration failed';
+      const message = err instanceof Error ? err.message : 'Registration failed';
       setError(message);
     } finally {
       setLoading(false);
@@ -243,13 +235,9 @@ export function LoginDialog({
               value={signupConfirm}
               onChange={(e) => setSignupConfirm(e.target.value)}
               required
-              error={
-                signupConfirm.length > 0 &&
-                signupPassword !== signupConfirm
-              }
+              error={signupConfirm.length > 0 && signupPassword !== signupConfirm}
               helperText={
-                signupConfirm.length > 0 &&
-                signupPassword !== signupConfirm
+                signupConfirm.length > 0 && signupPassword !== signupConfirm
                   ? 'Passwords do not match'
                   : ''
               }

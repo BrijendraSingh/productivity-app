@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import type {
   DashboardStats,
   MatrixAnalyticsResponse,
@@ -12,11 +12,7 @@ import type {
   Weather,
   BlogPostStatus,
 } from '@productivity-app/shared';
-import {
-  EISENHOWER_QUADRANTS,
-  PRIORITY_LEVELS,
-  MOOD_LEVELS,
-} from '@productivity-app/shared';
+import { EISENHOWER_QUADRANTS, PRIORITY_LEVELS, MOOD_LEVELS } from '@productivity-app/shared';
 import { dbGet, dbAll } from '../config/database';
 
 function parseDays(req: Request): number {
@@ -28,7 +24,7 @@ function parseDays(req: Request): number {
 /**
  * GET /api/analytics/dashboard
  */
-export async function getDashboard(req: Request, res: Response): Promise<void> {
+export async function getDashboard(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
 
@@ -47,7 +43,7 @@ export async function getDashboard(req: Request, res: Response): Promise<void> {
         SUM(CASE WHEN due_date < date('now') AND status NOT IN ('completed', 'cancelled') THEN 1 ELSE 0 END) as overdue
        FROM todos
        WHERE user_id = ?`,
-      [userId],
+      [userId]
     );
 
     const matrixStats = await dbGet<{
@@ -63,12 +59,12 @@ export async function getDashboard(req: Request, res: Response): Promise<void> {
         SUM(CASE WHEN eisenhower_quadrant = 'Q4' THEN 1 ELSE 0 END) as q4
        FROM todos
        WHERE user_id = ? AND status NOT IN ('completed', 'cancelled')`,
-      [userId],
+      [userId]
     );
 
     const diaryStats = await dbGet<{ total_entries: number }>(
       'SELECT COUNT(*) as total_entries FROM diary_entries WHERE user_id = ?',
-      [userId],
+      [userId]
     );
 
     let streak = 0;
@@ -77,7 +73,7 @@ export async function getDashboard(req: Request, res: Response): Promise<void> {
       const dateStr = checkDate.toISOString().split('T')[0];
       const entry = await dbGet<{ id: number }>(
         'SELECT id FROM diary_entries WHERE user_id = ? AND date = ?',
-        [userId, dateStr],
+        [userId, dateStr]
       );
       if (entry) {
         streak++;
@@ -101,7 +97,7 @@ export async function getDashboard(req: Request, res: Response): Promise<void> {
         SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END) as draft
        FROM blog_posts
        WHERE user_id = ?`,
-      [userId],
+      [userId]
     );
 
     const stats: DashboardStats = {
@@ -132,7 +128,7 @@ export async function getDashboard(req: Request, res: Response): Promise<void> {
     res.json({ success: true, data: stats });
   } catch (error) {
     console.error('Get dashboard error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -141,7 +137,11 @@ export async function getDashboard(req: Request, res: Response): Promise<void> {
  * Quadrant distribution, completed/time per quadrant, daily completions from
  * the quadrant_analytics table + live todo aggregates.
  */
-export async function getMatrixAnalytics(req: Request, res: Response): Promise<void> {
+export async function getMatrixAnalytics(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
   try {
     const userId = req.user!.id;
     const days = parseDays(req);
@@ -167,7 +167,7 @@ export async function getMatrixAnalytics(req: Request, res: Response): Promise<v
        FROM todos
        WHERE user_id = ? AND eisenhower_quadrant IS NOT NULL AND created_at >= ?
        GROUP BY eisenhower_quadrant`,
-      [userId, since],
+      [userId, since]
     );
 
     const quadrantMap = new Map(quadrantRows.map((r) => [r.quadrant, r]));
@@ -180,7 +180,7 @@ export async function getMatrixAnalytics(req: Request, res: Response): Promise<v
        FROM quadrant_analytics
        WHERE user_id = ? AND date >= ?
        GROUP BY quadrant`,
-      [userId, since],
+      [userId, since]
     );
     const timeMap = new Map(timeSpentRows.map((r) => [r.quadrant, r.total_time]));
 
@@ -216,20 +216,20 @@ export async function getMatrixAnalytics(req: Request, res: Response): Promise<v
        FROM quadrant_analytics
        WHERE user_id = ? AND date >= ?
        ORDER BY date ASC`,
-      [userId, since],
+      [userId, since]
     );
 
     const productivityRows = await dbAll<{ productivity_score: number }>(
       `SELECT productivity_score FROM quadrant_analytics
        WHERE user_id = ? AND date >= ? AND productivity_score IS NOT NULL`,
-      [userId, since],
+      [userId, since]
     );
     const productivityScore =
       productivityRows.length > 0
         ? Math.round(
             (productivityRows.reduce((s, r) => s + r.productivity_score, 0) /
               productivityRows.length) *
-              10,
+              10
           ) / 10
         : completionRate;
 
@@ -245,7 +245,7 @@ export async function getMatrixAnalytics(req: Request, res: Response): Promise<v
     res.json({ success: true, data });
   } catch (error) {
     console.error('Get matrix analytics error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -253,7 +253,11 @@ export async function getMatrixAnalytics(req: Request, res: Response): Promise<v
  * GET /api/analytics/trends?days=30
  * Priority distribution, completion trends over time, status breakdown.
  */
-export async function getTrendsAnalytics(req: Request, res: Response): Promise<void> {
+export async function getTrendsAnalytics(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
   try {
     const userId = req.user!.id;
     const days = parseDays(req);
@@ -275,7 +279,7 @@ export async function getTrendsAnalytics(req: Request, res: Response): Promise<v
        FROM todos
        WHERE user_id = ? AND created_at >= ?
        GROUP BY priority`,
-      [userId, since],
+      [userId, since]
     );
 
     const priorityMap = new Map(priorityRows.map((r) => [r.priority, r]));
@@ -299,7 +303,7 @@ export async function getTrendsAnalytics(req: Request, res: Response): Promise<v
        WHERE user_id = ? AND created_at >= ?
        GROUP BY date(created_at)
        ORDER BY date ASC`,
-      [userId, since],
+      [userId, since]
     );
 
     const completedByDay = await dbAll<{ date: string; count: number }>(
@@ -308,7 +312,7 @@ export async function getTrendsAnalytics(req: Request, res: Response): Promise<v
        WHERE user_id = ? AND completed_at IS NOT NULL AND completed_at >= ?
        GROUP BY date(completed_at)
        ORDER BY date ASC`,
-      [userId, since],
+      [userId, since]
     );
 
     const createdMap = new Map(createdByDay.map((r) => [r.date, r.count]));
@@ -330,7 +334,7 @@ export async function getTrendsAnalytics(req: Request, res: Response): Promise<v
        FROM todos
        WHERE user_id = ? AND created_at >= ?
        GROUP BY status`,
-      [userId, since],
+      [userId, since]
     );
 
     const avgRow = await dbGet<{ avg_hours: number | null }>(
@@ -339,21 +343,21 @@ export async function getTrendsAnalytics(req: Request, res: Response): Promise<v
        ) as avg_hours
        FROM todos
        WHERE user_id = ? AND completed_at IS NOT NULL AND created_at >= ?`,
-      [userId, since],
+      [userId, since]
     );
 
     const overdueRow = await dbGet<{ count: number }>(
       `SELECT COUNT(*) as count FROM todos
        WHERE user_id = ? AND due_date < date('now')
          AND status NOT IN ('completed', 'cancelled') AND created_at >= ?`,
-      [userId, since],
+      [userId, since]
     );
 
     const onTrackRow = await dbGet<{ count: number }>(
       `SELECT COUNT(*) as count FROM todos
        WHERE user_id = ? AND (due_date IS NULL OR due_date >= date('now'))
          AND status NOT IN ('completed', 'cancelled') AND created_at >= ?`,
-      [userId, since],
+      [userId, since]
     );
 
     const data: TrendsAnalyticsResponse = {
@@ -368,7 +372,7 @@ export async function getTrendsAnalytics(req: Request, res: Response): Promise<v
     res.json({ success: true, data });
   } catch (error) {
     console.error('Get trends analytics error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -376,7 +380,11 @@ export async function getTrendsAnalytics(req: Request, res: Response): Promise<v
  * GET /api/analytics/writing?days=30
  * Writing productivity, words over time, session tracking, blog stats.
  */
-export async function getWritingAnalytics(req: Request, res: Response): Promise<void> {
+export async function getWritingAnalytics(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
   try {
     const userId = req.user!.id;
     const days = parseDays(req);
@@ -401,7 +409,7 @@ export async function getWritingAnalytics(req: Request, res: Response): Promise<
         COALESCE(SUM(view_count), 0) as total_views
        FROM blog_posts
        WHERE user_id = ? AND created_at >= ?`,
-      [userId, since],
+      [userId, since]
     );
 
     const sessionStats = await dbGet<{
@@ -419,7 +427,7 @@ export async function getWritingAnalytics(req: Request, res: Response): Promise<
         ROUND(AVG(productivity_score), 1) as avg_productivity_score
        FROM writing_sessions
        WHERE user_id = ? AND created_at >= ?`,
-      [userId, since],
+      [userId, since]
     );
 
     const wordsOverTime = await dbAll<{
@@ -435,7 +443,7 @@ export async function getWritingAnalytics(req: Request, res: Response): Promise<
        WHERE user_id = ? AND start_time >= ?
        GROUP BY date(start_time)
        ORDER BY date ASC`,
-      [userId, since],
+      [userId, since]
     );
 
     const postsByStatus = await dbAll<{ status: BlogPostStatus; count: number }>(
@@ -443,7 +451,7 @@ export async function getWritingAnalytics(req: Request, res: Response): Promise<
        FROM blog_posts
        WHERE user_id = ? AND created_at >= ?
        GROUP BY status`,
-      [userId, since],
+      [userId, since]
     );
 
     const totalPosts = postStats?.total_posts ?? 0;
@@ -454,7 +462,8 @@ export async function getWritingAnalytics(req: Request, res: Response): Promise<
       draft_posts: postStats?.draft_posts ?? 0,
       total_words: postStats?.total_words ?? 0,
       total_reading_time: postStats?.total_reading_time ?? 0,
-      avg_words_per_post: totalPosts > 0 ? Math.round((postStats?.total_words ?? 0) / totalPosts) : 0,
+      avg_words_per_post:
+        totalPosts > 0 ? Math.round((postStats?.total_words ?? 0) / totalPosts) : 0,
       total_views: postStats?.total_views ?? 0,
       sessions: {
         total_sessions: sessionStats?.total_sessions ?? 0,
@@ -469,7 +478,7 @@ export async function getWritingAnalytics(req: Request, res: Response): Promise<
     res.json({ success: true, data });
   } catch (error) {
     console.error('Get writing analytics error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -477,7 +486,11 @@ export async function getWritingAnalytics(req: Request, res: Response): Promise<
  * GET /api/analytics/diary?days=30
  * Mood patterns, energy trends, entry frequency, weather distribution.
  */
-export async function getDiaryAnalytics(req: Request, res: Response): Promise<void> {
+export async function getDiaryAnalytics(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
   try {
     const userId = req.user!.id;
     const days = parseDays(req);
@@ -487,17 +500,16 @@ export async function getDiaryAnalytics(req: Request, res: Response): Promise<vo
 
     const totalRow = await dbGet<{ total: number }>(
       'SELECT COUNT(*) as total FROM diary_entries WHERE user_id = ? AND date >= ?',
-      [userId, since],
+      [userId, since]
     );
 
-    // Reuse the streak logic from getDashboard
     let streak = 0;
     const checkDate = new Date();
     for (let i = 0; i < 365; i++) {
       const dateStr = checkDate.toISOString().split('T')[0];
       const entry = await dbGet<{ id: number }>(
         'SELECT id FROM diary_entries WHERE user_id = ? AND date = ?',
-        [userId, dateStr],
+        [userId, dateStr]
       );
       if (entry) {
         streak++;
@@ -516,7 +528,7 @@ export async function getDiaryAnalytics(req: Request, res: Response): Promise<vo
        WHERE user_id = ? AND date >= ? AND mood IS NOT NULL
        GROUP BY mood
        ORDER BY count DESC`,
-      [userId, since],
+      [userId, since]
     );
 
     const mood_distribution = moodRows.map((r) => {
@@ -537,24 +549,23 @@ export async function getDiaryAnalytics(req: Request, res: Response): Promise<vo
        FROM diary_entries
        WHERE user_id = ? AND date >= ? AND energy_level IS NOT NULL
        ORDER BY date ASC`,
-      [userId, since],
+      [userId, since]
     );
 
     const avgEnergyRow = await dbGet<{ avg_energy: number | null }>(
       `SELECT ROUND(AVG(energy_level), 1) as avg_energy
        FROM diary_entries
        WHERE user_id = ? AND date >= ? AND energy_level IS NOT NULL`,
-      [userId, since],
+      [userId, since]
     );
 
-    // Build entry frequency calendar
     const entryDates = new Set(
       (
         await dbAll<{ date: string }>(
           'SELECT date FROM diary_entries WHERE user_id = ? AND date >= ?',
-          [userId, since],
+          [userId, since]
         )
-      ).map((r) => r.date),
+      ).map((r) => r.date)
     );
 
     const entry_frequency: DiaryAnalyticsResponse['entry_frequency'] = [];
@@ -569,7 +580,7 @@ export async function getDiaryAnalytics(req: Request, res: Response): Promise<vo
     const gratitudeRow = await dbGet<{ count: number }>(
       `SELECT COUNT(*) as count FROM diary_entries
        WHERE user_id = ? AND date >= ? AND gratitude IS NOT NULL AND gratitude != ''`,
-      [userId, since],
+      [userId, since]
     );
 
     const weatherRows = await dbAll<{ weather: Weather; count: number }>(
@@ -578,7 +589,7 @@ export async function getDiaryAnalytics(req: Request, res: Response): Promise<vo
        WHERE user_id = ? AND date >= ? AND weather IS NOT NULL
        GROUP BY weather
        ORDER BY count DESC`,
-      [userId, since],
+      [userId, since]
     );
 
     const data: DiaryAnalyticsResponse = {
@@ -596,6 +607,6 @@ export async function getDiaryAnalytics(req: Request, res: Response): Promise<vo
     res.json({ success: true, data });
   } catch (error) {
     console.error('Get diary analytics error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }

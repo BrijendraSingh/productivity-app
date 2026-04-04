@@ -118,7 +118,7 @@ export function DiaryView() {
       setSelectedDate(date);
       navigate(`/diary/${format(date, 'yyyy-MM-dd')}`, { replace: true });
     },
-    [setSelectedDate, navigate],
+    [setSelectedDate, navigate]
   );
 
   const [editing, setEditing] = useState(false);
@@ -130,14 +130,16 @@ export function DiaryView() {
   const hasEntry = currentEntry !== null;
 
   // Listen for FAB click
-  useDiaryDialogEvent(useCallback(() => {
-    if (!hasEntry) {
-      setEditing(true);
-      setForm(INITIAL_FORM);
-    } else {
-      setEditing(true);
-    }
-  }, [hasEntry]));
+  useDiaryDialogEvent(
+    useCallback(() => {
+      if (!hasEntry) {
+        setEditing(true);
+        setForm(INITIAL_FORM);
+      } else {
+        setEditing(true);
+      }
+    }, [hasEntry])
+  );
 
   // Sync form from current entry when entry changes or editing starts
   useEffect(() => {
@@ -270,7 +272,12 @@ export function DiaryView() {
         /* ─── Edit Mode ──────────────────────────────────────────────── */
         <Card sx={{ border: `2px solid ${theme.palette.primary.main}` }}>
           <CardContent sx={{ p: 3 }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 3 }}
+            >
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 {hasEntry ? 'Edit Entry' : 'New Entry'}
               </Typography>
@@ -283,11 +290,7 @@ export function DiaryView() {
                 >
                   {saving ? 'Saving...' : 'Save'}
                 </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<CancelIcon />}
-                  onClick={handleCancel}
-                >
+                <Button variant="outlined" startIcon={<CancelIcon />} onClick={handleCancel}>
                   Cancel
                 </Button>
               </Stack>
@@ -296,7 +299,7 @@ export function DiaryView() {
             {/* Mood */}
             <SectionLabel icon={<EmojiEmotions />} label="How are you feeling?" />
             <Stack direction="row" spacing={1} sx={{ mb: 3, flexWrap: 'wrap', gap: 1 }}>
-              {(Object.entries(MOOD_LEVELS) as [Mood, typeof MOOD_LEVELS[Mood]][]).map(
+              {(Object.entries(MOOD_LEVELS) as [Mood, (typeof MOOD_LEVELS)[Mood]][]).map(
                 ([key, info]) => (
                   <Chip
                     key={key}
@@ -315,7 +318,7 @@ export function DiaryView() {
                           }),
                     }}
                   />
-                ),
+                )
               )}
             </Stack>
 
@@ -344,7 +347,10 @@ export function DiaryView() {
             </Stack>
 
             {/* Energy Level */}
-            <SectionLabel icon={<SelfImprovement />} label={`Energy Level: ${form.energy_level}/10`} />
+            <SectionLabel
+              icon={<SelfImprovement />}
+              label={`Energy Level: ${form.energy_level}/10`}
+            />
             <Box sx={{ px: 2, mb: 3 }}>
               <Slider
                 value={form.energy_level}
@@ -355,7 +361,12 @@ export function DiaryView() {
                 marks={ENERGY_MARKS}
                 valueLabelDisplay="auto"
                 sx={{
-                  color: form.energy_level >= 7 ? '#4caf50' : form.energy_level >= 4 ? '#ff9800' : '#f44336',
+                  color:
+                    form.energy_level >= 7
+                      ? '#4caf50'
+                      : form.energy_level >= 4
+                        ? '#ff9800'
+                        : '#f44336',
                 }}
               />
             </Box>
@@ -397,7 +408,9 @@ export function DiaryView() {
                 value={form.highlights}
                 onChange={(e) => updateForm({ highlights: e.target.value })}
                 placeholder="What went well today?"
-                slotProps={{ input: { startAdornment: <TrendingUp sx={{ mr: 1, color: '#4caf50' }} /> } }}
+                slotProps={{
+                  input: { startAdornment: <TrendingUp sx={{ mr: 1, color: '#4caf50' }} /> },
+                }}
               />
               <TextField
                 label="Challenges"
@@ -408,7 +421,9 @@ export function DiaryView() {
                 value={form.challenges}
                 onChange={(e) => updateForm({ challenges: e.target.value })}
                 placeholder="What challenges did you face?"
-                slotProps={{ input: { startAdornment: <Warning sx={{ mr: 1, color: '#f44336' }} /> } }}
+                slotProps={{
+                  input: { startAdornment: <Warning sx={{ mr: 1, color: '#f44336' }} /> },
+                }}
               />
               <TextField
                 label="Tomorrow's Focus"
@@ -419,7 +434,9 @@ export function DiaryView() {
                 value={form.tomorrow_focus}
                 onChange={(e) => updateForm({ tomorrow_focus: e.target.value })}
                 placeholder="What will you focus on tomorrow?"
-                slotProps={{ input: { startAdornment: <ArrowForward sx={{ mr: 1, color: '#1976d2' }} /> } }}
+                slotProps={{
+                  input: { startAdornment: <ArrowForward sx={{ mr: 1, color: '#1976d2' }} /> },
+                }}
               />
             </Stack>
 
@@ -456,7 +473,12 @@ export function DiaryView() {
         /* ─── Read Mode ──────────────────────────────────────────────── */
         <Card>
           <CardContent sx={{ p: 3 }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 2 }}
+            >
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 Daily Reflection
               </Typography>
@@ -479,31 +501,41 @@ export function DiaryView() {
                   }}
                 />
               )}
-              {currentEntry.weather && (() => {
-                const w = WEATHER_OPTIONS.find((o) => o.value === currentEntry.weather);
-                return w ? (
-                  <Chip
-                    icon={<>{w.icon}</>}
-                    label={w.label}
-                    sx={{
-                      bgcolor: alpha(w.color, 0.15),
-                      color: w.color,
-                      '& .MuiChip-icon': { color: w.color },
-                      fontWeight: 600,
-                    }}
-                  />
-                ) : null;
-              })()}
+              {currentEntry.weather &&
+                (() => {
+                  const w = WEATHER_OPTIONS.find((o) => o.value === currentEntry.weather);
+                  return w ? (
+                    <Chip
+                      icon={<>{w.icon}</>}
+                      label={w.label}
+                      sx={{
+                        bgcolor: alpha(w.color, 0.15),
+                        color: w.color,
+                        '& .MuiChip-icon': { color: w.color },
+                        fontWeight: 600,
+                      }}
+                    />
+                  ) : null;
+                })()}
               {currentEntry.energy_level != null && (
                 <Chip
                   icon={<SelfImprovement fontSize="small" />}
                   label={`Energy: ${currentEntry.energy_level}/10`}
                   sx={{
                     bgcolor: alpha(
-                      currentEntry.energy_level >= 7 ? '#4caf50' : currentEntry.energy_level >= 4 ? '#ff9800' : '#f44336',
-                      0.15,
+                      currentEntry.energy_level >= 7
+                        ? '#4caf50'
+                        : currentEntry.energy_level >= 4
+                          ? '#ff9800'
+                          : '#f44336',
+                      0.15
                     ),
-                    color: currentEntry.energy_level >= 7 ? '#4caf50' : currentEntry.energy_level >= 4 ? '#ff9800' : '#f44336',
+                    color:
+                      currentEntry.energy_level >= 7
+                        ? '#4caf50'
+                        : currentEntry.energy_level >= 4
+                          ? '#ff9800'
+                          : '#f44336',
                     fontWeight: 600,
                   }}
                 />
@@ -511,27 +543,45 @@ export function DiaryView() {
             </Stack>
 
             {/* Content */}
-            {currentEntry.content && (
-              <ReadSection label="Journal" content={currentEntry.content} />
-            )}
+            {currentEntry.content && <ReadSection label="Journal" content={currentEntry.content} />}
             {currentEntry.gratitude && (
-              <ReadSection label="Gratitude" content={currentEntry.gratitude} icon={<Star sx={{ color: '#ff9800', fontSize: 18 }} />} />
+              <ReadSection
+                label="Gratitude"
+                content={currentEntry.gratitude}
+                icon={<Star sx={{ color: '#ff9800', fontSize: 18 }} />}
+              />
             )}
             {currentEntry.highlights && (
-              <ReadSection label="Highlights" content={currentEntry.highlights} icon={<TrendingUp sx={{ color: '#4caf50', fontSize: 18 }} />} />
+              <ReadSection
+                label="Highlights"
+                content={currentEntry.highlights}
+                icon={<TrendingUp sx={{ color: '#4caf50', fontSize: 18 }} />}
+              />
             )}
             {currentEntry.challenges && (
-              <ReadSection label="Challenges" content={currentEntry.challenges} icon={<Warning sx={{ color: '#f44336', fontSize: 18 }} />} />
+              <ReadSection
+                label="Challenges"
+                content={currentEntry.challenges}
+                icon={<Warning sx={{ color: '#f44336', fontSize: 18 }} />}
+              />
             )}
             {currentEntry.tomorrow_focus && (
-              <ReadSection label="Tomorrow's Focus" content={currentEntry.tomorrow_focus} icon={<ArrowForward sx={{ color: '#1976d2', fontSize: 18 }} />} />
+              <ReadSection
+                label="Tomorrow's Focus"
+                content={currentEntry.tomorrow_focus}
+                icon={<ArrowForward sx={{ color: '#1976d2', fontSize: 18 }} />}
+              />
             )}
 
-            {!currentEntry.content && !currentEntry.gratitude && !currentEntry.highlights && !currentEntry.challenges && !currentEntry.tomorrow_focus && (
-              <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                No written content — only mood/weather/energy recorded.
-              </Typography>
-            )}
+            {!currentEntry.content &&
+              !currentEntry.gratitude &&
+              !currentEntry.highlights &&
+              !currentEntry.challenges &&
+              !currentEntry.tomorrow_focus && (
+                <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                  No written content — only mood/weather/energy recorded.
+                </Typography>
+              )}
           </CardContent>
         </Card>
       ) : (
@@ -545,11 +595,7 @@ export function DiaryView() {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Start writing to capture your thoughts, mood, and reflections.
             </Typography>
-            <Button
-              variant="contained"
-              startIcon={<EditIcon />}
-              onClick={handleStartEdit}
-            >
+            <Button variant="contained" startIcon={<EditIcon />} onClick={handleStartEdit}>
               Write Entry
             </Button>
           </CardContent>
@@ -572,7 +618,15 @@ function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string })
   );
 }
 
-function ReadSection({ label, content, icon }: { label: string; content: string; icon?: React.ReactNode }) {
+function ReadSection({
+  label,
+  content,
+  icon,
+}: {
+  label: string;
+  content: string;
+  icon?: React.ReactNode;
+}) {
   return (
     <Box sx={{ mb: 2.5 }}>
       <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>

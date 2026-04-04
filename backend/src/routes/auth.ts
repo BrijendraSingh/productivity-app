@@ -24,7 +24,7 @@ router.post(
       .isLength({ min: APP_CONFIG.PASSWORD_MIN_LENGTH })
       .withMessage(`Password must be at least ${APP_CONFIG.PASSWORD_MIN_LENGTH} characters.`),
   ]),
-  authController.register,
+  authController.register
 );
 
 // POST /api/auth/login (public)
@@ -34,7 +34,7 @@ router.post(
     body('username').trim().notEmpty().withMessage('Username is required.'),
     body('password').notEmpty().withMessage('Password is required.'),
   ]),
-  authController.login,
+  authController.login
 );
 
 // POST /api/auth/logout [auth]

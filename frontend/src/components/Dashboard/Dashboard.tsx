@@ -28,13 +28,7 @@ import {
   PlayArrow as InProgressIcon,
   TaskAlt as CompletedIcon,
 } from '@mui/icons-material';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-} from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import type { DashboardStats } from '@productivity-app/shared';
 import { EISENHOWER_QUADRANTS } from '@productivity-app/shared';
 import { analyticsApi, todosApi } from '../../services/api';
@@ -56,31 +50,14 @@ interface StatCardProps {
 
 // ─── StatCard ────────────────────────────────────────────────────────────────
 
-function StatCard({
-  title,
-  value,
-  subtitle,
-  icon,
-  color,
-  onClick,
-  loading,
-}: StatCardProps) {
+function StatCard({ title, value, subtitle, icon, color, onClick, loading }: StatCardProps) {
   const theme = useTheme();
 
   const content = (
     <CardContent sx={{ p: 2.5 }}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="flex-start"
-      >
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
         <Box sx={{ flex: 1 }}>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            fontWeight={500}
-            gutterBottom
-          >
+          <Typography variant="body2" color="text.secondary" fontWeight={500} gutterBottom>
             {title}
           </Typography>
           {loading ? (
@@ -91,11 +68,7 @@ function StatCard({
             </Typography>
           )}
           {subtitle && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ mt: 0.5, display: 'block' }}
-            >
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
               {subtitle}
             </Typography>
           )}
@@ -129,13 +102,7 @@ function StatCard({
 
 // ─── SimpleAnalytics (Quadrant Pie) ──────────────────────────────────────────
 
-function SimpleAnalytics({
-  stats,
-  loading,
-}: {
-  stats: DashboardStats | null;
-  loading: boolean;
-}) {
+function SimpleAnalytics({ stats, loading }: { stats: DashboardStats | null; loading: boolean }) {
   const theme = useTheme();
 
   if (loading || !stats) {
@@ -162,19 +129,12 @@ function SimpleAnalytics({
   ].filter((d) => d.value > 0);
 
   const completionRate =
-    stats.todos.total > 0
-      ? Math.round((stats.todos.completed / stats.todos.total) * 100)
-      : 0;
+    stats.todos.total > 0 ? Math.round((stats.todos.completed / stats.todos.total) * 100) : 0;
 
   return (
     <Card sx={{ height: '100%' }}>
       <CardContent sx={{ p: 2.5 }}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={1}
-          sx={{ mb: 2 }}
-        >
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
           <TrendingUp sx={{ color: 'primary.main', fontSize: 20 }} />
           <Typography variant="h6" fontWeight={600}>
             Quick Insights
@@ -183,11 +143,7 @@ function SimpleAnalytics({
 
         {/* Completion rate */}
         <Box sx={{ mb: 3 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            sx={{ mb: 0.5 }}
-          >
+          <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
             <Typography variant="body2" color="text.secondary">
               Completion Rate
             </Typography>
@@ -213,11 +169,7 @@ function SimpleAnalytics({
         {/* Quadrant pie */}
         {matrixTotal > 0 ? (
           <>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: 1 }}
-            >
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               Active Tasks by Quadrant
             </Typography>
             <Box sx={{ height: 180 }}>
@@ -237,11 +189,7 @@ function SimpleAnalytics({
                       <Cell key={entry.name} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    formatter={(value) => [
-                      `${value} task${value !== 1 ? 's' : ''}`,
-                    ]}
-                  />
+                  <Tooltip formatter={(value) => [`${value} task${value !== 1 ? 's' : ''}`]} />
                 </PieChart>
               </ResponsiveContainer>
             </Box>
@@ -269,12 +217,7 @@ function SimpleAnalytics({
             </Stack>
           </>
         ) : (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            textAlign="center"
-            sx={{ py: 3 }}
-          >
+          <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 3 }}>
             No active tasks in the matrix yet.
           </Typography>
         )}
@@ -285,13 +228,7 @@ function SimpleAnalytics({
 
 // ─── Today's Focus ───────────────────────────────────────────────────────────
 
-function TodaysFocus({
-  stats,
-  loading,
-}: {
-  stats: DashboardStats | null;
-  loading: boolean;
-}) {
+function TodaysFocus({ stats, loading }: { stats: DashboardStats | null; loading: boolean }) {
   if (loading || !stats) {
     return (
       <Card>
@@ -433,12 +370,7 @@ function RecentActivity({ loading }: { loading: boolean }) {
             ))}
           </Stack>
         ) : recentTodos.length === 0 ? (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            textAlign="center"
-            sx={{ py: 4 }}
-          >
+          <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 4 }}>
             No todos yet. Create your first task to get started!
           </Typography>
         ) : (
@@ -454,31 +386,21 @@ function RecentActivity({ loading }: { loading: boolean }) {
                   '&:hover': {
                     bgcolor: alpha(
                       theme.palette.primary.main,
-                      theme.palette.mode === 'dark' ? 0.08 : 0.04,
+                      theme.palette.mode === 'dark' ? 0.08 : 0.04
                     ),
                   },
                 }}
                 onClick={() => navigate(`/todos/${todo.id}`)}
               >
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography
                       variant="body2"
                       fontWeight={500}
                       noWrap
                       sx={{
-                        textDecoration:
-                          todo.status === 'completed'
-                            ? 'line-through'
-                            : 'none',
-                        color:
-                          todo.status === 'completed'
-                            ? 'text.secondary'
-                            : 'text.primary',
+                        textDecoration: todo.status === 'completed' ? 'line-through' : 'none',
+                        color: todo.status === 'completed' ? 'text.secondary' : 'text.primary',
                       }}
                     >
                       {todo.title}
@@ -497,7 +419,7 @@ function RecentActivity({ loading }: { loading: boolean }) {
                             quadrantColors[
                               todo.eisenhower_quadrant as keyof typeof quadrantColors
                             ] || '#757575',
-                            0.12,
+                            0.12
                           ),
                           color:
                             quadrantColors[
@@ -513,10 +435,7 @@ function RecentActivity({ loading }: { loading: boolean }) {
                         height: 20,
                         fontSize: '0.68rem',
                         fontWeight: 500,
-                        bgcolor: alpha(
-                          statusColor[todo.status] || '#9e9e9e',
-                          0.12,
-                        ),
+                        bgcolor: alpha(statusColor[todo.status] || '#9e9e9e', 0.12),
                         color: statusColor[todo.status] || '#9e9e9e',
                       }}
                     />
@@ -574,10 +493,7 @@ function QuickNav() {
                   borderColor: alpha(item.color, 0.25),
                   '&:hover': {
                     borderColor: item.color,
-                    bgcolor: alpha(
-                      item.color,
-                      theme.palette.mode === 'dark' ? 0.08 : 0.03,
-                    ),
+                    bgcolor: alpha(item.color, theme.palette.mode === 'dark' ? 0.08 : 0.03),
                     transform: 'translateY(-2px)',
                   },
                 }}
@@ -680,12 +596,7 @@ export function Dashboard() {
           <StatCard
             title="Matrix Items"
             value={
-              stats
-                ? stats.matrix.q1 +
-                  stats.matrix.q2 +
-                  stats.matrix.q3 +
-                  stats.matrix.q4
-                : 0
+              stats ? stats.matrix.q1 + stats.matrix.q2 + stats.matrix.q3 + stats.matrix.q4 : 0
             }
             subtitle={stats ? `Q1: ${stats.matrix.q1} urgent` : undefined}
             icon={<MatrixIcon />}
@@ -714,9 +625,7 @@ export function Dashboard() {
             title="Blog Posts"
             value={stats?.blog.total_posts ?? 0}
             subtitle={
-              stats
-                ? `${stats.blog.published} published, ${stats.blog.draft} drafts`
-                : undefined
+              stats ? `${stats.blog.published} published, ${stats.blog.draft} drafts` : undefined
             }
             icon={<BlogIcon />}
             color="#4caf50"

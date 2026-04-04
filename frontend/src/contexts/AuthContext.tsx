@@ -7,11 +7,7 @@ import React, {
   useMemo,
   type ReactNode,
 } from 'react';
-import type {
-  SafeUser,
-  RegisterRequest,
-  LoginRequest,
-} from '@productivity-app/shared';
+import type { SafeUser, RegisterRequest, LoginRequest } from '@productivity-app/shared';
 import { APP_CONFIG } from '@productivity-app/shared';
 import { authApi, setOnUnauthorized } from '../services/api';
 
@@ -39,8 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  const [token, setToken] = useState<string | null>(
-    () => localStorage.getItem(APP_CONFIG.TOKEN_STORAGE_KEY),
+  const [token, setToken] = useState<string | null>(() =>
+    localStorage.getItem(APP_CONFIG.TOKEN_STORAGE_KEY)
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,10 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const res = await authApi.verify();
         if (res.success && res.data) {
           setUser(res.data.user);
-          localStorage.setItem(
-            APP_CONFIG.USER_STORAGE_KEY,
-            JSON.stringify(res.data.user),
-          );
+          localStorage.setItem(APP_CONFIG.USER_STORAGE_KEY, JSON.stringify(res.data.user));
         } else {
           clearCredentials();
         }
@@ -93,10 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(res.data.user);
       setToken(res.data.token);
       localStorage.setItem(APP_CONFIG.TOKEN_STORAGE_KEY, res.data.token);
-      localStorage.setItem(
-        APP_CONFIG.USER_STORAGE_KEY,
-        JSON.stringify(res.data.user),
-      );
+      localStorage.setItem(APP_CONFIG.USER_STORAGE_KEY, JSON.stringify(res.data.user));
     } else {
       throw new Error(res.message || 'Login failed');
     }
@@ -109,10 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(res.data.user);
       setToken(res.data.token);
       localStorage.setItem(APP_CONFIG.TOKEN_STORAGE_KEY, res.data.token);
-      localStorage.setItem(
-        APP_CONFIG.USER_STORAGE_KEY,
-        JSON.stringify(res.data.user),
-      );
+      localStorage.setItem(APP_CONFIG.USER_STORAGE_KEY, JSON.stringify(res.data.user));
     } else {
       throw new Error(res.message || 'Registration failed');
     }
@@ -141,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       error,
       clearError,
     }),
-    [user, token, isLoading, login, register, logout, error, clearError],
+    [user, token, isLoading, login, register, logout, error, clearError]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

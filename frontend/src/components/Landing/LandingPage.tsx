@@ -167,10 +167,7 @@ export function LandingPage() {
           <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <DashboardIcon sx={{ color: 'primary.main', fontSize: 28 }} />
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 700, color: 'text.primary' }}
-              >
+              <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                 {APP_CONFIG.APP_NAME}
               </Typography>
             </Stack>
@@ -179,11 +176,7 @@ export function LandingPage() {
                 {isDark ? <LightMode /> : <DarkMode />}
               </IconButton>
               {isAuthenticated ? (
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() => navigate('/')}
-                >
+                <Button variant="contained" size="small" onClick={() => navigate('/')}>
                   Go to Dashboard
                 </Button>
               ) : (
@@ -191,11 +184,7 @@ export function LandingPage() {
                   <Button size="small" onClick={handleSignIn}>
                     Sign In
                   </Button>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={handleGetStarted}
-                  >
+                  <Button variant="contained" size="small" onClick={handleGetStarted}>
                     Get Started
                   </Button>
                 </>
@@ -243,14 +232,10 @@ export function LandingPage() {
               lineHeight: 1.6,
             }}
           >
-            Manage tasks with the Eisenhower Matrix, journal your thoughts,
-            write blog posts, and track your productivity — all in one place.
+            Manage tasks with the Eisenhower Matrix, journal your thoughts, write blog posts, and
+            track your productivity — all in one place.
           </Typography>
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            justifyContent="center"
-          >
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
             <Button
               variant="contained"
               size="large"
@@ -300,12 +285,7 @@ export function LandingPage() {
         }}
       >
         <Container maxWidth="lg">
-          <Typography
-            variant="h4"
-            textAlign="center"
-            fontWeight={700}
-            sx={{ mb: 1 }}
-          >
+          <Typography variant="h4" textAlign="center" fontWeight={700} sx={{ mb: 1 }}>
             Everything You Need
           </Typography>
           <Typography
@@ -349,22 +329,11 @@ export function LandingPage() {
 
       {/* ─── Eisenhower Matrix Preview ─── */}
       <Container maxWidth="md" sx={{ py: { xs: 6, md: 8 } }}>
-        <Typography
-          variant="h4"
-          textAlign="center"
-          fontWeight={700}
-          sx={{ mb: 1 }}
-        >
+        <Typography variant="h4" textAlign="center" fontWeight={700} sx={{ mb: 1 }}>
           Eisenhower Matrix Built In
         </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          textAlign="center"
-          sx={{ mb: 4 }}
-        >
-          Every task is automatically placed in the right quadrant based on
-          urgency and importance.
+        <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mb: 4 }}>
+          Every task is automatically placed in the right quadrant based on urgency and importance.
         </Typography>
         <Grid container spacing={2}>
           {(['Q1', 'Q2', 'Q3', 'Q4'] as const).map((q) => {
@@ -384,11 +353,7 @@ export function LandingPage() {
                     justifyContent: 'center',
                   }}
                 >
-                  <Typography
-                    variant="h6"
-                    fontWeight={700}
-                    sx={{ color: info.color }}
-                  >
+                  <Typography variant="h6" fontWeight={700} sx={{ color: info.color }}>
                     {q}: {info.label}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -411,21 +376,10 @@ export function LandingPage() {
         }}
       >
         <Container maxWidth="md">
-          <Typography
-            variant="h5"
-            textAlign="center"
-            fontWeight={600}
-            sx={{ mb: 3 }}
-          >
+          <Typography variant="h5" textAlign="center" fontWeight={600} sx={{ mb: 3 }}>
             Built With Modern Tech
           </Typography>
-          <Stack
-            direction="row"
-            flexWrap="wrap"
-            justifyContent="center"
-            spacing={1}
-            useFlexGap
-          >
+          <Stack direction="row" flexWrap="wrap" justifyContent="center" spacing={1} useFlexGap>
             {TECH_STACK.map((tech) => (
               <Chip
                 key={tech}
@@ -447,11 +401,7 @@ export function LandingPage() {
           <Typography variant="h4" fontWeight={700} sx={{ mb: 2 }}>
             Ready to Be More Productive?
           </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ mb: 3 }}
-          >
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             Create a free account and start organizing your life today.
           </Typography>
           <Button
@@ -480,11 +430,7 @@ export function LandingPage() {
       </Box>
 
       {/* ─── Login Dialog ─── */}
-      <LoginDialog
-        open={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        initialTab={loginTab}
-      />
+      <LoginDialog open={loginOpen} onClose={() => setLoginOpen(false)} initialTab={loginTab} />
     </Box>
   );
 }

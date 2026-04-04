@@ -68,9 +68,16 @@ import { useBlog } from '../../hooks/useBlog';
 
 // ─── Blog status config ──────────────────────────────────────────────────────
 
-const BLOG_STATUS_CONFIG: Record<BlogPostStatus, { label: string; color: string; icon: React.ReactNode }> = {
+const BLOG_STATUS_CONFIG: Record<
+  BlogPostStatus,
+  { label: string; color: string; icon: React.ReactNode }
+> = {
   draft: { label: 'Draft', color: '#78909c', icon: <DraftIcon sx={{ fontSize: 16 }} /> },
-  published: { label: 'Published', color: '#4caf50', icon: <PublishedIcon sx={{ fontSize: 16 }} /> },
+  published: {
+    label: 'Published',
+    color: '#4caf50',
+    icon: <PublishedIcon sx={{ fontSize: 16 }} />,
+  },
   archived: { label: 'Archived', color: '#ff9800', icon: <ArchiveIcon sx={{ fontSize: 16 }} /> },
 };
 
@@ -114,10 +121,26 @@ export function BlogView() {
   const postId = idParam ? parseInt(idParam, 10) : null;
 
   const {
-    posts, currentPost, loading, saving, error, filters,
-    page, meta, tags, setFilters, resetFilters, setPage,
-    refresh, fetchPost, clearCurrentPost, createPost,
-    updatePost, deletePost, publishPost, stats,
+    posts,
+    currentPost,
+    loading,
+    saving,
+    error,
+    filters,
+    page,
+    meta,
+    tags,
+    setFilters,
+    resetFilters,
+    setPage,
+    refresh,
+    fetchPost,
+    clearCurrentPost,
+    createPost,
+    updatePost,
+    deletePost,
+    publishPost,
+    stats,
   } = useBlog();
 
   const [editing, setEditing] = useState(false);
@@ -131,12 +154,14 @@ export function BlogView() {
   const [showSeo, setShowSeo] = useState(false);
 
   // FAB listener
-  useBlogDialogEvent(useCallback(() => {
-    setEditingPostId(null);
-    setForm(INITIAL_EDITOR_FORM);
-    setEditing(true);
-    if (postId) navigate('/blog');
-  }, [postId, navigate]));
+  useBlogDialogEvent(
+    useCallback(() => {
+      setEditingPostId(null);
+      setForm(INITIAL_EDITOR_FORM);
+      setEditing(true);
+      if (postId) navigate('/blog');
+    }, [postId, navigate])
+  );
 
   // Load post when URL has an ID
   useEffect(() => {
@@ -175,7 +200,7 @@ export function BlogView() {
       }, 350);
       setSearchTimeout(timeout);
     },
-    [setFilters, searchTimeout],
+    [setFilters, searchTimeout]
   );
 
   const handleNewPost = useCallback(() => {
@@ -235,13 +260,16 @@ export function BlogView() {
     }
   }, [form, editingPostId, updatePost, createPost, navigate]);
 
-  const handlePublish = useCallback(async (id: number) => {
-    const success = await publishPost(id);
-    if (success && viewMode === 'editor') {
-      setEditing(false);
-      setEditingPostId(null);
-    }
-  }, [publishPost, viewMode]);
+  const handlePublish = useCallback(
+    async (id: number) => {
+      const success = await publishPost(id);
+      if (success && viewMode === 'editor') {
+        setEditing(false);
+        setEditingPostId(null);
+      }
+    },
+    [publishPost, viewMode]
+  );
 
   const handleDelete = useCallback(async () => {
     if (confirmDeleteId === null) return;
@@ -254,9 +282,12 @@ export function BlogView() {
     }
   }, [confirmDeleteId, deletePost, navigate]);
 
-  const handleViewPost = useCallback((id: number) => {
-    navigate(`/blog/${id}`);
-  }, [navigate]);
+  const handleViewPost = useCallback(
+    (id: number) => {
+      navigate(`/blog/${id}`);
+    },
+    [navigate]
+  );
 
   const handleBackToList = useCallback(() => {
     setEditing(false);
@@ -298,8 +329,8 @@ export function BlogView() {
         />
       )}
 
-      {viewMode === 'reader' && (
-        currentPost ? (
+      {viewMode === 'reader' &&
+        (currentPost ? (
           <BlogReaderView
             theme={theme}
             post={currentPost}
@@ -319,21 +350,39 @@ export function BlogView() {
               Back to Posts
             </Button>
           </Paper>
-        )
-      )}
+        ))}
 
       {viewMode === 'list' && (
         <>
           {/* Quick Stats */}
           <Stack direction="row" spacing={1.5} sx={{ mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
-            <StatChip icon={<ArticleIcon sx={{ fontSize: 16 }} />} label={`${stats.total} Total`} color={theme.palette.primary.main} />
-            <StatChip icon={<PublishedIcon sx={{ fontSize: 16 }} />} label={`${stats.published} Published`} color="#4caf50" />
-            <StatChip icon={<DraftIcon sx={{ fontSize: 16 }} />} label={`${stats.draft} Drafts`} color="#78909c" />
-            <StatChip icon={<ArchiveIcon sx={{ fontSize: 16 }} />} label={`${stats.archived} Archived`} color="#ff9800" />
+            <StatChip
+              icon={<ArticleIcon sx={{ fontSize: 16 }} />}
+              label={`${stats.total} Total`}
+              color={theme.palette.primary.main}
+            />
+            <StatChip
+              icon={<PublishedIcon sx={{ fontSize: 16 }} />}
+              label={`${stats.published} Published`}
+              color="#4caf50"
+            />
+            <StatChip
+              icon={<DraftIcon sx={{ fontSize: 16 }} />}
+              label={`${stats.draft} Drafts`}
+              color="#78909c"
+            />
+            <StatChip
+              icon={<ArchiveIcon sx={{ fontSize: 16 }} />}
+              label={`${stats.archived} Archived`}
+              color="#ff9800"
+            />
           </Stack>
 
           {/* Search + Filters */}
-          <Paper elevation={0} sx={{ p: 2, mb: 2, border: `1px solid ${theme.palette.divider}`, borderRadius: 2 }}>
+          <Paper
+            elevation={0}
+            sx={{ p: 2, mb: 2, border: `1px solid ${theme.palette.divider}`, borderRadius: 2 }}
+          >
             <Stack direction="row" spacing={1.5} alignItems="center">
               <TextField
                 placeholder="Search posts..."
@@ -350,7 +399,13 @@ export function BlogView() {
                     ),
                     endAdornment: searchInput ? (
                       <InputAdornment position="end">
-                        <IconButton size="small" onClick={() => { setSearchInput(''); setFilters({ search: '' }); }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setSearchInput('');
+                            setFilters({ search: '' });
+                          }}
+                        >
                           <ClearIcon fontSize="small" />
                         </IconButton>
                       </InputAdornment>
@@ -359,7 +414,10 @@ export function BlogView() {
                 }}
               />
               <Tooltip title="Toggle filters">
-                <IconButton onClick={() => setShowFilters(!showFilters)} color={showFilters || hasActiveFilters ? 'primary' : 'default'}>
+                <IconButton
+                  onClick={() => setShowFilters(!showFilters)}
+                  color={showFilters || hasActiveFilters ? 'primary' : 'default'}
+                >
                   <FilterIcon />
                 </IconButton>
               </Tooltip>
@@ -368,20 +426,31 @@ export function BlogView() {
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
-              <Button variant="contained" size="small" onClick={handleNewPost} sx={{ whiteSpace: 'nowrap' }}>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleNewPost}
+                sx={{ whiteSpace: 'nowrap' }}
+              >
                 New Post
               </Button>
             </Stack>
 
             <Collapse in={showFilters}>
               <Box sx={{ mt: 2 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}
+                >
                   Status
                 </Typography>
                 <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
                   {STATUS_FILTERS.map((s) => {
                     const isSelected = filters.status === s.value;
-                    const color = s.value ? BLOG_STATUS_CONFIG[s.value].color : theme.palette.primary.main;
+                    const color = s.value
+                      ? BLOG_STATUS_CONFIG[s.value].color
+                      : theme.palette.primary.main;
                     return (
                       <Chip
                         key={s.value || 'all'}
@@ -392,7 +461,11 @@ export function BlogView() {
                           fontWeight: 500,
                           ...(isSelected
                             ? { bgcolor: color, color: '#fff' }
-                            : { bgcolor: alpha(color, 0.1), color, '&:hover': { bgcolor: alpha(color, 0.2) } }),
+                            : {
+                                bgcolor: alpha(color, 0.1),
+                                color,
+                                '&:hover': { bgcolor: alpha(color, 0.2) },
+                              }),
                         }}
                       />
                     );
@@ -404,8 +477,14 @@ export function BlogView() {
                     <Chip
                       label="Clear all filters"
                       size="small"
-                      onDelete={() => { resetFilters(); setSearchInput(''); }}
-                      onClick={() => { resetFilters(); setSearchInput(''); }}
+                      onDelete={() => {
+                        resetFilters();
+                        setSearchInput('');
+                      }}
+                      onClick={() => {
+                        resetFilters();
+                        setSearchInput('');
+                      }}
                       color="default"
                       variant="outlined"
                     />
@@ -426,7 +505,9 @@ export function BlogView() {
                   {hasActiveFilters ? 'No posts match your filters' : 'No blog posts yet'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  {hasActiveFilters ? 'Try adjusting your filters or search.' : 'Start writing your first blog post.'}
+                  {hasActiveFilters
+                    ? 'Try adjusting your filters or search.'
+                    : 'Start writing your first blog post.'}
                 </Typography>
                 {!hasActiveFilters && (
                   <Button variant="contained" startIcon={<EditIcon />} onClick={handleNewPost}>
@@ -437,7 +518,13 @@ export function BlogView() {
             </Card>
           ) : (
             <>
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' }, gap: 2 }}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' },
+                  gap: 2,
+                }}
+              >
                 {posts.map((post) => (
                   <PostCard
                     key={post.id}
@@ -592,13 +679,19 @@ function BlogEditorView({
           size="small"
         >
           <ToggleButton value="edit">
-            <Tooltip title="Edit"><CodeIcon fontSize="small" /></Tooltip>
+            <Tooltip title="Edit">
+              <CodeIcon fontSize="small" />
+            </Tooltip>
           </ToggleButton>
           <ToggleButton value="live">
-            <Tooltip title="Live Preview"><LiveIcon fontSize="small" /></Tooltip>
+            <Tooltip title="Live Preview">
+              <LiveIcon fontSize="small" />
+            </Tooltip>
           </ToggleButton>
           <ToggleButton value="preview">
-            <Tooltip title="Preview"><PreviewIcon fontSize="small" /></Tooltip>
+            <Tooltip title="Preview">
+              <PreviewIcon fontSize="small" />
+            </Tooltip>
           </ToggleButton>
         </ToggleButtonGroup>
 
@@ -630,7 +723,10 @@ function BlogEditorView({
       </Box>
 
       {/* Meta Fields */}
-      <Paper elevation={0} sx={{ p: 2.5, border: `1px solid ${theme.palette.divider}`, borderRadius: 2, mb: 2 }}>
+      <Paper
+        elevation={0}
+        sx={{ p: 2.5, border: `1px solid ${theme.palette.divider}`, borderRadius: 2, mb: 2 }}
+      >
         <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
           Post Details
         </Typography>
@@ -654,7 +750,9 @@ function BlogEditorView({
             getOptionLabel={(opt) => opt.name}
             value={selectedTags}
             onChange={(_, newValue) => updateForm({ tag_ids: newValue.map((t) => t.id) })}
-            renderInput={(params) => <TextField {...params} label="Tags" size="small" placeholder="Select tags..." />}
+            renderInput={(params) => (
+              <TextField {...params} label="Tags" size="small" placeholder="Select tags..." />
+            )}
             renderTags={(value, getTagProps) =>
               value.map((opt, idx) => {
                 const { key, ...rest } = getTagProps({ index: idx });
@@ -674,7 +772,11 @@ function BlogEditorView({
 
           {/* Status selector */}
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}
+            >
               Status
             </Typography>
             <Stack direction="row" spacing={0.75}>
@@ -691,7 +793,11 @@ function BlogEditorView({
                       fontWeight: 500,
                       ...(isSelected
                         ? { bgcolor: cfg.color, color: '#fff' }
-                        : { bgcolor: alpha(cfg.color, 0.1), color: cfg.color, '&:hover': { bgcolor: alpha(cfg.color, 0.2) } }),
+                        : {
+                            bgcolor: alpha(cfg.color, 0.1),
+                            color: cfg.color,
+                            '&:hover': { bgcolor: alpha(cfg.color, 0.2) },
+                          }),
                     }}
                   />
                 );
@@ -789,20 +895,39 @@ function BlogReaderView({
         </IconButton>
         <Stack direction="row" spacing={1}>
           {post.status === 'draft' && (
-            <Button variant="outlined" color="success" startIcon={<PublishIcon />} onClick={onPublish} size="small">
+            <Button
+              variant="outlined"
+              color="success"
+              startIcon={<PublishIcon />}
+              onClick={onPublish}
+              size="small"
+            >
               Publish
             </Button>
           )}
           <Button variant="outlined" startIcon={<EditIcon />} onClick={onEdit} size="small">
             Edit
           </Button>
-          <Button variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={onDelete} size="small">
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={onDelete}
+            size="small"
+          >
             Delete
           </Button>
         </Stack>
       </Stack>
 
-      <Paper elevation={0} sx={{ p: { xs: 2.5, md: 4 }, border: `1px solid ${theme.palette.divider}`, borderRadius: 2 }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 2.5, md: 4 },
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 2,
+        }}
+      >
         {/* Title + Status */}
         <Stack direction="row" alignItems="flex-start" spacing={1.5} sx={{ mb: 2 }}>
           <Typography variant="h4" sx={{ fontWeight: 700, flex: 1 }}>
@@ -870,11 +995,17 @@ function BlogReaderView({
 
         {/* Content */}
         {post.content ? (
-          <Box data-color-mode={theme.palette.mode} sx={{ '& .wmde-markdown': { background: 'transparent' } }}>
+          <Box
+            data-color-mode={theme.palette.mode}
+            sx={{ '& .wmde-markdown': { background: 'transparent' } }}
+          >
             <MDEditor.Markdown source={post.content} style={{ whiteSpace: 'pre-wrap' }} />
           </Box>
         ) : (
-          <Typography color="text.secondary" sx={{ fontStyle: 'italic', py: 4, textAlign: 'center' }}>
+          <Typography
+            color="text.secondary"
+            sx={{ fontStyle: 'italic', py: 4, textAlign: 'center' }}
+          >
             No content yet. Click "Edit" to start writing.
           </Typography>
         )}
@@ -973,7 +1104,11 @@ function PostCard({
                 />
               ))}
               {post.tags.length > 3 && (
-                <Chip label={`+${post.tags.length - 3}`} size="small" sx={{ height: 22, fontSize: '0.7rem' }} />
+                <Chip
+                  label={`+${post.tags.length - 3}`}
+                  size="small"
+                  sx={{ height: 22, fontSize: '0.7rem' }}
+                />
               )}
             </Stack>
           )}
@@ -1044,7 +1179,13 @@ function StatChip({ icon, label, color }: { icon: React.ReactNode; label: string
 
 function BlogListSkeleton() {
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' }, gap: 2 }}>
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr 1fr' },
+        gap: 2,
+      }}
+    >
       {Array.from({ length: 6 }).map((_, i) => (
         <Card key={i}>
           <CardContent>

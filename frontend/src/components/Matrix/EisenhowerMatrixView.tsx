@@ -24,10 +24,7 @@ import {
   ArrowUpward as UrgentIcon,
   Star as ImportantIcon,
 } from '@mui/icons-material';
-import type {
-  TodoWithRelations,
-  EisenhowerQuadrant,
-} from '@productivity-app/shared';
+import type { TodoWithRelations, EisenhowerQuadrant } from '@productivity-app/shared';
 import {
   EISENHOWER_QUADRANTS,
   PRIORITY_LEVELS,
@@ -59,7 +56,9 @@ export function EisenhowerMatrixView() {
 
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   const fetchAllTodos = useCallback(async () => {
@@ -83,7 +82,9 @@ export function EisenhowerMatrixView() {
     }
   }, []);
 
-  useEffect(() => { fetchAllTodos(); }, [fetchAllTodos]);
+  useEffect(() => {
+    fetchAllTodos();
+  }, [fetchAllTodos]);
 
   const grouped = EisenhowerUtils.groupByQuadrant(todos);
   const counts = EisenhowerUtils.getQuadrantCounts(todos);
@@ -102,7 +103,8 @@ export function EisenhowerMatrixView() {
             Eisenhower Matrix
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Prioritize by urgency and importance — {totalTasks} task{totalTasks !== 1 ? 's' : ''} total
+            Prioritize by urgency and importance — {totalTasks} task{totalTasks !== 1 ? 's' : ''}{' '}
+            total
           </Typography>
         </Box>
         <Tooltip title="Refresh">
@@ -420,10 +422,7 @@ function MatrixLegend() {
   const allQuadrants = EisenhowerUtils.getAllQuadrants();
 
   return (
-    <Paper
-      variant="outlined"
-      sx={{ mt: 3, p: 2 }}
-    >
+    <Paper variant="outlined" sx={{ mt: 3, p: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <InfoIcon fontSize="small" color="action" />
         <Typography variant="subtitle2" fontWeight={600}>

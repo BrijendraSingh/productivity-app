@@ -1,16 +1,17 @@
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import type {
   CreateCategoryRequest,
   UpdateCategoryRequest,
   CategoryWithCount,
 } from '@productivity-app/shared';
 import { dbGet, dbAll, dbRun } from '../config/database';
+import { AppError } from '../utils/AppError';
 
 /**
  * GET /api/categories
  * Returns all categories for the authenticated user, each with a todo_count.
  */
-export async function getAll(req: Request, res: Response): Promise<void> {
+export async function getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
 
@@ -22,20 +23,20 @@ export async function getAll(req: Request, res: Response): Promise<void> {
        WHERE c.user_id = ?
        GROUP BY c.id
        ORDER BY c.name ASC`,
-      [userId],
+      [userId]
     );
 
     res.json({ success: true, data: categories });
   } catch (error) {
     console.error('Get categories error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
 /**
  * GET /api/categories/:id
  */
-export async function getById(req: Request, res: Response): Promise<void> {
+export async function getById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const categoryId = parseInt(req.params.id as string, 10);
@@ -47,18 +48,17 @@ export async function getById(req: Request, res: Response): Promise<void> {
        LEFT JOIN todos t ON t.category_id = c.id
        WHERE c.id = ? AND c.user_id = ?
        GROUP BY c.id`,
-      [categoryId, userId],
+      [categoryId, userId]
     );
 
     if (!category) {
-      res.status(404).json({ success: false, message: 'Category not found.' });
-      return;
+      return next(AppError.notFound('Category not found.'));
     }
 
     res.json({ success: true, data: category });
   } catch (error) {
     console.error('Get category error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -66,7 +66,7 @@ export async function getById(req: Request, res: Response): Promise<void> {
  * POST /api/categories
  * Enforces UNIQUE(user_id, name).
  */
-export async function create(req: Request, res: Response): Promise<void> {
+export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const body = req.body as CreateCategoryRequest;
@@ -74,19 +74,13 @@ export async function create(req: Request, res: Response): Promise<void> {
     const result = await dbRun(
       `INSERT INTO categories (user_id, name, color, icon, description)
        VALUES (?, ?, ?, ?, ?)`,
-      [
-        userId,
-        body.name,
-        body.color ?? '#1976d2',
-        body.icon ?? null,
-        body.description ?? null,
-      ],
+      [userId, body.name, body.color ?? '#1976d2', body.icon ?? null, body.description ?? null]
     );
 
     const category = await dbGet<CategoryWithCount>(
       `SELECT c.*, 0 as todo_count
        FROM categories c WHERE c.id = ?`,
-      [result.lastID],
+      [result.lastID]
     );
 
     res.status(201).json({
@@ -96,24 +90,17 @@ export async function create(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Create category error:', error);
-    if (
-      error instanceof Error &&
-      error.message.includes('UNIQUE constraint failed')
-    ) {
-      res.status(409).json({
-        success: false,
-        message: 'A category with this name already exists.',
-      });
-      return;
+    if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+      return next(AppError.conflict('A category with this name already exists.'));
     }
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
 /**
  * PUT /api/categories/:id
  */
-export async function update(req: Request, res: Response): Promise<void> {
+export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const categoryId = parseInt(req.params.id as string, 10);
@@ -121,12 +108,11 @@ export async function update(req: Request, res: Response): Promise<void> {
 
     const existing = await dbGet<Record<string, unknown>>(
       'SELECT * FROM categories WHERE id = ? AND user_id = ?',
-      [categoryId, userId],
+      [categoryId, userId]
     );
 
     if (!existing) {
-      res.status(404).json({ success: false, message: 'Category not found.' });
-      return;
+      return next(AppError.notFound('Category not found.'));
     }
 
     await dbRun(
@@ -144,7 +130,7 @@ export async function update(req: Request, res: Response): Promise<void> {
         body.description !== undefined ? body.description : existing.description,
         categoryId,
         userId,
-      ],
+      ]
     );
 
     const updated = await dbGet<CategoryWithCount>(
@@ -154,7 +140,7 @@ export async function update(req: Request, res: Response): Promise<void> {
        LEFT JOIN todos t ON t.category_id = c.id
        WHERE c.id = ?
        GROUP BY c.id`,
-      [categoryId],
+      [categoryId]
     );
 
     res.json({
@@ -164,41 +150,33 @@ export async function update(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Update category error:', error);
-    if (
-      error instanceof Error &&
-      error.message.includes('UNIQUE constraint failed')
-    ) {
-      res.status(409).json({
-        success: false,
-        message: 'A category with this name already exists.',
-      });
-      return;
+    if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+      return next(AppError.conflict('A category with this name already exists.'));
     }
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
 /**
  * DELETE /api/categories/:id
  */
-export async function remove(req: Request, res: Response): Promise<void> {
+export async function remove(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const categoryId = parseInt(req.params.id as string, 10);
 
-    const result = await dbRun(
-      'DELETE FROM categories WHERE id = ? AND user_id = ?',
-      [categoryId, userId],
-    );
+    const result = await dbRun('DELETE FROM categories WHERE id = ? AND user_id = ?', [
+      categoryId,
+      userId,
+    ]);
 
     if (result.changes === 0) {
-      res.status(404).json({ success: false, message: 'Category not found.' });
-      return;
+      return next(AppError.notFound('Category not found.'));
     }
 
     res.json({ success: true, message: 'Category deleted successfully.' });
   } catch (error) {
     console.error('Delete category error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }

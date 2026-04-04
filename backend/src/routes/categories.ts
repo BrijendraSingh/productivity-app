@@ -15,10 +15,8 @@ router.get('/', categoryController.getAll);
 // GET /api/categories/:id
 router.get(
   '/:id',
-  validate([
-    param('id').isInt({ min: 1 }).withMessage('Category ID must be a positive integer.'),
-  ]),
-  categoryController.getById,
+  validate([param('id').isInt({ min: 1 }).withMessage('Category ID must be a positive integer.')]),
+  categoryController.getById
 );
 
 // POST /api/categories
@@ -44,7 +42,7 @@ router.post(
       .isLength({ max: 500 })
       .withMessage('Description must be at most 500 characters.'),
   ]),
-  categoryController.create,
+  categoryController.create
 );
 
 // PUT /api/categories/:id
@@ -61,21 +59,17 @@ router.put(
       .optional()
       .matches(/^#[0-9a-fA-F]{6}$/)
       .withMessage('Color must be a valid hex color (e.g. #1976d2).'),
-    body('icon')
-      .optional({ values: 'null' }),
-    body('description')
-      .optional({ values: 'null' }),
+    body('icon').optional({ values: 'null' }),
+    body('description').optional({ values: 'null' }),
   ]),
-  categoryController.update,
+  categoryController.update
 );
 
 // DELETE /api/categories/:id
 router.delete(
   '/:id',
-  validate([
-    param('id').isInt({ min: 1 }).withMessage('Category ID must be a positive integer.'),
-  ]),
-  categoryController.remove,
+  validate([param('id').isInt({ min: 1 }).withMessage('Category ID must be a positive integer.')]),
+  categoryController.remove
 );
 
 export default router;

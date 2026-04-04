@@ -52,10 +52,7 @@ export function setOnUnauthorized(cb: () => void): void {
   onUnauthorized = cb;
 }
 
-async function request<T>(
-  url: string,
-  options: RequestInit = {},
-): Promise<ApiResponse<T>> {
+async function request<T>(url: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
   const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -101,14 +98,11 @@ export const authApi = {
       body: JSON.stringify(body),
     }),
 
-  logout: () =>
-    request<void>(API_ENDPOINTS.AUTH_LOGOUT, { method: 'POST' }),
+  logout: () => request<void>(API_ENDPOINTS.AUTH_LOGOUT, { method: 'POST' }),
 
-  verify: () =>
-    request<{ user: SafeUser }>(API_ENDPOINTS.AUTH_VERIFY),
+  verify: () => request<{ user: SafeUser }>(API_ENDPOINTS.AUTH_VERIFY),
 
-  profile: () =>
-    request<SafeUser>(API_ENDPOINTS.AUTH_PROFILE),
+  profile: () => request<SafeUser>(API_ENDPOINTS.AUTH_PROFILE),
 };
 
 // ─── Todos ────────────────────────────────────────────────────────────────────
@@ -119,8 +113,7 @@ export const todosApi = {
     return request<TodoWithRelations[]>(`${API_ENDPOINTS.TODOS}${qs}`);
   },
 
-  get: (id: number) =>
-    request<TodoWithRelations>(API_ENDPOINTS.TODO_BY_ID(id)),
+  get: (id: number) => request<TodoWithRelations>(API_ENDPOINTS.TODO_BY_ID(id)),
 
   create: (body: CreateTodoRequest) =>
     request<Todo>(API_ENDPOINTS.TODOS, {
@@ -134,18 +127,15 @@ export const todosApi = {
       body: JSON.stringify(body),
     }),
 
-  delete: (id: number) =>
-    request<void>(API_ENDPOINTS.TODO_BY_ID(id), { method: 'DELETE' }),
+  delete: (id: number) => request<void>(API_ENDPOINTS.TODO_BY_ID(id), { method: 'DELETE' }),
 };
 
 // ─── Categories ───────────────────────────────────────────────────────────────
 
 export const categoriesApi = {
-  list: () =>
-    request<CategoryWithCount[]>(API_ENDPOINTS.CATEGORIES),
+  list: () => request<CategoryWithCount[]>(API_ENDPOINTS.CATEGORIES),
 
-  get: (id: number) =>
-    request<Category>(API_ENDPOINTS.CATEGORY_BY_ID(id)),
+  get: (id: number) => request<Category>(API_ENDPOINTS.CATEGORY_BY_ID(id)),
 
   create: (body: CreateCategoryRequest) =>
     request<Category>(API_ENDPOINTS.CATEGORIES, {
@@ -159,8 +149,7 @@ export const categoriesApi = {
       body: JSON.stringify(body),
     }),
 
-  delete: (id: number) =>
-    request<void>(API_ENDPOINTS.CATEGORY_BY_ID(id), { method: 'DELETE' }),
+  delete: (id: number) => request<void>(API_ENDPOINTS.CATEGORY_BY_ID(id), { method: 'DELETE' }),
 };
 
 // ─── Tags ─────────────────────────────────────────────────────────────────────
@@ -171,11 +160,9 @@ export const tagsApi = {
     return request<TagWithCount[]>(`${API_ENDPOINTS.TAGS}${qs}`);
   },
 
-  get: (id: number) =>
-    request<Tag>(API_ENDPOINTS.TAG_BY_ID(id)),
+  get: (id: number) => request<Tag>(API_ENDPOINTS.TAG_BY_ID(id)),
 
-  getTodos: (id: number) =>
-    request<TodoWithRelations[]>(API_ENDPOINTS.TAG_TODOS(id)),
+  getTodos: (id: number) => request<TodoWithRelations[]>(API_ENDPOINTS.TAG_TODOS(id)),
 
   create: (body: CreateTagRequest) =>
     request<Tag>(API_ENDPOINTS.TAGS, {
@@ -189,8 +176,7 @@ export const tagsApi = {
       body: JSON.stringify(body),
     }),
 
-  delete: (id: number) =>
-    request<void>(API_ENDPOINTS.TAG_BY_ID(id), { method: 'DELETE' }),
+  delete: (id: number) => request<void>(API_ENDPOINTS.TAG_BY_ID(id), { method: 'DELETE' }),
 };
 
 // ─── Diary ────────────────────────────────────────────────────────────────────
@@ -201,8 +187,7 @@ export const diaryApi = {
     return request<DiaryEntry[]>(`${API_ENDPOINTS.DIARY}${qs}`);
   },
 
-  get: (date: string) =>
-    request<DiaryEntry>(API_ENDPOINTS.DIARY_BY_DATE(date)),
+  get: (date: string) => request<DiaryEntry>(API_ENDPOINTS.DIARY_BY_DATE(date)),
 
   upsert: (date: string, body: CreateDiaryEntryRequest) =>
     request<DiaryEntry>(API_ENDPOINTS.DIARY_BY_DATE(date), {
@@ -210,8 +195,7 @@ export const diaryApi = {
       body: JSON.stringify(body),
     }),
 
-  delete: (date: string) =>
-    request<void>(API_ENDPOINTS.DIARY_BY_DATE(date), { method: 'DELETE' }),
+  delete: (date: string) => request<void>(API_ENDPOINTS.DIARY_BY_DATE(date), { method: 'DELETE' }),
 };
 
 // ─── Bullet Journal ───────────────────────────────────────────────────────────
@@ -254,8 +238,7 @@ export const blogApi = {
     return request<BlogPostWithRelations[]>(`${API_ENDPOINTS.BLOG}${qs}`);
   },
 
-  get: (id: number) =>
-    request<BlogPostWithRelations>(API_ENDPOINTS.BLOG_BY_ID(id)),
+  get: (id: number) => request<BlogPostWithRelations>(API_ENDPOINTS.BLOG_BY_ID(id)),
 
   create: (body: CreateBlogPostRequest) =>
     request<BlogPost>(API_ENDPOINTS.BLOG, {
@@ -269,21 +252,17 @@ export const blogApi = {
       body: JSON.stringify(body),
     }),
 
-  delete: (id: number) =>
-    request<void>(API_ENDPOINTS.BLOG_BY_ID(id), { method: 'DELETE' }),
+  delete: (id: number) => request<void>(API_ENDPOINTS.BLOG_BY_ID(id), { method: 'DELETE' }),
 
-  publish: (id: number) =>
-    request<BlogPost>(API_ENDPOINTS.BLOG_PUBLISH(id), { method: 'PATCH' }),
+  publish: (id: number) => request<BlogPost>(API_ENDPOINTS.BLOG_PUBLISH(id), { method: 'PATCH' }),
 };
 
 // ─── Blog Categories ──────────────────────────────────────────────────────
 
 export const blogCategoriesApi = {
-  list: () =>
-    request<(BlogCategory & { post_count: number })[]>(API_ENDPOINTS.BLOG_CATEGORIES),
+  list: () => request<(BlogCategory & { post_count: number })[]>(API_ENDPOINTS.BLOG_CATEGORIES),
 
-  get: (id: number) =>
-    request<BlogCategory>(API_ENDPOINTS.BLOG_CATEGORY_BY_ID(id)),
+  get: (id: number) => request<BlogCategory>(API_ENDPOINTS.BLOG_CATEGORY_BY_ID(id)),
 
   create: (body: CreateBlogCategoryRequest) =>
     request<BlogCategory>(API_ENDPOINTS.BLOG_CATEGORIES, {
@@ -320,8 +299,7 @@ export const writingSessionsApi = {
 // ─── Analytics ────────────────────────────────────────────────────────────────
 
 export const analyticsApi = {
-  dashboard: () =>
-    request<DashboardStats>(API_ENDPOINTS.ANALYTICS_DASHBOARD),
+  dashboard: () => request<DashboardStats>(API_ENDPOINTS.ANALYTICS_DASHBOARD),
 
   matrix: (params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';

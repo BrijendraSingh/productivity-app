@@ -63,13 +63,7 @@ const INITIAL_STATE = {
   tag_ids: [] as number[],
 };
 
-export function AddTodoDialog({
-  open,
-  onClose,
-  onSubmit,
-  categories,
-  tags,
-}: AddTodoDialogProps) {
+export function AddTodoDialog({ open, onClose, onSubmit, categories, tags }: AddTodoDialogProps) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [form, setForm] = useState(INITIAL_STATE);
@@ -78,7 +72,7 @@ export function AddTodoDialog({
 
   const quadrant: EisenhowerQuadrant = useMemo(
     () => EisenhowerUtils.calculateQuadrant(form.urgency_level, form.importance_level),
-    [form.urgency_level, form.importance_level],
+    [form.urgency_level, form.importance_level]
   );
 
   const quadrantInfo = EISENHOWER_QUADRANTS[quadrant];
@@ -230,7 +224,9 @@ export function AddTodoDialog({
             <Select
               value={form.energy_required}
               label="Energy Level"
-              onChange={(e) => setForm({ ...form, energy_required: e.target.value as EnergyLevel | '' })}
+              onChange={(e) =>
+                setForm({ ...form, energy_required: e.target.value as EnergyLevel | '' })
+              }
             >
               <MenuItem value="">
                 <em>None</em>
@@ -270,7 +266,9 @@ export function AddTodoDialog({
               {BULLET_SYMBOLS.map((b) => (
                 <MenuItem key={b.symbol} value={b.symbol}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: 18, width: 24, textAlign: 'center' }}>
+                    <Typography
+                      sx={{ fontWeight: 700, fontSize: 18, width: 24, textAlign: 'center' }}
+                    >
                       {b.symbol}
                     </Typography>
                     {b.label}
@@ -288,7 +286,9 @@ export function AddTodoDialog({
           getOptionLabel={(option) => option.name}
           value={selectedTags}
           onChange={(_, newValue) => setForm({ ...form, tag_ids: newValue.map((t) => t.id) })}
-          renderInput={(params) => <TextField {...params} label="Tags" placeholder="Select tags..." />}
+          renderInput={(params) => (
+            <TextField {...params} label="Tags" placeholder="Select tags..." />
+          )}
           renderTags={(value, getTagProps) =>
             value.map((tag, index) => {
               const { key, ...chipProps } = getTagProps({ index });
@@ -317,10 +317,7 @@ export function AddTodoDialog({
         />
 
         {/* ─── Urgency / Importance Sliders + Quadrant Preview ──────────── */}
-        <Paper
-          variant="outlined"
-          sx={{ p: 2.5, borderRadius: 2 }}
-        >
+        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
           <Typography variant="subtitle1" fontWeight={600} gutterBottom>
             Eisenhower Matrix Placement
           </Typography>

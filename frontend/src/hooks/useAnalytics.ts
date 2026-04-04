@@ -43,7 +43,9 @@ export function useAnalytics(): UseAnalyticsReturn {
 
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   const fetchAll = useCallback(async () => {
@@ -67,8 +69,7 @@ export function useAnalytics(): UseAnalyticsReturn {
       if (writingRes.success) setWriting(writingRes.data ?? null);
       if (diaryRes.success) setDiary(diaryRes.data ?? null);
 
-      const failed = [matrixRes, trendsRes, writingRes, diaryRes]
-        .filter((r) => !r.success);
+      const failed = [matrixRes, trendsRes, writingRes, diaryRes].filter((r) => !r.success);
       if (failed.length === 4) {
         setError('Failed to load analytics data');
       }
@@ -81,7 +82,9 @@ export function useAnalytics(): UseAnalyticsReturn {
     }
   }, [timeRange]);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   return {
     matrix,

@@ -23,9 +23,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 function getInitialMode(): ThemeMode {
   const stored = localStorage.getItem(APP_CONFIG.THEME_STORAGE_KEY);
   if (stored === 'light' || stored === 'dark') return stored;
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
 export function AppThemeProvider({ children }: { children: ReactNode }) {
@@ -35,12 +33,11 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(APP_CONFIG.THEME_STORAGE_KEY, mode);
   }, [mode]);
 
-  const toggleTheme = () =>
-    setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
+  const toggleTheme = () => setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
 
   const value = useMemo<ThemeContextValue>(
     () => ({ mode, toggleTheme, isDark: mode === 'dark' }),
-    [mode],
+    [mode]
   );
 
   const theme = mode === 'dark' ? darkTheme : lightTheme;

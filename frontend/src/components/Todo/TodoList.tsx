@@ -51,7 +51,13 @@ interface TodoListProps {
   onDelete: (id: number) => Promise<boolean>;
 }
 
-const STATUS_OPTIONS: TodoStatus[] = ['pending', 'in_progress', 'completed', 'cancelled', 'deferred'];
+const STATUS_OPTIONS: TodoStatus[] = [
+  'pending',
+  'in_progress',
+  'completed',
+  'cancelled',
+  'deferred',
+];
 
 export function TodoList({
   todos,
@@ -123,7 +129,10 @@ export function TodoList({
         open={Boolean(menuAnchor)}
         onClose={() => setMenuAnchor(null)}
       >
-        <Typography variant="caption" sx={{ px: 2, py: 0.5, color: 'text.secondary', display: 'block' }}>
+        <Typography
+          variant="caption"
+          sx={{ px: 2, py: 0.5, color: 'text.secondary', display: 'block' }}
+        >
           Set Status
         </Typography>
         {STATUS_OPTIONS.map((status) => {
@@ -269,7 +278,9 @@ function TodoCard({ todo, highlighted, onToggleComplete, onOpenMenu, onDelete }:
 
               {/* Priority */}
               <Chip
-                icon={<FlagIcon sx={{ fontSize: 14, color: `${priorityConfig.color} !important` }} />}
+                icon={
+                  <FlagIcon sx={{ fontSize: 14, color: `${priorityConfig.color} !important` }} />
+                }
                 label={priorityConfig.label}
                 size="small"
                 sx={{
@@ -314,7 +325,11 @@ function TodoCard({ todo, highlighted, onToggleComplete, onOpenMenu, onDelete }:
               {/* Due date */}
               {dueDate && (
                 <Chip
-                  icon={<ScheduleIcon sx={{ fontSize: 14, color: isOverdue ? '#f44336 !important' : undefined }} />}
+                  icon={
+                    <ScheduleIcon
+                      sx={{ fontSize: 14, color: isOverdue ? '#f44336 !important' : undefined }}
+                    />
+                  }
                   label={dueDate.toLocaleDateString()}
                   size="small"
                   sx={{
@@ -345,7 +360,12 @@ function TodoCard({ todo, highlighted, onToggleComplete, onOpenMenu, onDelete }:
                   icon={<EnergyIcon sx={{ fontSize: 14 }} />}
                   label={todo.energy_required}
                   size="small"
-                  sx={{ fontWeight: 500, fontSize: '0.7rem', height: 22, textTransform: 'capitalize' }}
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: '0.7rem',
+                    height: 22,
+                    textTransform: 'capitalize',
+                  }}
                 />
               )}
 

@@ -1,40 +1,39 @@
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import type {
   CreateWritingSessionRequest,
   UpdateWritingSessionRequest,
   WritingSession,
 } from '@productivity-app/shared';
 import { dbGet, dbRun } from '../config/database';
+import { AppError } from '../utils/AppError';
 
 /**
  * POST /api/writing-sessions
  * Start a new writing session. Auto-sets start_time and user_id.
  */
-export async function startSession(req: Request, res: Response): Promise<void> {
+export async function startSession(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const body = req.body as CreateWritingSessionRequest;
 
     const post = await dbGet<{ id: number }>(
       'SELECT id FROM blog_posts WHERE id = ? AND user_id = ?',
-      [body.blog_post_id, userId],
+      [body.blog_post_id, userId]
     );
 
     if (!post) {
-      res.status(404).json({ success: false, message: 'Blog post not found.' });
-      return;
+      return next(AppError.notFound('Blog post not found.'));
     }
 
     const result = await dbRun(
       `INSERT INTO writing_sessions (user_id, blog_post_id, start_time, session_type)
        VALUES (?, ?, datetime('now'), 'writing')`,
-      [userId, body.blog_post_id],
+      [userId, body.blog_post_id]
     );
 
-    const session = await dbGet<WritingSession>(
-      'SELECT * FROM writing_sessions WHERE id = ?',
-      [result.lastID],
-    );
+    const session = await dbGet<WritingSession>('SELECT * FROM writing_sessions WHERE id = ?', [
+      result.lastID,
+    ]);
 
     res.status(201).json({
       success: true,
@@ -43,7 +42,7 @@ export async function startSession(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Start writing session error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -51,7 +50,7 @@ export async function startSession(req: Request, res: Response): Promise<void> {
  * PATCH /api/writing-sessions/:id
  * End a writing session. Auto-sets end_time, computes productivity_score.
  */
-export async function endSession(req: Request, res: Response): Promise<void> {
+export async function endSession(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const sessionId = parseInt(req.params.id as string, 10);
@@ -59,20 +58,17 @@ export async function endSession(req: Request, res: Response): Promise<void> {
 
     const existing = await dbGet<WritingSession>(
       'SELECT * FROM writing_sessions WHERE id = ? AND user_id = ?',
-      [sessionId, userId],
+      [sessionId, userId]
     );
 
     if (!existing) {
-      res.status(404).json({ success: false, message: 'Writing session not found.' });
-      return;
+      return next(AppError.notFound('Writing session not found.'));
     }
 
     if (existing.end_time) {
-      res.status(400).json({ success: false, message: 'Session already ended.' });
-      return;
+      return next(AppError.badRequest('Session already ended.'));
     }
 
-    // Compute duration in minutes for productivity score
     const startTime = existing.start_time ? new Date(existing.start_time).getTime() : Date.now();
     const endTime = Date.now();
     const durationMinutes = Math.max(1, (endTime - startTime) / 60000);
@@ -86,19 +82,12 @@ export async function endSession(req: Request, res: Response): Promise<void> {
         productivity_score = ?,
         notes = ?
        WHERE id = ? AND user_id = ?`,
-      [
-        wordsWritten,
-        productivityScore,
-        body.notes ?? existing.notes,
-        sessionId,
-        userId,
-      ],
+      [wordsWritten, productivityScore, body.notes ?? existing.notes, sessionId, userId]
     );
 
-    const updated = await dbGet<WritingSession>(
-      'SELECT * FROM writing_sessions WHERE id = ?',
-      [sessionId],
-    );
+    const updated = await dbGet<WritingSession>('SELECT * FROM writing_sessions WHERE id = ?', [
+      sessionId,
+    ]);
 
     res.json({
       success: true,
@@ -107,6 +96,6 @@ export async function endSession(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('End writing session error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }

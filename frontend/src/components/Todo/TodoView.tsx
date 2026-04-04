@@ -25,11 +25,7 @@ import {
   PlayArrow as InProgressIcon,
   Assignment as TotalIcon,
 } from '@mui/icons-material';
-import type {
-  TodoStatus,
-  Priority,
-  EisenhowerQuadrant,
-} from '@productivity-app/shared';
+import type { TodoStatus, Priority, EisenhowerQuadrant } from '@productivity-app/shared';
 import {
   EISENHOWER_QUADRANTS,
   PRIORITY_LEVELS,
@@ -106,7 +102,7 @@ export function TodoView() {
       }, 350);
       setSearchTimeout(timeout);
     },
-    [setFilters, searchTimeout],
+    [setFilters, searchTimeout]
   );
 
   const hasActiveFilters =
@@ -210,9 +206,7 @@ export function TodoView() {
                   key={s.value}
                   label={s.label}
                   size="small"
-                  onClick={() =>
-                    setFilters({ status: filters.status === s.value ? '' : s.value })
-                  }
+                  onClick={() => setFilters({ status: filters.status === s.value ? '' : s.value })}
                   sx={{
                     fontWeight: 500,
                     ...(filters.status === s.value
@@ -360,15 +354,7 @@ export function TodoView() {
 
 // ─── Small sub-components ─────────────────────────────────────────────────────
 
-function StatChip({
-  icon,
-  label,
-  color,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  color: string;
-}) {
+function StatChip({ icon, label, color }: { icon: React.ReactNode; label: string; color: string }) {
   return (
     <Chip
       icon={<>{icon}</>}
@@ -385,16 +371,14 @@ function StatChip({
   );
 }
 
-function FilterSection({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function FilterSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <Box sx={{ mb: 1.5 }}>
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}
+      >
         {label}
       </Typography>
       <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>

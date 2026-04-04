@@ -15,7 +15,7 @@ router.get(
   validate([
     param('id').isInt({ min: 1 }).withMessage('Blog category ID must be a positive integer.'),
   ]),
-  blogCategoryController.getById,
+  blogCategoryController.getById
 );
 
 router.post(
@@ -49,7 +49,7 @@ router.post(
       .isInt({ min: 1 })
       .withMessage('Parent ID must be a positive integer.'),
   ]),
-  blogCategoryController.create,
+  blogCategoryController.create
 );
 
 router.put(
@@ -66,16 +66,12 @@ router.put(
       .trim()
       .isLength({ min: 1, max: 150 })
       .withMessage('Slug must be 1-150 characters.'),
-    body('description')
-      .optional({ values: 'null' }),
-    body('color')
-      .optional({ values: 'null' }),
-    body('icon')
-      .optional({ values: 'null' }),
-    body('parent_id')
-      .optional({ values: 'null' }),
+    body('description').optional({ values: 'null' }),
+    body('color').optional({ values: 'null' }),
+    body('icon').optional({ values: 'null' }),
+    body('parent_id').optional({ values: 'null' }),
   ]),
-  blogCategoryController.update,
+  blogCategoryController.update
 );
 
 router.delete(
@@ -83,7 +79,7 @@ router.delete(
   validate([
     param('id').isInt({ min: 1 }).withMessage('Blog category ID must be a positive integer.'),
   ]),
-  blogCategoryController.remove,
+  blogCategoryController.remove
 );
 
 export default router;

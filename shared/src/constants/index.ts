@@ -210,8 +210,18 @@ export const DEFAULT_CATEGORIES = [
   { name: 'Work', color: '#1976d2', icon: 'work', description: 'Work-related tasks and projects' },
   { name: 'Personal', color: '#9c27b0', icon: 'person', description: 'Personal tasks and errands' },
   { name: 'Health', color: '#4caf50', icon: 'favorite', description: 'Health and fitness goals' },
-  { name: 'Learning', color: '#ff9800', icon: 'school', description: 'Education and skill development' },
-  { name: 'Finance', color: '#607d8b', icon: 'account_balance', description: 'Financial tasks and planning' },
+  {
+    name: 'Learning',
+    color: '#ff9800',
+    icon: 'school',
+    description: 'Education and skill development',
+  },
+  {
+    name: 'Finance',
+    color: '#607d8b',
+    icon: 'account_balance',
+    description: 'Financial tasks and planning',
+  },
 ] as const;
 
 // ─── Default Tags ────────────────────────────────────────────────────────────

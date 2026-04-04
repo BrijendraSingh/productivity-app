@@ -76,7 +76,9 @@ export function useBlog(): UseBlogReturn {
 
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   // ─── Fetch posts list ─────────────────────────────────────────────────────
@@ -123,8 +125,12 @@ export function useBlog(): UseBlogReturn {
     }
   }, []);
 
-  useEffect(() => { fetchPosts(); }, [fetchPosts]);
-  useEffect(() => { fetchTags(); }, [fetchTags]);
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+  useEffect(() => {
+    fetchTags();
+  }, [fetchTags]);
 
   // ─── Fetch single post ────────────────────────────────────────────────────
 
@@ -166,83 +172,99 @@ export function useBlog(): UseBlogReturn {
 
   // ─── CRUD ─────────────────────────────────────────────────────────────────
 
-  const createPost = useCallback(async (data: CreateBlogPostRequest): Promise<number | false> => {
-    setSaving(true);
-    try {
-      const response = await blogApi.create(data);
-      if (response.success && response.data) {
-        if (mountedRef.current) await fetchPosts();
-        return response.data.id;
-      }
-      if (mountedRef.current) setError(response.message || 'Failed to create post');
-      return false;
-    } catch (err) {
-      if (mountedRef.current) setError(err instanceof Error ? err.message : 'Failed to create post');
-      return false;
-    } finally {
-      if (mountedRef.current) setSaving(false);
-    }
-  }, [fetchPosts]);
-
-  const updatePost = useCallback(async (id: number, data: UpdateBlogPostRequest): Promise<boolean> => {
-    setSaving(true);
-    try {
-      const response = await blogApi.update(id, data);
-      if (response.success) {
-        if (mountedRef.current) {
-          await fetchPost(id);
-          await fetchPosts();
+  const createPost = useCallback(
+    async (data: CreateBlogPostRequest): Promise<number | false> => {
+      setSaving(true);
+      try {
+        const response = await blogApi.create(data);
+        if (response.success && response.data) {
+          if (mountedRef.current) await fetchPosts();
+          return response.data.id;
         }
-        return true;
+        if (mountedRef.current) setError(response.message || 'Failed to create post');
+        return false;
+      } catch (err) {
+        if (mountedRef.current)
+          setError(err instanceof Error ? err.message : 'Failed to create post');
+        return false;
+      } finally {
+        if (mountedRef.current) setSaving(false);
       }
-      if (mountedRef.current) setError(response.message || 'Failed to update post');
-      return false;
-    } catch (err) {
-      if (mountedRef.current) setError(err instanceof Error ? err.message : 'Failed to update post');
-      return false;
-    } finally {
-      if (mountedRef.current) setSaving(false);
-    }
-  }, [fetchPosts, fetchPost]);
+    },
+    [fetchPosts]
+  );
 
-  const deletePost = useCallback(async (id: number): Promise<boolean> => {
-    try {
-      const response = await blogApi.delete(id);
-      if (response.success) {
-        if (mountedRef.current) {
-          setCurrentPost(null);
-          await fetchPosts();
+  const updatePost = useCallback(
+    async (id: number, data: UpdateBlogPostRequest): Promise<boolean> => {
+      setSaving(true);
+      try {
+        const response = await blogApi.update(id, data);
+        if (response.success) {
+          if (mountedRef.current) {
+            await fetchPost(id);
+            await fetchPosts();
+          }
+          return true;
         }
-        return true;
+        if (mountedRef.current) setError(response.message || 'Failed to update post');
+        return false;
+      } catch (err) {
+        if (mountedRef.current)
+          setError(err instanceof Error ? err.message : 'Failed to update post');
+        return false;
+      } finally {
+        if (mountedRef.current) setSaving(false);
       }
-      if (mountedRef.current) setError(response.message || 'Failed to delete post');
-      return false;
-    } catch (err) {
-      if (mountedRef.current) setError(err instanceof Error ? err.message : 'Failed to delete post');
-      return false;
-    }
-  }, [fetchPosts]);
+    },
+    [fetchPosts, fetchPost]
+  );
 
-  const publishPost = useCallback(async (id: number): Promise<boolean> => {
-    setSaving(true);
-    try {
-      const response = await blogApi.publish(id);
-      if (response.success) {
-        if (mountedRef.current) {
-          await fetchPost(id);
-          await fetchPosts();
+  const deletePost = useCallback(
+    async (id: number): Promise<boolean> => {
+      try {
+        const response = await blogApi.delete(id);
+        if (response.success) {
+          if (mountedRef.current) {
+            setCurrentPost(null);
+            await fetchPosts();
+          }
+          return true;
         }
-        return true;
+        if (mountedRef.current) setError(response.message || 'Failed to delete post');
+        return false;
+      } catch (err) {
+        if (mountedRef.current)
+          setError(err instanceof Error ? err.message : 'Failed to delete post');
+        return false;
       }
-      if (mountedRef.current) setError(response.message || 'Failed to publish post');
-      return false;
-    } catch (err) {
-      if (mountedRef.current) setError(err instanceof Error ? err.message : 'Failed to publish post');
-      return false;
-    } finally {
-      if (mountedRef.current) setSaving(false);
-    }
-  }, [fetchPosts, fetchPost]);
+    },
+    [fetchPosts]
+  );
+
+  const publishPost = useCallback(
+    async (id: number): Promise<boolean> => {
+      setSaving(true);
+      try {
+        const response = await blogApi.publish(id);
+        if (response.success) {
+          if (mountedRef.current) {
+            await fetchPost(id);
+            await fetchPosts();
+          }
+          return true;
+        }
+        if (mountedRef.current) setError(response.message || 'Failed to publish post');
+        return false;
+      } catch (err) {
+        if (mountedRef.current)
+          setError(err instanceof Error ? err.message : 'Failed to publish post');
+        return false;
+      } finally {
+        if (mountedRef.current) setSaving(false);
+      }
+    },
+    [fetchPosts, fetchPost]
+  );
 
   // ─── Stats ────────────────────────────────────────────────────────────────
 

@@ -18,7 +18,7 @@ declare global {
 export async function authMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): Promise<void> {
   try {
     const authHeader = req.headers.authorization;
@@ -45,7 +45,7 @@ export async function authMiddleware(
       `SELECT id, username, email, is_active, profile_data, preferences, created_at, updated_at
        FROM users
        WHERE api_token = ? AND is_active = 1`,
-      [token],
+      [token]
     );
 
     if (!user) {

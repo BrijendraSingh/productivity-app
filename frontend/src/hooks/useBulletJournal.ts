@@ -46,7 +46,9 @@ export function useBulletJournal(): UseBulletJournalReturn {
 
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   const dateString = format(selectedDate, 'yyyy-MM-dd');
@@ -68,7 +70,7 @@ export function useBulletJournal(): UseBulletJournalReturn {
       if (response.success && response.data) {
         setLogs(response.data);
         const match = response.data.find(
-          (log) => log.date === dateString && log.type === activeTab,
+          (log) => log.date === dateString && log.type === activeTab
         );
         setCurrentLog(match ?? null);
       } else {
@@ -98,8 +100,12 @@ export function useBulletJournal(): UseBulletJournalReturn {
     }
   }, [dateString]);
 
-  useEffect(() => { fetchLogs(); }, [fetchLogs]);
-  useEffect(() => { fetchEvents(); }, [fetchEvents]);
+  useEffect(() => {
+    fetchLogs();
+  }, [fetchLogs]);
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   // ─── Navigation ───────────────────────────────────────────────────────────
 
@@ -113,47 +119,53 @@ export function useBulletJournal(): UseBulletJournalReturn {
 
   // ─── CRUD ─────────────────────────────────────────────────────────────────
 
-  const upsertLog = useCallback(async (content: string): Promise<boolean> => {
-    setSaving(true);
-    try {
-      const body: CreateBulletLogRequest = { content };
-      const response = await bulletApi.upsertLog(dateString, activeTab, body);
-      if (response.success) {
-        if (mountedRef.current) {
-          setCurrentLog(response.data ?? null);
-          await fetchLogs();
+  const upsertLog = useCallback(
+    async (content: string): Promise<boolean> => {
+      setSaving(true);
+      try {
+        const body: CreateBulletLogRequest = { content };
+        const response = await bulletApi.upsertLog(dateString, activeTab, body);
+        if (response.success) {
+          if (mountedRef.current) {
+            setCurrentLog(response.data ?? null);
+            await fetchLogs();
+          }
+          return true;
         }
-        return true;
+        setError(response.message || 'Failed to save bullet log');
+        return false;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to save bullet log');
+        return false;
+      } finally {
+        if (mountedRef.current) setSaving(false);
       }
-      setError(response.message || 'Failed to save bullet log');
-      return false;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save bullet log');
-      return false;
-    } finally {
-      if (mountedRef.current) setSaving(false);
-    }
-  }, [dateString, activeTab, fetchLogs]);
+    },
+    [dateString, activeTab, fetchLogs]
+  );
 
-  const createEvent = useCallback(async (data: CreateEventRequest): Promise<boolean> => {
-    setSaving(true);
-    try {
-      const response = await bulletApi.createEvent(data);
-      if (response.success) {
-        if (mountedRef.current) {
-          await fetchEvents();
+  const createEvent = useCallback(
+    async (data: CreateEventRequest): Promise<boolean> => {
+      setSaving(true);
+      try {
+        const response = await bulletApi.createEvent(data);
+        if (response.success) {
+          if (mountedRef.current) {
+            await fetchEvents();
+          }
+          return true;
         }
-        return true;
+        setError(response.message || 'Failed to create event');
+        return false;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create event');
+        return false;
+      } finally {
+        if (mountedRef.current) setSaving(false);
       }
-      setError(response.message || 'Failed to create event');
-      return false;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create event');
-      return false;
-    } finally {
-      if (mountedRef.current) setSaving(false);
-    }
-  }, [fetchEvents]);
+    },
+    [fetchEvents]
+  );
 
   const updateTodoSymbol = useCallback(async (id: number, symbol: string): Promise<boolean> => {
     try {

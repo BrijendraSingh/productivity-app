@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import type {
   BulletLog,
   CreateBulletLogRequest,
@@ -6,12 +6,13 @@ import type {
 } from '@productivity-app/shared';
 import type { Event as AppEvent } from '@productivity-app/shared';
 import { dbGet, dbAll, dbRun } from '../config/database';
+import { AppError } from '../utils/AppError';
 
 /**
  * GET /api/bullet/logs
  * Supports: ?date, ?type
  */
-export async function getLogs(req: Request, res: Response): Promise<void> {
+export async function getLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const { date, type } = req.query;
@@ -34,13 +35,13 @@ export async function getLogs(req: Request, res: Response): Promise<void> {
       `SELECT * FROM bullet_logs
        WHERE ${whereClause}
        ORDER BY date DESC, created_at DESC`,
-      params,
+      params
     );
 
     res.json({ success: true, data: logs });
   } catch (error) {
     console.error('Get bullet logs error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -48,7 +49,7 @@ export async function getLogs(req: Request, res: Response): Promise<void> {
  * PUT /api/bullet/logs/:date/:type
  * Upsert — creates log if none exists for date+type, updates otherwise.
  */
-export async function upsertLog(req: Request, res: Response): Promise<void> {
+export async function upsertLog(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const { date, type } = req.params;
@@ -56,7 +57,7 @@ export async function upsertLog(req: Request, res: Response): Promise<void> {
 
     const existing = await dbGet<BulletLog>(
       'SELECT * FROM bullet_logs WHERE user_id = ? AND date = ? AND type = ?',
-      [userId, date, type],
+      [userId, date, type]
     );
 
     if (existing) {
@@ -65,24 +66,19 @@ export async function upsertLog(req: Request, res: Response): Promise<void> {
           content = ?,
           updated_at = CURRENT_TIMESTAMP
          WHERE user_id = ? AND date = ? AND type = ?`,
-        [
-          body.content !== undefined ? body.content : existing.content,
-          userId,
-          date,
-          type,
-        ],
+        [body.content !== undefined ? body.content : existing.content, userId, date, type]
       );
     } else {
       await dbRun(
         `INSERT INTO bullet_logs (user_id, date, type, content)
          VALUES (?, ?, ?, ?)`,
-        [userId, date, type, body.content ?? null],
+        [userId, date, type, body.content ?? null]
       );
     }
 
     const log = await dbGet<BulletLog>(
       'SELECT * FROM bullet_logs WHERE user_id = ? AND date = ? AND type = ?',
-      [userId, date, type],
+      [userId, date, type]
     );
 
     const statusCode = existing ? 200 : 201;
@@ -95,7 +91,7 @@ export async function upsertLog(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Upsert bullet log error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -103,7 +99,7 @@ export async function upsertLog(req: Request, res: Response): Promise<void> {
  * GET /api/bullet/events
  * Supports: ?date, ?date_from, ?date_to
  */
-export async function getEvents(req: Request, res: Response): Promise<void> {
+export async function getEvents(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const { date, date_from, date_to } = req.query;
@@ -130,20 +126,20 @@ export async function getEvents(req: Request, res: Response): Promise<void> {
       `SELECT * FROM events
        WHERE ${whereClause}
        ORDER BY event_date ASC, event_time ASC`,
-      params,
+      params
     );
 
     res.json({ success: true, data: events });
   } catch (error) {
     console.error('Get bullet events error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
 /**
  * POST /api/bullet/events
  */
-export async function createEvent(req: Request, res: Response): Promise<void> {
+export async function createEvent(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = req.user!.id;
     const body = req.body as CreateEventRequest;
@@ -162,13 +158,10 @@ export async function createEvent(req: Request, res: Response): Promise<void> {
         body.location ?? null,
         body.category_id ?? null,
         body.bullet_symbol ?? '○',
-      ],
+      ]
     );
 
-    const event = await dbGet<AppEvent>(
-      'SELECT * FROM events WHERE id = ?',
-      [result.lastID],
-    );
+    const event = await dbGet<AppEvent>('SELECT * FROM events WHERE id = ?', [result.lastID]);
 
     res.status(201).json({
       success: true,
@@ -177,7 +170,7 @@ export async function createEvent(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Create bullet event error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }
 
@@ -185,7 +178,11 @@ export async function createEvent(req: Request, res: Response): Promise<void> {
  * PATCH /api/bullet/todos/:id/symbol
  * Updates the bullet_symbol on a todo.
  */
-export async function updateTodoSymbol(req: Request, res: Response): Promise<void> {
+export async function updateTodoSymbol(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
   try {
     const userId = req.user!.id;
     const todoId = parseInt(req.params.id as string, 10);
@@ -193,24 +190,22 @@ export async function updateTodoSymbol(req: Request, res: Response): Promise<voi
 
     const existing = await dbGet<{ id: number }>(
       'SELECT id FROM todos WHERE id = ? AND user_id = ?',
-      [todoId, userId],
+      [todoId, userId]
     );
 
     if (!existing) {
-      res.status(404).json({ success: false, message: 'Todo not found.' });
-      return;
+      return next(AppError.notFound('Todo not found.'));
     }
 
     await dbRun(
       `UPDATE todos SET bullet_symbol = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ? AND user_id = ?`,
-      [bullet_symbol, todoId, userId],
+      [bullet_symbol, todoId, userId]
     );
 
-    const updated = await dbGet<Record<string, unknown>>(
-      'SELECT * FROM todos WHERE id = ?',
-      [todoId],
-    );
+    const updated = await dbGet<Record<string, unknown>>('SELECT * FROM todos WHERE id = ?', [
+      todoId,
+    ]);
 
     res.json({
       success: true,
@@ -219,6 +214,6 @@ export async function updateTodoSymbol(req: Request, res: Response): Promise<voi
     });
   } catch (error) {
     console.error('Update todo symbol error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error.' });
+    next(error);
   }
 }

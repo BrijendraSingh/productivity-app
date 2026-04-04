@@ -19,7 +19,7 @@ router.get(
       .matches(/^\d{4}-\d{2}-\d{2}$/)
       .withMessage('Date must be in YYYY-MM-DD format.'),
   ]),
-  diaryController.getByDate,
+  diaryController.getByDate
 );
 
 // PUT /api/diary/:date — upsert (one entry per day)
@@ -29,9 +29,7 @@ router.put(
     param('date')
       .matches(/^\d{4}-\d{2}-\d{2}$/)
       .withMessage('Date must be in YYYY-MM-DD format.'),
-    body('content')
-      .optional()
-      .isString(),
+    body('content').optional().isString(),
     body('mood')
       .optional()
       .isIn(['great', 'good', 'neutral', 'bad', 'terrible'])
@@ -44,20 +42,12 @@ router.put(
       .optional()
       .isInt({ min: 1, max: 10 })
       .withMessage('Energy level must be between 1 and 10.'),
-    body('gratitude')
-      .optional()
-      .isString(),
-    body('highlights')
-      .optional()
-      .isString(),
-    body('challenges')
-      .optional()
-      .isString(),
-    body('tomorrow_focus')
-      .optional()
-      .isString(),
+    body('gratitude').optional().isString(),
+    body('highlights').optional().isString(),
+    body('challenges').optional().isString(),
+    body('tomorrow_focus').optional().isString(),
   ]),
-  diaryController.upsert,
+  diaryController.upsert
 );
 
 // DELETE /api/diary/:date
@@ -68,7 +58,7 @@ router.delete(
       .matches(/^\d{4}-\d{2}-\d{2}$/)
       .withMessage('Date must be in YYYY-MM-DD format.'),
   ]),
-  diaryController.remove,
+  diaryController.remove
 );
 
 export default router;

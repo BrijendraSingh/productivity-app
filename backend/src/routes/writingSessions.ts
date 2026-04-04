@@ -12,11 +12,9 @@ router.use(authMiddleware);
 router.post(
   '/',
   validate([
-    body('blog_post_id')
-      .isInt({ min: 1 })
-      .withMessage('blog_post_id must be a positive integer.'),
+    body('blog_post_id').isInt({ min: 1 }).withMessage('blog_post_id must be a positive integer.'),
   ]),
-  writingSessionController.startSession,
+  writingSessionController.startSession
 );
 
 // PATCH /api/writing-sessions/:id — end a session
@@ -34,7 +32,7 @@ router.patch(
       .isLength({ max: 2000 })
       .withMessage('Notes must be at most 2000 characters.'),
   ]),
-  writingSessionController.endSession,
+  writingSessionController.endSession
 );
 
 export default router;

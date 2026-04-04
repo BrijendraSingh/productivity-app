@@ -267,7 +267,7 @@ export function closeDatabase(): Promise<void> {
 /** Promise wrapper for db.get */
 export function dbGet<T = Record<string, unknown>>(
   sql: string,
-  params: unknown[] = [],
+  params: unknown[] = []
 ): Promise<T | undefined> {
   return new Promise((resolve, reject) => {
     getDatabase().get(sql, params, (err, row) => {
@@ -280,7 +280,7 @@ export function dbGet<T = Record<string, unknown>>(
 /** Promise wrapper for db.all */
 export function dbAll<T = Record<string, unknown>>(
   sql: string,
-  params: unknown[] = [],
+  params: unknown[] = []
 ): Promise<T[]> {
   return new Promise((resolve, reject) => {
     getDatabase().all(sql, params, (err, rows) => {
@@ -293,7 +293,7 @@ export function dbAll<T = Record<string, unknown>>(
 /** Promise wrapper for db.run — returns { lastID, changes } */
 export function dbRun(
   sql: string,
-  params: unknown[] = [],
+  params: unknown[] = []
 ): Promise<{ lastID: number; changes: number }> {
   return new Promise((resolve, reject) => {
     getDatabase().run(sql, params, function (err) {

@@ -53,10 +53,9 @@ export class EisenhowerUtils {
     };
 
     for (const todo of todos) {
-      const quadrant = todo.eisenhower_quadrant ?? EisenhowerUtils.calculateQuadrant(
-        todo.urgency_level,
-        todo.importance_level,
-      );
+      const quadrant =
+        todo.eisenhower_quadrant ??
+        EisenhowerUtils.calculateQuadrant(todo.urgency_level, todo.importance_level);
       grouped[quadrant].push(todo);
     }
 
@@ -94,6 +93,6 @@ export class EisenhowerUtils {
    * Get all quadrant info entries as an ordered array (Q1 → Q4).
    */
   static getAllQuadrants(): QuadrantInfo[] {
-    return (['Q1', 'Q2', 'Q3', 'Q4'] as const).map(q => EISENHOWER_QUADRANTS[q]);
+    return (['Q1', 'Q2', 'Q3', 'Q4'] as const).map((q) => EISENHOWER_QUADRANTS[q]);
   }
 }

@@ -15,10 +15,8 @@ router.get('/', todoController.getAll);
 // GET /api/todos/:id
 router.get(
   '/:id',
-  validate([
-    param('id').isInt({ min: 1 }).withMessage('Todo ID must be a positive integer.'),
-  ]),
-  todoController.getById,
+  validate([param('id').isInt({ min: 1 }).withMessage('Todo ID must be a positive integer.')]),
+  todoController.getById
 );
 
 // POST /api/todos
@@ -29,17 +27,12 @@ router.post(
       .trim()
       .isLength({ min: 1, max: 500 })
       .withMessage('Title is required (1-500 characters).'),
-    body('description')
-      .optional()
-      .isString(),
+    body('description').optional().isString(),
     body('priority')
       .optional()
       .isIn(['low', 'medium', 'high'])
       .withMessage('Priority must be low, medium, or high.'),
-    body('due_date')
-      .optional()
-      .isISO8601()
-      .withMessage('Due date must be a valid ISO 8601 date.'),
+    body('due_date').optional().isISO8601().withMessage('Due date must be a valid ISO 8601 date.'),
     body('category_id')
       .optional()
       .isInt({ min: 1 })
@@ -64,16 +57,13 @@ router.post(
       .optional()
       .isIn(['low', 'medium', 'high'])
       .withMessage('Energy required must be low, medium, or high.'),
-    body('tag_ids')
-      .optional()
-      .isArray()
-      .withMessage('Tag IDs must be an array.'),
+    body('tag_ids').optional().isArray().withMessage('Tag IDs must be an array.'),
     body('tag_ids.*')
       .optional()
       .isInt({ min: 1 })
       .withMessage('Each tag ID must be a positive integer.'),
   ]),
-  todoController.create,
+  todoController.create
 );
 
 // PUT /api/todos/:id
@@ -86,8 +76,7 @@ router.put(
       .trim()
       .isLength({ min: 1, max: 500 })
       .withMessage('Title must be 1-500 characters.'),
-    body('description')
-      .optional(),
+    body('description').optional(),
     body('status')
       .optional()
       .isIn(['pending', 'in_progress', 'completed', 'cancelled', 'deferred'])
@@ -96,10 +85,8 @@ router.put(
       .optional()
       .isIn(['low', 'medium', 'high'])
       .withMessage('Priority must be low, medium, or high.'),
-    body('due_date')
-      .optional({ values: 'null' }),
-    body('category_id')
-      .optional({ values: 'null' }),
+    body('due_date').optional({ values: 'null' }),
+    body('category_id').optional({ values: 'null' }),
     body('urgency_level')
       .optional()
       .isInt({ min: 1, max: 10 })
@@ -112,29 +99,22 @@ router.put(
       .optional()
       .isIn(['•', '×', '→', '○', '–', '!'])
       .withMessage('Invalid bullet symbol.'),
-    body('time_estimate')
-      .optional({ values: 'null' }),
-    body('energy_required')
-      .optional({ values: 'null' }),
-    body('tag_ids')
-      .optional()
-      .isArray()
-      .withMessage('Tag IDs must be an array.'),
+    body('time_estimate').optional({ values: 'null' }),
+    body('energy_required').optional({ values: 'null' }),
+    body('tag_ids').optional().isArray().withMessage('Tag IDs must be an array.'),
     body('tag_ids.*')
       .optional()
       .isInt({ min: 1 })
       .withMessage('Each tag ID must be a positive integer.'),
   ]),
-  todoController.update,
+  todoController.update
 );
 
 // DELETE /api/todos/:id
 router.delete(
   '/:id',
-  validate([
-    param('id').isInt({ min: 1 }).withMessage('Todo ID must be a positive integer.'),
-  ]),
-  todoController.remove,
+  validate([param('id').isInt({ min: 1 }).withMessage('Todo ID must be a positive integer.')]),
+  todoController.remove
 );
 
 export default router;

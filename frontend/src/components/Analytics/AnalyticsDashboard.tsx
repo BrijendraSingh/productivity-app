@@ -123,9 +123,7 @@ function ChartCard({
             {subtitle}
           </Typography>
         )}
-        <Box sx={{ width: '100%', minHeight }}>
-          {children}
-        </Box>
+        <Box sx={{ width: '100%', minHeight }}>{children}</Box>
       </CardContent>
     </Card>
   );
@@ -151,7 +149,10 @@ function ProductivityGauge({ score }: { score: number }) {
         value={100}
         size={140}
         thickness={4}
-        sx={{ color: alpha(color, theme.palette.mode === 'dark' ? 0.15 : 0.1), position: 'absolute' }}
+        sx={{
+          color: alpha(color, theme.palette.mode === 'dark' ? 0.15 : 0.1),
+          position: 'absolute',
+        }}
       />
       <CircularProgress
         variant="determinate"
@@ -216,17 +217,8 @@ function CustomTooltip({
 
 export function AnalyticsDashboard() {
   const theme = useTheme();
-  const {
-    matrix,
-    trends,
-    writing,
-    diary,
-    loading,
-    error,
-    timeRange,
-    setTimeRange,
-    refresh,
-  } = useAnalytics();
+  const { matrix, trends, writing, diary, loading, error, timeRange, setTimeRange, refresh } =
+    useAnalytics();
 
   if (loading && !matrix && !trends) {
     return (
@@ -238,49 +230,56 @@ export function AnalyticsDashboard() {
 
   // ─── Derived data ─────────────────────────────────────────────────────────
 
-  const quadrantPieData = matrix?.distribution.map((d) => ({
-    name: `${d.quadrant} — ${d.label}`,
-    value: d.total,
-    color: d.color,
-  })) ?? [];
+  const quadrantPieData =
+    matrix?.distribution.map((d) => ({
+      name: `${d.quadrant} — ${d.label}`,
+      value: d.total,
+      color: d.color,
+    })) ?? [];
 
-  const completionTrendData = trends?.completion_trends.map((d) => ({
-    date: d.date.slice(5),
-    Created: d.created,
-    Completed: d.completed,
-    Net: d.net,
-  })) ?? [];
+  const completionTrendData =
+    trends?.completion_trends.map((d) => ({
+      date: d.date.slice(5),
+      Created: d.created,
+      Completed: d.completed,
+      Net: d.net,
+    })) ?? [];
 
-  const priorityBarData = trends?.priority_distribution.map((d) => ({
-    name: d.label,
-    Total: d.total,
-    Completed: d.completed,
-    Pending: d.pending,
-    fill: d.color,
-  })) ?? [];
+  const priorityBarData =
+    trends?.priority_distribution.map((d) => ({
+      name: d.label,
+      Total: d.total,
+      Completed: d.completed,
+      Pending: d.pending,
+      fill: d.color,
+    })) ?? [];
 
-  const statusPieData = trends?.status_breakdown.map((d) => ({
-    name: TODO_STATUS_CONFIG[d.status]?.label ?? d.status,
-    value: d.count,
-    color: statusColors[d.status] ?? '#9e9e9e',
-  })) ?? [];
+  const statusPieData =
+    trends?.status_breakdown.map((d) => ({
+      name: TODO_STATUS_CONFIG[d.status]?.label ?? d.status,
+      value: d.count,
+      color: statusColors[d.status] ?? '#9e9e9e',
+    })) ?? [];
 
-  const moodBarData = diary?.mood_distribution.map((d) => ({
-    name: `${d.emoji} ${d.label}`,
-    Count: d.count,
-    fill: d.color,
-  })) ?? [];
+  const moodBarData =
+    diary?.mood_distribution.map((d) => ({
+      name: `${d.emoji} ${d.label}`,
+      Count: d.count,
+      fill: d.color,
+    })) ?? [];
 
-  const energyLineData = diary?.energy_trends.map((d) => ({
-    date: d.date.slice(5),
-    Energy: d.energy_level,
-  })) ?? [];
+  const energyLineData =
+    diary?.energy_trends.map((d) => ({
+      date: d.date.slice(5),
+      Energy: d.energy_level,
+    })) ?? [];
 
-  const wordsLineData = writing?.words_over_time.map((d) => ({
-    date: d.date.slice(5),
-    Words: d.words_written,
-    Sessions: d.sessions,
-  })) ?? [];
+  const wordsLineData =
+    writing?.words_over_time.map((d) => ({
+      date: d.date.slice(5),
+      Words: d.words_written,
+      Sessions: d.sessions,
+    })) ?? [];
 
   const dailyCompletionData: Array<Record<string, string | number>> = [];
   if (matrix?.daily_completions.length) {
@@ -326,7 +325,9 @@ export function AnalyticsDashboard() {
             size="small"
             exclusive
             value={timeRange}
-            onChange={(_, v: TimeRange | null) => { if (v) setTimeRange(v); }}
+            onChange={(_, v: TimeRange | null) => {
+              if (v) setTimeRange(v);
+            }}
           >
             {TIME_RANGE_OPTIONS.map((opt) => (
               <ToggleButton key={opt.value} value={opt.value}>
@@ -351,7 +352,9 @@ export function AnalyticsDashboard() {
       {/* ── Productivity Score + Overview Stats ─────────────────────────────── */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Card
+            sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
             <CardContent sx={{ textAlign: 'center', py: 4 }}>
               <Typography variant="h6" gutterBottom>
                 Productivity Score
@@ -479,11 +482,17 @@ export function AnalyticsDashboard() {
 
         {/* Daily Completions by Quadrant */}
         <Grid size={{ xs: 12 }}>
-          <ChartCard title="Daily Completions by Quadrant" subtitle="Stacked bar chart of completed tasks per day">
+          <ChartCard
+            title="Daily Completions by Quadrant"
+            subtitle="Stacked bar chart of completed tasks per day"
+          >
             {dailyCompletionData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={dailyCompletionData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.1)} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={alpha(theme.palette.text.primary, 0.1)}
+                  />
                   <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                   <RechartsTooltip content={<CustomTooltip />} />
@@ -515,14 +524,36 @@ export function AnalyticsDashboard() {
             {completionTrendData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={completionTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.1)} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={alpha(theme.palette.text.primary, 0.1)}
+                  />
                   <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                   <RechartsTooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Line type="monotone" dataKey="Created" stroke="#ff9800" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="Completed" stroke="#4caf50" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="Net" stroke="#2196f3" strokeWidth={1.5} strokeDasharray="5 5" dot={false} />
+                  <Line
+                    type="monotone"
+                    dataKey="Created"
+                    stroke="#ff9800"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="Completed"
+                    stroke="#4caf50"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="Net"
+                    stroke="#2196f3"
+                    strokeWidth={1.5}
+                    strokeDasharray="5 5"
+                    dot={false}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -560,11 +591,17 @@ export function AnalyticsDashboard() {
 
         {/* Priority Distribution Bar */}
         <Grid size={{ xs: 12 }}>
-          <ChartCard title="Priority Distribution" subtitle="Tasks by priority level with completion status">
+          <ChartCard
+            title="Priority Distribution"
+            subtitle="Tasks by priority level with completion status"
+          >
             {priorityBarData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={priorityBarData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.1)} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={alpha(theme.palette.text.primary, 0.1)}
+                  />
                   <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
                   <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 12 }} />
                   <RechartsTooltip content={<CustomTooltip />} />
@@ -627,18 +664,34 @@ export function AnalyticsDashboard() {
 
         {/* Words Over Time */}
         <Grid size={{ xs: 12, md: 8 }}>
-          <ChartCard title="Words Written Over Time" subtitle="Daily word count and writing sessions">
+          <ChartCard
+            title="Words Written Over Time"
+            subtitle="Daily word count and writing sessions"
+          >
             {wordsLineData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={wordsLineData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.1)} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={alpha(theme.palette.text.primary, 0.1)}
+                  />
                   <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                   <YAxis yAxisId="words" allowDecimals={false} tick={{ fontSize: 12 }} />
-                  <YAxis yAxisId="sessions" orientation="right" allowDecimals={false} tick={{ fontSize: 12 }} />
+                  <YAxis
+                    yAxisId="sessions"
+                    orientation="right"
+                    allowDecimals={false}
+                    tick={{ fontSize: 12 }}
+                  />
                   <RechartsTooltip content={<CustomTooltip />} />
                   <Legend />
                   <Bar yAxisId="words" dataKey="Words" fill="#9c27b0" radius={[4, 4, 0, 0]} />
-                  <Bar yAxisId="sessions" dataKey="Sessions" fill={alpha('#1976d2', 0.6)} radius={[4, 4, 0, 0]} />
+                  <Bar
+                    yAxisId="sessions"
+                    dataKey="Sessions"
+                    fill={alpha('#1976d2', 0.6)}
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -658,8 +711,10 @@ export function AnalyticsDashboard() {
                       name: d.status.charAt(0).toUpperCase() + d.status.slice(1),
                       value: d.count,
                       color:
-                        d.status === 'published' ? '#4caf50'
-                          : d.status === 'draft' ? '#ff9800'
+                        d.status === 'published'
+                          ? '#4caf50'
+                          : d.status === 'draft'
+                            ? '#ff9800'
                             : '#9e9e9e',
                     }))}
                     cx="50%"
@@ -672,8 +727,10 @@ export function AnalyticsDashboard() {
                       <Cell
                         key={i}
                         fill={
-                          d.status === 'published' ? '#4caf50'
-                            : d.status === 'draft' ? '#ff9800'
+                          d.status === 'published'
+                            ? '#4caf50'
+                            : d.status === 'draft'
+                              ? '#ff9800'
                               : '#9e9e9e'
                         }
                       />
@@ -756,7 +813,11 @@ export function AnalyticsDashboard() {
         <Grid size={{ xs: 6, sm: 3 }}>
           <StatCard
             title="Common Mood"
-            value={diary?.most_common_mood ? diary.most_common_mood.charAt(0).toUpperCase() + diary.most_common_mood.slice(1) : '—'}
+            value={
+              diary?.most_common_mood
+                ? diary.most_common_mood.charAt(0).toUpperCase() + diary.most_common_mood.slice(1)
+                : '—'
+            }
             icon={<MoodIcon />}
             color="#9c27b0"
           />
@@ -777,7 +838,10 @@ export function AnalyticsDashboard() {
             {moodBarData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={moodBarData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.1)} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={alpha(theme.palette.text.primary, 0.1)}
+                  />
                   <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                   <RechartsTooltip content={<CustomTooltip />} />
@@ -800,7 +864,10 @@ export function AnalyticsDashboard() {
             {energyLineData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={energyLineData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={alpha(theme.palette.text.primary, 0.1)} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={alpha(theme.palette.text.primary, 0.1)}
+                  />
                   <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                   <YAxis domain={[0, 10]} tick={{ fontSize: 12 }} />
                   <RechartsTooltip content={<CustomTooltip />} />

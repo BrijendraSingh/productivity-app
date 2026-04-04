@@ -78,7 +78,9 @@ export function useTodos(): UseTodosReturn {
 
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   // ─── Fetch todos ──────────────────────────────────────────────────────────
@@ -120,10 +122,7 @@ export function useTodos(): UseTodosReturn {
 
   const fetchMetadata = useCallback(async () => {
     try {
-      const [catRes, tagRes] = await Promise.all([
-        categoriesApi.list(),
-        tagsApi.list(),
-      ]);
+      const [catRes, tagRes] = await Promise.all([categoriesApi.list(), tagsApi.list()]);
       if (!mountedRef.current) return;
       if (catRes.success && catRes.data) setCategories(catRes.data);
       if (tagRes.success && tagRes.data) setTags(tagRes.data);
@@ -132,8 +131,12 @@ export function useTodos(): UseTodosReturn {
     }
   }, []);
 
-  useEffect(() => { fetchTodos(); }, [fetchTodos]);
-  useEffect(() => { fetchMetadata(); }, [fetchMetadata]);
+  useEffect(() => {
+    fetchTodos();
+  }, [fetchTodos]);
+  useEffect(() => {
+    fetchMetadata();
+  }, [fetchMetadata]);
 
   // ─── Filter helpers ───────────────────────────────────────────────────────
 
@@ -149,57 +152,69 @@ export function useTodos(): UseTodosReturn {
 
   // ─── CRUD ─────────────────────────────────────────────────────────────────
 
-  const createTodo = useCallback(async (data: CreateTodoRequest): Promise<boolean> => {
-    try {
-      const response = await todosApi.create(data);
-      if (response.success) {
-        await fetchTodos();
-        await fetchMetadata();
-        return true;
+  const createTodo = useCallback(
+    async (data: CreateTodoRequest): Promise<boolean> => {
+      try {
+        const response = await todosApi.create(data);
+        if (response.success) {
+          await fetchTodos();
+          await fetchMetadata();
+          return true;
+        }
+        setError(response.message || 'Failed to create todo');
+        return false;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create todo');
+        return false;
       }
-      setError(response.message || 'Failed to create todo');
-      return false;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create todo');
-      return false;
-    }
-  }, [fetchTodos, fetchMetadata]);
+    },
+    [fetchTodos, fetchMetadata]
+  );
 
-  const updateTodo = useCallback(async (id: number, data: UpdateTodoRequest): Promise<boolean> => {
-    try {
-      const response = await todosApi.update(id, data);
-      if (response.success) {
-        await fetchTodos();
-        return true;
+  const updateTodo = useCallback(
+    async (id: number, data: UpdateTodoRequest): Promise<boolean> => {
+      try {
+        const response = await todosApi.update(id, data);
+        if (response.success) {
+          await fetchTodos();
+          return true;
+        }
+        setError(response.message || 'Failed to update todo');
+        return false;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to update todo');
+        return false;
       }
-      setError(response.message || 'Failed to update todo');
-      return false;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update todo');
-      return false;
-    }
-  }, [fetchTodos]);
+    },
+    [fetchTodos]
+  );
 
-  const deleteTodo = useCallback(async (id: number): Promise<boolean> => {
-    try {
-      const response = await todosApi.delete(id);
-      if (response.success) {
-        await fetchTodos();
-        await fetchMetadata();
-        return true;
+  const deleteTodo = useCallback(
+    async (id: number): Promise<boolean> => {
+      try {
+        const response = await todosApi.delete(id);
+        if (response.success) {
+          await fetchTodos();
+          await fetchMetadata();
+          return true;
+        }
+        setError(response.message || 'Failed to delete todo');
+        return false;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete todo');
+        return false;
       }
-      setError(response.message || 'Failed to delete todo');
-      return false;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete todo');
-      return false;
-    }
-  }, [fetchTodos, fetchMetadata]);
+    },
+    [fetchTodos, fetchMetadata]
+  );
 
-  const toggleComplete = useCallback(async (todo: TodoWithRelations): Promise<boolean> => {
-    const newStatus: TodoStatus = todo.status === 'completed' ? 'pending' : 'completed';
-    return updateTodo(todo.id, { status: newStatus });
-  }, [updateTodo]);
+  const toggleComplete = useCallback(
+    async (todo: TodoWithRelations): Promise<boolean> => {
+      const newStatus: TodoStatus = todo.status === 'completed' ? 'pending' : 'completed';
+      return updateTodo(todo.id, { status: newStatus });
+    },
+    [updateTodo]
+  );
 
   // ─── Stats ────────────────────────────────────────────────────────────────
 

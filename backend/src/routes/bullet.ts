@@ -21,11 +21,9 @@ router.put(
     param('type')
       .isIn(['daily', 'weekly', 'monthly', 'yearly', 'future'])
       .withMessage('Type must be daily, weekly, monthly, yearly, or future.'),
-    body('content')
-      .optional()
-      .isString(),
+    body('content').optional().isString(),
   ]),
-  bulletController.upsertLog,
+  bulletController.upsertLog
 );
 
 // GET /api/bullet/events — filter by ?date, ?date_from, ?date_to
@@ -42,9 +40,7 @@ router.post(
     body('event_date')
       .matches(/^\d{4}-\d{2}-\d{2}$/)
       .withMessage('Event date must be in YYYY-MM-DD format.'),
-    body('description')
-      .optional()
-      .isString(),
+    body('description').optional().isString(),
     body('event_time')
       .optional()
       .matches(/^\d{2}:\d{2}(:\d{2})?$/)
@@ -53,9 +49,7 @@ router.post(
       .optional()
       .isInt({ min: 1 })
       .withMessage('Duration must be a positive integer (minutes).'),
-    body('location')
-      .optional()
-      .isString(),
+    body('location').optional().isString(),
     body('category_id')
       .optional()
       .isInt({ min: 1 })
@@ -65,7 +59,7 @@ router.post(
       .isIn(['•', '×', '→', '○', '–', '!'])
       .withMessage('Invalid bullet symbol.'),
   ]),
-  bulletController.createEvent,
+  bulletController.createEvent
 );
 
 // PATCH /api/bullet/todos/:id/symbol — update a todo's bullet symbol
@@ -77,7 +71,7 @@ router.patch(
       .isIn(['•', '×', '→', '○', '–', '!'])
       .withMessage('Invalid bullet symbol.'),
   ]),
-  bulletController.updateTodoSymbol,
+  bulletController.updateTodoSymbol
 );
 
 export default router;

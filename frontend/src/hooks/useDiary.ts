@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type {
-  DiaryEntry,
-  CreateDiaryEntryRequest,
-  Mood,
-} from '@productivity-app/shared';
+import type { DiaryEntry, CreateDiaryEntryRequest, Mood } from '@productivity-app/shared';
 import { diaryApi } from '../services/api';
 import { format } from 'date-fns';
 
@@ -57,7 +53,9 @@ export function useDiary(): UseDiaryReturn {
 
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   const dateString = format(selectedDate, 'yyyy-MM-dd');
@@ -108,8 +106,12 @@ export function useDiary(): UseDiaryReturn {
     }
   }, [dateString]);
 
-  useEffect(() => { fetchEntries(); }, [fetchEntries]);
-  useEffect(() => { fetchEntry(); }, [fetchEntry]);
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
+  useEffect(() => {
+    fetchEntry();
+  }, [fetchEntry]);
 
   // ─── Date navigation ─────────────────────────────────────────────────────
 
@@ -129,44 +131,50 @@ export function useDiary(): UseDiaryReturn {
 
   // ─── CRUD ─────────────────────────────────────────────────────────────────
 
-  const upsertEntry = useCallback(async (data: CreateDiaryEntryRequest): Promise<boolean> => {
-    setSaving(true);
-    try {
-      const response = await diaryApi.upsert(dateString, data);
-      if (response.success) {
-        if (mountedRef.current) {
-          setCurrentEntry(response.data ?? null);
-          await fetchEntries();
+  const upsertEntry = useCallback(
+    async (data: CreateDiaryEntryRequest): Promise<boolean> => {
+      setSaving(true);
+      try {
+        const response = await diaryApi.upsert(dateString, data);
+        if (response.success) {
+          if (mountedRef.current) {
+            setCurrentEntry(response.data ?? null);
+            await fetchEntries();
+          }
+          return true;
         }
-        return true;
+        setError(response.message || 'Failed to save diary entry');
+        return false;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to save diary entry');
+        return false;
+      } finally {
+        if (mountedRef.current) setSaving(false);
       }
-      setError(response.message || 'Failed to save diary entry');
-      return false;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save diary entry');
-      return false;
-    } finally {
-      if (mountedRef.current) setSaving(false);
-    }
-  }, [dateString, fetchEntries]);
+    },
+    [dateString, fetchEntries]
+  );
 
-  const deleteEntry = useCallback(async (date: string): Promise<boolean> => {
-    try {
-      const response = await diaryApi.delete(date);
-      if (response.success) {
-        if (mountedRef.current) {
-          setCurrentEntry(null);
-          await fetchEntries();
+  const deleteEntry = useCallback(
+    async (date: string): Promise<boolean> => {
+      try {
+        const response = await diaryApi.delete(date);
+        if (response.success) {
+          if (mountedRef.current) {
+            setCurrentEntry(null);
+            await fetchEntries();
+          }
+          return true;
         }
-        return true;
+        setError(response.message || 'Failed to delete diary entry');
+        return false;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete diary entry');
+        return false;
       }
-      setError(response.message || 'Failed to delete diary entry');
-      return false;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete diary entry');
-      return false;
-    }
-  }, [fetchEntries]);
+    },
+    [fetchEntries]
+  );
 
   return {
     entries,

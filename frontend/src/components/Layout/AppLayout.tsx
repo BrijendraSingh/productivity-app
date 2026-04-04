@@ -88,16 +88,11 @@ export function AppLayout() {
   };
 
   const isActive = (path: string) => {
-    if (path === '/')
-      return (
-        location.pathname === '/' || location.pathname === '/dashboard'
-      );
+    if (path === '/') return location.pathname === '/' || location.pathname === '/dashboard';
     return location.pathname.startsWith(path);
   };
 
-  const currentPage =
-    NAV_ITEMS.find((item) => isActive(item.path))?.label ||
-    APP_CONFIG.APP_NAME;
+  const currentPage = NAV_ITEMS.find((item) => isActive(item.path))?.label || APP_CONFIG.APP_NAME;
 
   const fabLabel = FAB_CONFIG[location.pathname];
 
@@ -106,11 +101,7 @@ export function AppLayout() {
   const drawerContent = (
     <Box sx={{ width: DRAWER_WIDTH }}>
       <Toolbar>
-        <Typography
-          variant="h6"
-          noWrap
-          sx={{ fontWeight: 700, color: 'primary.main' }}
-        >
+        <Typography variant="h6" noWrap sx={{ fontWeight: 700, color: 'primary.main' }}>
           {APP_CONFIG.APP_NAME}
         </Typography>
       </Toolbar>
@@ -132,9 +123,7 @@ export function AppLayout() {
                 },
               }}
             >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                {item.icon}
-              </ListItemIcon>
+              <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
               <ListItemText primary={item.label} />
             </ListItemButton>
           </ListItem>
@@ -157,12 +146,7 @@ export function AppLayout() {
       >
         <Toolbar>
           {isMobile && (
-            <IconButton
-              color="inherit"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 1 }}
-            >
+            <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 1 }}>
               <MenuIcon />
             </IconButton>
           )}
@@ -194,11 +178,7 @@ export function AppLayout() {
                 }}
                 variant="outlined"
               />
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-              >
+              <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
                 <MenuItem
                   onClick={async () => {
                     setAnchorEl(null);
@@ -212,10 +192,7 @@ export function AppLayout() {
               </Menu>
             </>
           ) : (
-            <IconButton
-              color="inherit"
-              onClick={() => setLoginOpen(true)}
-            >
+            <IconButton color="inherit" onClick={() => setLoginOpen(true)}>
               <LoginIcon />
             </IconButton>
           )}
