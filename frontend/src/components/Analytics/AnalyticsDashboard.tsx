@@ -213,6 +213,47 @@ function CustomTooltip({
   );
 }
 
+// ─── Pie Label (positioned outside with connector lines) ─────────────────────
+
+const RADIAN = Math.PI / 180;
+
+function renderOuterPieLabel({
+  cx,
+  cy,
+  midAngle,
+  outerRadius,
+  shortName,
+  value,
+  fill,
+}: {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  outerRadius: number;
+  shortName?: string;
+  name: string;
+  value: number;
+  fill: string;
+}) {
+  const radius = outerRadius + 20;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill={fill}
+      textAnchor={x > cx ? 'start' : 'end'}
+      dominantBaseline="central"
+      fontSize={13}
+      fontWeight={600}
+    >
+      {`${shortName ?? ''}: ${value}`}
+    </text>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function AnalyticsDashboard() {
@@ -231,11 +272,14 @@ export function AnalyticsDashboard() {
   // ─── Derived data ─────────────────────────────────────────────────────────
 
   const quadrantPieData =
-    matrix?.distribution.map((d) => ({
-      name: `${d.quadrant} — ${d.label}`,
-      value: d.total,
-      color: d.color,
-    })) ?? [];
+    matrix?.distribution
+      .map((d) => ({
+        name: `${d.quadrant} — ${d.label}`,
+        shortName: d.quadrant,
+        value: d.total,
+        color: d.color,
+      }))
+      .filter((d) => d.value > 0) ?? [];
 
   const completionTrendData =
     trends?.completion_trends.map((d) => ({
@@ -425,25 +469,51 @@ export function AnalyticsDashboard() {
         <Grid size={{ xs: 12, md: 6 }}>
           <ChartCard title="Quadrant Distribution" subtitle="Tasks across the four quadrants">
             {quadrantPieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={quadrantPieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`}
-                  >
-                    {quadrantPieData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
+              <>
+                <ResponsiveContainer width="100%" height={260}>
+                  <PieChart>
+                    <Pie
+                      data={quadrantPieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={90}
+                      paddingAngle={3}
+                      dataKey="value"
+                      nameKey="name"
+                      label={renderOuterPieLabel}
+                      labelLine={{ stroke: theme.palette.text.secondary, strokeWidth: 1 }}
+                    >
+                      {quadrantPieData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <Stack
+                  direction="row"
+                  flexWrap="wrap"
+                  spacing={1}
+                  useFlexGap
+                  justifyContent="center"
+                  sx={{ mt: 1 }}
+                >
+                  {quadrantPieData.map((d) => (
+                    <Chip
+                      key={d.name}
+                      label={`${d.name} (${d.value})`}
+                      size="small"
+                      sx={{
+                        bgcolor: alpha(d.color, 0.12),
+                        color: d.color,
+                        fontWeight: 500,
+                        fontSize: '0.72rem',
+                      }}
+                    />
+                  ))}
+                </Stack>
+              </>
             ) : (
               <EmptyState message="No matrix data yet" />
             )}
