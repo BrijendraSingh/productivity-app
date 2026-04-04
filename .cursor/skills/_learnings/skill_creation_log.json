@@ -1,0 +1,42 @@
+[
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["skill-creation", "fullstack-feature-dev"],
+    "skill_name": "fullstack-feature-dev",
+    "source": "project-scanner",
+    "iterations": 1,
+    "test_prompts": ["Add a blog categories CRUD API", "Add a new field to the todo entity", "Wire up the writing_sessions table"],
+    "outcome": "success",
+    "notes": "Encodes the shared→backend→frontend development pattern, SQLite user-scoping, junction table sync, hook/component patterns. Detailed key patterns reference included."
+  },
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["skill-creation", "playwright-qa"],
+    "skill_name": "playwright-qa",
+    "source": "project-scanner",
+    "iterations": 1,
+    "test_prompts": ["Write E2E tests for the todo CRUD flow", "Set up Vitest for the shared package", "Write auth login/register E2E tests"],
+    "outcome": "success",
+    "notes": "Documents the existing ensureAuthenticated pattern, test user isolation strategy, Playwright config structure. Includes priority matrix for which features to test first."
+  },
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["skill-creation", "bug-investigator"],
+    "skill_name": "bug-investigator",
+    "source": "project-scanner",
+    "iterations": 1,
+    "test_prompts": ["Debug why blog categories can't be created", "Investigate 401 errors on API calls", "Trace why analytics shows empty data"],
+    "outcome": "success",
+    "notes": "Full request lifecycle documentation, common failure modes table, known pre-existing bugs catalog, debugging toolkit with curl examples."
+  },
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["skill-creation", "code-quality-infra"],
+    "skill_name": "code-quality-infra",
+    "source": "project-scanner",
+    "iterations": 1,
+    "test_prompts": ["Set up ESLint and Prettier for the monorepo", "Create a GitHub Actions CI pipeline", "Standardize error handling in the backend"],
+    "outcome": "success",
+    "notes": "Step-by-step setup guides for ESLint flat config, Prettier, Vitest workspace config, GitHub Actions CI, husky/lint-staged. Includes AppError class template for error standardization."
+  }
+]

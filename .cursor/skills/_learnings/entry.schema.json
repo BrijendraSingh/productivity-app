@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Learning Entry",
+  "description": "Schema for entries in _learnings/*.json files. All entries must conform to this base schema; individual files may extend it with additional required fields.",
+  "type": "object",
+  "required": ["discovered_at", "tags"],
+  "properties": {
+    "discovered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when this entry was created"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "maxItems": 5,
+      "description": "1-5 domain keywords for filtering and relevance matching"
+    },
+    "finding": {
+      "type": "string",
+      "description": "What was discovered or learned"
+    },
+    "context": {
+      "type": "string",
+      "description": "Where/when this finding applies"
+    },
+    "promoted_to": {
+      "type": "string",
+      "description": "If promoted, the destination path (e.g., 'config/mappings.json' or 'docs/agent.md'). Null if not yet promoted."
+    },
+    "superseded_by": {
+      "type": "string",
+      "description": "If this entry was corrected by a later finding, the later entry's summary. Helps compaction."
+    }
+  },
+  "additionalProperties": true
+}
