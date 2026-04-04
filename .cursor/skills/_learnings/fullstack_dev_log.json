@@ -1,0 +1,44 @@
+[
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["fullstack", "frontend", "routing"],
+    "finding": "When passing highlight refs through component hierarchies, wrapping the child component in a plain div with the ref is simpler than adding forwardRef to the child. The highlight styling (boxShadow ring) can be passed as a prop instead.",
+    "context": "Issue 4: TodoList needed to scroll-to and highlight a specific TodoCard based on the /todos/:id route param. The TodoCard is a non-forwarded function component.",
+    "files_touched": ["frontend/src/components/Todo/TodoList.tsx", "frontend/src/components/Todo/TodoView.tsx"]
+  },
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["fullstack", "frontend", "routing"],
+    "finding": "For date-based route params like /diary/:date, use parseISO from date-fns to safely parse the param and sync it into hook state via useEffect. The reverse sync (user picks new date → URL updates) requires useNavigate with replace: true to avoid polluting browser history.",
+    "context": "Issue 5: DiaryView had /diary/:date route defined but never consumed useParams. The useDiary hook manages date via internal state, so the sync is bi-directional.",
+    "files_touched": ["frontend/src/components/Diary/DiaryView.tsx"]
+  },
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["fullstack", "frontend", "naming"],
+    "finding": "When a URL param name (slug) doesn't match its actual usage (numeric ID), rename the route param rather than adding slug-based lookups. The frontend already navigates with numeric IDs, so the param name should match.",
+    "context": "Issue 6: /blog/:slug used parseInt on the slug param. Renamed to /blog/:id to match the actual data type and navigation pattern.",
+    "files_touched": ["frontend/src/App.tsx", "frontend/src/components/Blog/BlogView.tsx"]
+  },
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["fullstack", "backend", "crud"],
+    "finding": "blog_categories table has a UNIQUE(user_id, slug) constraint. Auto-generating slugs from the name via slugify() prevents manual slug management while still enforcing uniqueness. The blog_posts FK references blog_categories(id) with ON DELETE SET NULL, so deleting a category doesn't break posts.",
+    "context": "Issue 1: Created full CRUD for blog_categories — controller, routes, shared DTOs, API_ENDPOINTS, frontend API service.",
+    "files_touched": ["backend/src/controllers/blogCategoryController.ts", "backend/src/routes/blogCategories.ts", "shared/src/types/index.ts", "shared/src/constants/index.ts", "shared/src/index.ts", "backend/src/index.ts", "frontend/src/services/api.ts"]
+  },
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["fullstack", "backend", "writing-sessions"],
+    "finding": "Writing sessions use a start/end pattern: POST creates with start_time, PATCH sets end_time and computes productivity_score as words_per_minute. The session is validated against blog_post ownership to prevent cross-user session creation.",
+    "context": "Issue 2: Created writing session endpoints (POST start, PATCH end) with auto-computed metrics.",
+    "files_touched": ["backend/src/controllers/writingSessionController.ts", "backend/src/routes/writingSessions.ts", "shared/src/types/index.ts", "shared/src/constants/index.ts", "shared/src/index.ts", "backend/src/index.ts", "frontend/src/services/api.ts"]
+  },
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["fullstack", "backend", "analytics"],
+    "finding": "quadrant_analytics upsert pattern: check for existing row by (user_id, date, quadrant), increment tasks_completed if found, insert with 1 if not. The productivity_score is set to the running tasks_completed count for the day. time_spent uses the todo's time_estimate field as a proxy.",
+    "context": "Issue 3: Added auto-population of quadrant_analytics in todoController.update when a todo transitions to 'completed' status.",
+    "files_touched": ["backend/src/controllers/todoController.ts"]
+  }
+]

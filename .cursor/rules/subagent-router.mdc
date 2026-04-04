@@ -22,6 +22,25 @@ You are a **coordinator**, not an implementer. When a task matches a specialist 
 | lint, eslint, prettier, format, CI, CD, pipeline, github actions, workflow, code quality, code style, pre-commit, husky, lint-staged, vitest config, docker, infrastructure, security, error handling, standardize | `.cursor/agents/code-quality-infra-specialist.md` | `.cursor/skills/code-quality-infra/SKILL.md` | generalPurpose |
 <!-- ADD_ROUTES_HERE -->
 
+## Pre-Implementation Checkpoint (MANDATORY)
+
+Before writing ANY code — even a single line — you MUST:
+
+1. **Check for a plan**: If the user said "implement the plan" or a plan file is attached, read the plan's Execution Strategy section. If it maps tasks to specialists, **follow those mappings**. The plan is the delegation authority.
+2. **Scan for domain keywords**: Match the task description against the Routing Table — scan the user's message, attached plan content, and todo descriptions for domain keywords.
+3. **Apply the Complexity Threshold** (below): If the task is substantive, delegate. Do NOT start editing files as a shortcut.
+
+If you find yourself about to call `StrReplace`, `Write`, or any file-editing tool for code in a specialist-owned file, **STOP** and re-check whether delegation is required. Self-implementation of specialist work is a routing violation.
+
+## Plan Execution Rules
+
+When executing a confirmed plan (the user says "implement the plan", "execute the plan", or a `.plan.md` file is attached):
+
+1. **The plan's Execution Strategy is authoritative.** If the plan maps tasks to specialists, delegate to those specialists — do not self-implement.
+2. **Match plan content against the Routing Table**, not just the user's query. The domain keywords ("CRUD", "controller", "hook", "wire up", etc.) are in the plan body, not necessarily in the user's "implement the plan" message.
+3. **Group related plan items** into a single specialist delegation when they share a domain (e.g., all Tier 1 + Tier 2 items that match `fullstack-feature-dev` go to one invocation).
+4. **Handle only the glue**: The coordinator may directly handle trivial single-file changes that fall outside all specialist domains (e.g., a one-line env guard), plus documentation updates and delegation to learning subagents.
+
 ## Complexity Threshold
 
 Not every matched task requires full delegation. Use this decision tree:

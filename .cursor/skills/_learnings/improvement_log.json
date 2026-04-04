@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "discovered_at": "2026-04-04T00:00:00Z",
+    "tags": ["engineering-memory", "decision-log", "issue-resolution"],
+    "finding": "All 7 open issues resolved in one batch: 3 route params wired, 3 orphaned tables given write paths (CRUD, start/end API, event-driven upsert), and dev credentials gated behind env check. 3 new Decision Log entries and 5 Known Gaps checked off in docs/agent.md.",
+    "context": "Bulk update to docs/agent.md after fullstack-feature-dev specialist resolved issues 1-7 covering missing APIs, unused route params, and hardcoded dev credentials."
+  },
+  {
+    "discovered_at": "2026-04-04T12:00:00Z",
+    "tags": ["routing", "gap", "delegation", "plan-execution"],
+    "finding": "Routing bypass during plan execution: the coordinator self-implemented code changes instead of delegating to fullstack-feature-dev. Root cause was threefold: (1) no rule to scan plan content for domain keywords when user says 'implement the plan', (2) no pre-implementation checkpoint to verify delegation before editing files, (3) plan execution strategy was advisory with no enforcement. Fixed by adding 'Pre-Implementation Checkpoint' and 'Plan Execution Rules' sections to subagent-router.mdc, and 'Plan-Driven Delegation' section to delegation-protocol.md.",
+    "context": "User asked 'why are you not using special skills and subagents for the fixes' after observing the coordinator directly editing TodoView.tsx and TodoList.tsx instead of delegating."
+  }
+]
