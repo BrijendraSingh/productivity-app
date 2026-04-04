@@ -26,6 +26,7 @@ This skill guides end-to-end feature development across the productivity-app mon
 ## Halt and Ask
 
 Stop and confirm with the user if:
+
 - The change requires adding a new database table (confirm schema design first)
 - The change modifies the auth mechanism or user model
 - You're unsure whether to extend an existing entity or create a new one
@@ -36,6 +37,7 @@ Stop and confirm with the user if:
 ### Step 1: Understand the Change
 
 Read the relevant existing files to understand current patterns:
+
 - For new entities: look at an existing entity end-to-end (e.g., `todos` — types, controller, route, hook, component)
 - For modifications: read the specific files that will change
 
@@ -115,13 +117,17 @@ For new or modified UI features:
 ## Key Patterns Reference
 
 ### SQLite User Scoping
+
 Every query that touches user data must include `user_id`:
+
 ```sql
 SELECT * FROM todos WHERE user_id = ? AND id = ?
 ```
 
 ### Junction Table Sync
+
 For many-to-many relationships (todo_tags, blog_post_tags):
+
 ```typescript
 await dbRun('DELETE FROM todo_tags WHERE todo_id = ?', [todoId]);
 for (const tagId of tagIds) {
@@ -130,6 +136,7 @@ for (const tagId of tagIds) {
 ```
 
 ### API Response Format
+
 ```typescript
 // Success
 res.json({ success: true, data: result });
@@ -141,9 +148,14 @@ res.status(409).json({ success: false, message: 'Resource already exists' });
 ```
 
 ### Frontend Hook Pattern
+
 ```typescript
 const mountedRef = useRef(true);
-useEffect(() => { return () => { mountedRef.current = false; }; }, []);
+useEffect(() => {
+  return () => {
+    mountedRef.current = false;
+  };
+}, []);
 
 const fetchData = useCallback(async () => {
   try {
@@ -161,6 +173,7 @@ const fetchData = useCallback(async () => {
 ```
 
 ### FAB Cross-Component Event
+
 ```typescript
 // Dispatch (from AppLayout FAB)
 window.dispatchEvent(new CustomEvent('open-add-<name>-dialog'));
@@ -188,10 +201,13 @@ The specialist produces working code changes across the relevant packages, follo
 ## Learning Protocol
 
 ### Read on Entry
+
 - `.cursor/skills/_learnings/fullstack_dev_log.json` — prior development patterns, gotchas, and corrections
 
 ### Write on Exit
+
 Append to `fullstack_dev_log.json`:
+
 ```json
 {
   "discovered_at": "ISO-8601",

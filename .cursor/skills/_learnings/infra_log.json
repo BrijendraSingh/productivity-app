@@ -1,0 +1,33 @@
+[
+  {
+    "discovered_at": "2026-04-04T11:50:00Z",
+    "tags": ["infrastructure", "eslint", "prettier", "husky"],
+    "finding": "Set up ESLint 9 flat config, Prettier 3.8, Husky 9 + lint-staged 16 for monorepo. Key gotchas: (1) ESLint 10 incompatible with eslint-plugin-react-hooks v7 — pinned to ESLint 9. (2) react-hooks v7 adds set-state-in-effect rule that flags common setState-in-useEffect patterns as errors — downgraded to warning. (3) @typescript-eslint/no-namespace disabled because backend uses Express.Request augmentation via namespace merge. (4) eslint-config-prettier must be last in flat config array. (5) After ESLint --fix, must re-run Prettier to normalize formatting. 25 warnings remain (unused vars, react-refresh, set-state-in-effect) — all intentionally lenient for initial setup.",
+    "context": "Tier 1 of remaining issues plan — initial code quality tooling setup",
+    "config_files": [
+      "eslint.config.mjs",
+      ".prettierrc",
+      ".prettierignore",
+      ".husky/pre-commit",
+      "package.json"
+    ]
+  },
+  {
+    "discovered_at": "2026-04-04T12:30:00Z",
+    "tags": ["infrastructure", "error-handling", "backend"],
+    "finding": "Standardized backend error handling across all 10 controllers. Created AppError class (backend/src/utils/AppError.ts) with static factory methods (notFound, conflict, badRequest, unauthorized). Enhanced global error handler in index.ts to detect AppError instances and SQLite UNIQUE constraint errors. Refactored all controllers: (1) replaced inline res.status(4xx).json() with return next(AppError.xxx()), (2) replaced catch-block res.status(500).json() with next(error) to delegate to global handler, (3) added NextFunction to all handler signatures. Gotchas: (a) controllers with manual UNIQUE constraint checks in catch blocks (authController, categoryController, tagController, blogCategoryController) now use next(AppError.conflict('specific message')) to preserve domain-specific error messages while still delegating to the global handler, (b) Express route files needed no changes — Express automatically passes (req, res, next) to handlers, (c) analyticsController has no 404/conflict paths so only catch blocks changed, (d) authController has two throw-to-catch patterns for internal 500s (dev user creation failure, user retrieval failure) — used throw new AppError(500, ...) for these.",
+    "context": "Tier 4 of remaining issues plan — standardize error handling",
+    "config_files": [
+      "backend/src/utils/AppError.ts",
+      "backend/src/index.ts",
+      "backend/src/controllers/*.ts"
+    ]
+  },
+  {
+    "discovered_at": "2026-04-04T13:15:00Z",
+    "tags": ["infrastructure", "ci-cd", "github-actions"],
+    "finding": "Created GitHub Actions CI pipeline (.github/workflows/ci.yml) with three jobs: (1) quality — lint, format:check, build; (2) unit-tests — builds shared then runs vitest via test:unit; (3) e2e-tests — full build, Playwright install, starts backend and frontend, waits for health, runs playwright test. Key decisions: (a) E2E uses vite dev server (not vite preview) because the frontend uses relative API URLs (/api/...) that require the dev server's proxy to reach backend on port 3001 — vite preview does not support proxying. (b) No JWT_SECRET env var needed — backend uses simple database-stored API tokens, not JWT. (c) SQLite auto-creates in default location (data/productivity_app.db) so no DATABASE_PATH needed in CI. (d) wait-on (v9) added as devDep to poll /health and frontend before running tests. (e) unit-tests and e2e-tests run in parallel after quality gate passes (needs: quality).",
+    "context": "Tier 3 of remaining issues plan — CI/CD pipeline",
+    "config_files": [".github/workflows/ci.yml", "package.json"]
+  }
+]

@@ -9,13 +9,14 @@ You are the **Continuous Learning Agent**. Your purpose is to maintain and grow 
 
 ## Files You Own
 
-| File | Role |
-|------|------|
+| File            | Role                                                 |
+| --------------- | ---------------------------------------------------- |
 | `docs/agent.md` | Living engineering memory — decisions, lessons, gaps |
 
 ## Persistent Memory
 
 On every invocation:
+
 1. **Read** `.cursor/skills/_learnings/improvement_log.json` — prior cross-cutting observations.
 2. After work, **write** significant findings back to `improvement_log.json`.
 

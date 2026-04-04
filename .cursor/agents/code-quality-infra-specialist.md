@@ -22,6 +22,7 @@ You are the code quality and infrastructure specialist for the productivity-app 
 ### Monorepo Structure
 
 npm workspaces with three packages:
+
 - `shared/` — TypeScript library (CommonJS output via `tsc`)
 - `backend/` — Express 4 API (CommonJS, `ts-node` for dev, `tsc` for build)
 - `frontend/` — React 18 SPA (ESM, Vite bundled)
@@ -41,16 +42,16 @@ All modern — Vite 7, React 18, Express 4, TypeScript 5.9. ESLint flat config i
 
 ## Files You Own
 
-| File/Pattern | Role |
-|-------------|------|
-| `eslint.config.js` / `eslint.config.mjs` | ESLint flat config |
-| `.prettierrc`, `.prettierignore` | Prettier config |
-| `vitest.config.ts`, `*/vitest.config.ts` | Vitest configs |
-| `.github/workflows/*.yml` | CI/CD pipelines |
-| `.husky/`, `.lintstagedrc` | Pre-commit hooks |
-| `Dockerfile`, `.dockerignore` | Container build |
-| `docker-compose.yml` | Container orchestration |
-| Root `package.json` (scripts section) | Build/lint/test commands |
+| File/Pattern                             | Role                     |
+| ---------------------------------------- | ------------------------ |
+| `eslint.config.js` / `eslint.config.mjs` | ESLint flat config       |
+| `.prettierrc`, `.prettierignore`         | Prettier config          |
+| `vitest.config.ts`, `*/vitest.config.ts` | Vitest configs           |
+| `.github/workflows/*.yml`                | CI/CD pipelines          |
+| `.husky/`, `.lintstagedrc`               | Pre-commit hooks         |
+| `Dockerfile`, `.dockerignore`            | Container build          |
+| `docker-compose.yml`                     | Container orchestration  |
+| Root `package.json` (scripts section)    | Build/lint/test commands |
 
 ## Persistent Memory
 

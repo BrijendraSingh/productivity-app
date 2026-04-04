@@ -52,32 +52,33 @@ User Request
 
 <!-- GENERATED — this table is populated by the project-scanner skill or manually -->
 
-| Specialist | Agent File | Skill Playbook | Domain |
-|---|---|---|---|
-| project-scanner | `.cursor/agents/project-scanner.md` | `.cursor/skills/project-scanner/SKILL.md` | Codebase analysis, domain discovery, specialist generation |
-| skill-factory | `.cursor/agents/skill-factory.md` | `.cursor/skills/skill-factory/SKILL.md` | Skill creation, testing, iteration using /skill-creator |
-| continuous-learner | `.cursor/agents/continuous-learner.md` | `.cursor/skills/continuous-learner/SKILL.md` | Cross-cutting memory maintenance in `docs/agent.md` |
-| manage-learnings | `.cursor/agents/manage-learnings-specialist.md` | `.cursor/skills/manage-learnings/SKILL.md` | `_learnings/` store operations (compact, promote, audit) |
-| fullstack-feature-dev | `.cursor/agents/fullstack-feature-dev-specialist.md` | `.cursor/skills/fullstack-feature-dev/SKILL.md` | End-to-end feature development across shared/backend/frontend |
-| playwright-qa | `.cursor/agents/playwright-qa-specialist.md` | `.cursor/skills/playwright-qa/SKILL.md` | Playwright E2E tests, unit test infrastructure, QA coverage |
-| bug-investigator | `.cursor/agents/bug-investigator-specialist.md` | `.cursor/skills/bug-investigator/SKILL.md` | Cross-stack debugging: frontend → API → SQLite |
-| code-quality-infra | `.cursor/agents/code-quality-infra-specialist.md` | `.cursor/skills/code-quality-infra/SKILL.md` | ESLint, Prettier, Vitest, CI/CD, Docker, error standardization |
+| Specialist            | Agent File                                           | Skill Playbook                                  | Domain                                                         |
+| --------------------- | ---------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------- |
+| project-scanner       | `.cursor/agents/project-scanner.md`                  | `.cursor/skills/project-scanner/SKILL.md`       | Codebase analysis, domain discovery, specialist generation     |
+| skill-factory         | `.cursor/agents/skill-factory.md`                    | `.cursor/skills/skill-factory/SKILL.md`         | Skill creation, testing, iteration using /skill-creator        |
+| continuous-learner    | `.cursor/agents/continuous-learner.md`               | `.cursor/skills/continuous-learner/SKILL.md`    | Cross-cutting memory maintenance in `docs/agent.md`            |
+| manage-learnings      | `.cursor/agents/manage-learnings-specialist.md`      | `.cursor/skills/manage-learnings/SKILL.md`      | `_learnings/` store operations (compact, promote, audit)       |
+| fullstack-feature-dev | `.cursor/agents/fullstack-feature-dev-specialist.md` | `.cursor/skills/fullstack-feature-dev/SKILL.md` | End-to-end feature development across shared/backend/frontend  |
+| playwright-qa         | `.cursor/agents/playwright-qa-specialist.md`         | `.cursor/skills/playwright-qa/SKILL.md`         | Playwright E2E tests, unit test infrastructure, QA coverage    |
+| bug-investigator      | `.cursor/agents/bug-investigator-specialist.md`      | `.cursor/skills/bug-investigator/SKILL.md`      | Cross-stack debugging: frontend → API → SQLite                 |
+| code-quality-infra    | `.cursor/agents/code-quality-infra-specialist.md`    | `.cursor/skills/code-quality-infra/SKILL.md`    | ESLint, Prettier, Vitest, CI/CD, Docker, error standardization |
+
 <!-- ADD_SPECIALISTS_HERE -->
 
 ## Continuous Learning System
 
 This project uses a **layered memory architecture** that grows smarter with every interaction:
 
-| Layer | Location | Role | Mutability |
-|---|---|---|---|
-| **Guardrails** | `AGENTS.md` + `.cursor/rules/` | What agents must/must not do | Static |
-| **Routing** | `.cursor/rules/subagent-router.mdc` | Which specialist handles which task | Static |
-| **Specialists** | `.cursor/agents/*.md` | Pre-trained domain experts | Semi-static |
-| **Skill Playbooks** | `.cursor/skills/*/SKILL.md` | Detailed procedures and reference docs | Semi-static |
-| **Skill Memory** | `.cursor/skills/_learnings/*.json` | Accumulated runtime knowledge per domain | Grows every interaction |
-| **Engineering Memory** | `docs/agent.md` | Cross-cutting decisions, edge cases, gaps | Grows over time |
-| **Knowledge Base** | `.cursor/knowledge-base/` | Human-readable patterns and edge cases | Curated periodically |
-| **Config** | `config/` (created as needed) | Domain-specific data, mappings, scope | Updated as needed |
+| Layer                  | Location                            | Role                                      | Mutability              |
+| ---------------------- | ----------------------------------- | ----------------------------------------- | ----------------------- |
+| **Guardrails**         | `AGENTS.md` + `.cursor/rules/`      | What agents must/must not do              | Static                  |
+| **Routing**            | `.cursor/rules/subagent-router.mdc` | Which specialist handles which task       | Static                  |
+| **Specialists**        | `.cursor/agents/*.md`               | Pre-trained domain experts                | Semi-static             |
+| **Skill Playbooks**    | `.cursor/skills/*/SKILL.md`         | Detailed procedures and reference docs    | Semi-static             |
+| **Skill Memory**       | `.cursor/skills/_learnings/*.json`  | Accumulated runtime knowledge per domain  | Grows every interaction |
+| **Engineering Memory** | `docs/agent.md`                     | Cross-cutting decisions, edge cases, gaps | Grows over time         |
+| **Knowledge Base**     | `.cursor/knowledge-base/`           | Human-readable patterns and edge cases    | Curated periodically    |
+| **Config**             | `config/` (created as needed)       | Domain-specific data, mappings, scope     | Updated as needed       |
 
 Before making architectural decisions, consult the **Decision Log** in `docs/agent.md`. After discovering edge cases or fixing bugs, append to **Lessons Learned**.
 

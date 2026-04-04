@@ -28,6 +28,7 @@ This skill handles all code quality tooling and infrastructure for the productiv
 ## Halt and Ask
 
 Stop and confirm with the user if:
+
 - Adding significant new devDependencies (ESLint, Prettier, Vitest, husky, etc.)
 - Changing existing code to conform to new lint rules (could be a large diff)
 - Setting up CI that requires GitHub repo configuration (secrets, branch protection)
@@ -48,6 +49,7 @@ npm install -D eslint @eslint/js typescript-eslint eslint-plugin-react eslint-pl
 #### Step 2: Create Root Config
 
 Create `eslint.config.js` at repo root using flat config format. Key considerations:
+
 - TypeScript parser for all `.ts`/`.tsx` files
 - React plugin + hooks plugin for frontend
 - Node environment for backend
@@ -57,6 +59,7 @@ Create `eslint.config.js` at repo root using flat config format. Key considerati
 #### Step 3: Add Scripts
 
 Add to root `package.json`:
+
 ```json
 {
   "scripts": {
@@ -77,6 +80,7 @@ npm install -D prettier eslint-config-prettier
 #### Step 2: Configure
 
 Create `.prettierrc` at repo root:
+
 ```json
 {
   "semi": true,
@@ -88,6 +92,7 @@ Create `.prettierrc` at repo root:
 ```
 
 Create `.prettierignore`:
+
 ```
 dist/
 node_modules/
@@ -119,6 +124,7 @@ npm install -D @testing-library/react @testing-library/jest-dom jsdom --workspac
 #### Step 2: Root Config
 
 Create `vitest.config.ts` at repo root with workspace definitions:
+
 ```typescript
 import { defineConfig } from 'vitest/config';
 
@@ -199,6 +205,7 @@ npx husky init
 #### Step 2: Configure
 
 Add to root `package.json`:
+
 ```json
 {
   "lint-staged": {
@@ -209,6 +216,7 @@ Add to root `package.json`:
 ```
 
 Update `.husky/pre-commit`:
+
 ```bash
 npx lint-staged
 ```
@@ -218,6 +226,7 @@ npx lint-staged
 The backend currently uses ad-hoc try/catch with inconsistent status codes. Standardize with:
 
 1. **Shared error class** in `shared/src/utils/AppError.ts`:
+
 ```typescript
 export class AppError extends Error {
   constructor(
@@ -254,6 +263,7 @@ export class AppError extends Error {
 ### Docker Optimization
 
 Current Dockerfile is solid (multi-stage, alpine, non-root user, healthcheck). Potential improvements:
+
 - Add `.dockerignore` entries for new tooling dirs (`.github/`, `.husky/`)
 - Layer caching optimization for `npm ci`
 - Build arg for `NODE_ENV`
@@ -261,6 +271,7 @@ Current Dockerfile is solid (multi-stage, alpine, non-root user, healthcheck). P
 ## Output Format
 
 The specialist produces:
+
 - Configuration files (ESLint, Prettier, Vitest, CI workflows, husky)
 - Script additions to `package.json` files
 - Shared utility code (AppError class)
@@ -269,10 +280,13 @@ The specialist produces:
 ## Learning Protocol
 
 ### Read on Entry
+
 - `.cursor/skills/_learnings/infra_log.json` — prior setup decisions, config gotchas, CI fixes
 
 ### Write on Exit
+
 Append to `infra_log.json`:
+
 ```json
 {
   "discovered_at": "ISO-8601",

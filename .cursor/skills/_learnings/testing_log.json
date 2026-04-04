@@ -1,0 +1,16 @@
+[
+  {
+    "discovered_at": "2026-04-04T17:30:00.000Z",
+    "tags": ["testing", "unit", "vitest", "shared", "backend"],
+    "finding": "Vitest unit test infrastructure set up across shared and backend workspaces. vitest v4.1.2 installed at root with @vitest/coverage-v8. Each workspace has its own vitest.config.ts with globals:true and environment:'node'. Test scripts wired via 'vitest run' in each workspace package.json, root 'npm test' runs all via --workspaces --if-present. 173 total tests: 155 in shared (4 files covering EisenhowerUtils, TextUtils, ValidationUtils, DateUtils), 18 in backend (1 file covering AppError). Key gotcha: date-fns differenceInDays truncates partial days, so fake timers must be set to midnight for clean day-count assertions. TextUtils.stripMarkdown processes regexes sequentially — image regex runs after link regex, so standalone image markdown ![alt](url) leaves '!alt' residue (known source code behavior, not a test bug).",
+    "context": "Tier 2a of remaining issues plan — unit test infrastructure",
+    "test_file": "shared/src/utils/EisenhowerUtils.test.ts, shared/src/utils/TextUtils.test.ts, shared/src/utils/ValidationUtils.test.ts, shared/src/utils/DateUtils.test.ts, backend/src/utils/AppError.test.ts"
+  },
+  {
+    "discovered_at": "2026-04-04T20:00:00.000Z",
+    "tags": ["testing", "e2e", "playwright"],
+    "finding": "Expanded Playwright E2E coverage from 1 spec (bullet-journal) to 7 specs covering all core features: auth (8 tests), todos (7 tests), diary (5 tests), blog (7 tests), matrix (6 tests), analytics (9 tests). Extracted shared ensureAuthenticated helper to frontend/e2e/helpers.ts — each spec uses a unique username to avoid data collisions. Updated playwright.config.ts testMatch from 'bullet-journal.spec.ts' to '*.spec.ts'. Added test:e2e npm script. Key UI targeting patterns: MUI uses role='dialog' for Dialogs, role='tab' for Tab components, role='banner' for AppBar, role='alert' for Alert. The LoginDialog has separate state for Sign In (tab 0) and Sign Up (tab 1) tabs with independent fields — getByLabel('Password').first() is needed because both tabs render password fields. The FAB button uses aria-label matching FAB_CONFIG values ('New Todo', 'New Entry', 'New Post', 'New Log'). Blog uses confirmation dialog for delete (Dialog with 'Delete Post' title). The Eisenhower Matrix quadrant labels are 'Do First', 'Schedule', 'Delegate', 'Eliminate'. Analytics ToggleButtonGroup uses text labels like '7 days', '30 days'. The Diary uses ChevronLeft/ChevronRight icons for date nav with a 'Go to Today' button when not on today's date.",
+    "context": "Tier 2b of remaining issues plan — E2E test expansion",
+    "test_file": "frontend/auth.spec.ts, frontend/todos.spec.ts, frontend/diary.spec.ts, frontend/blog.spec.ts, frontend/matrix.spec.ts, frontend/analytics.spec.ts, frontend/e2e/helpers.ts"
+  }
+]

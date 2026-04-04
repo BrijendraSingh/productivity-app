@@ -2,13 +2,13 @@
 name: skill-factory
 description: Creates, tests, and iterates on specialist skills and agent definitions using the /skill-creator methodology. Use this skill when a new domain has been identified and needs a full specialist setup (SKILL.md + agent definition + routing + learnings), when an existing skill needs improvement, when someone says "create a skill for X", "improve the Y skill", "add a specialist for Z", or when the project-scanner has proposed domains that need specialists built.
 intent_examples:
-  - "Create a skill for database migrations"
-  - "Add a specialist for the API layer"
-  - "Improve the testing skill"
-  - "Make a new agent for deployment"
-  - "Build a specialist for authentication"
+  - 'Create a skill for database migrations'
+  - 'Add a specialist for the API layer'
+  - 'Improve the testing skill'
+  - 'Make a new agent for deployment'
+  - 'Build a specialist for authentication'
   - "The auth skill isn't working well, iterate on it"
-  - "Draft a skill for CI/CD workflows"
+  - 'Draft a skill for CI/CD workflows'
 ---
 
 ## Role
@@ -31,6 +31,7 @@ The skill-factory transforms domain proposals into production-quality skills wit
 ## Halt and Ask
 
 Stop and ask the user if:
+
 - The domain proposal is too vague to create a useful skill
 - The proposed specialist would overlap significantly with an existing one
 - The skill would need access to external services or MCPs not currently available
@@ -41,12 +42,13 @@ Stop and ask the user if:
 ### Phase 1: Domain Intake
 
 Validate the domain proposal has all required fields:
+
 - **Name** (kebab-case, max 64 chars)
 - **Description** (what and when, under 1024 chars)
 - **Key Files** the specialist would own
 - **Repeatable Workflows** the skill enables
 - **Routing Keywords** for the subagent-router
-- **Proposed _learnings files** with their purpose
+- **Proposed \_learnings files** with their purpose
 
 If anything is missing, ask the project-scanner or user for it.
 
@@ -66,6 +68,7 @@ description: <third-person, slightly pushy for discoverability>
 ```
 
 Body sections:
+
 - **Role**: What this skill enables (1 paragraph)
 - **When to Use**: Trigger conditions and natural-language phrases
 - **Prerequisites**: Tools, env vars, auth, MCPs
@@ -77,6 +80,7 @@ Body sections:
 - **Constraints**: Safety and boundary rules
 
 Writing tips (from the skill-creator methodology):
+
 - Explain the "why" behind instructions — models generalize better from reasoning than from rigid rules
 - Keep it under 500 lines — use reference docs for overflow
 - Include examples where they materially improve output quality
@@ -94,6 +98,7 @@ description: <what this specialist owns and when to invoke it>
 ```
 
 Body sections:
+
 - **Identity**: One-paragraph role statement
 - **Domain Knowledge**: Key concepts, terminology, architecture patterns
 - **Files You Own**: Table of files and their roles
@@ -110,7 +115,7 @@ Add a row to `.cursor/rules/subagent-router.mdc` at the `<!-- ADD_ROUTES_HERE --
 | <routing keywords> | `.cursor/agents/<name>-specialist.md` | `.cursor/skills/<name>/SKILL.md` | generalPurpose |
 ```
 
-#### 2d. _learnings Schema
+#### 2d. \_learnings Schema
 
 Create initial JSON files in `.cursor/skills/_learnings/` and add them to `_learnings/README.md`.
 
@@ -136,19 +141,23 @@ Follow the skill-creator's test/eval loop:
 ### Phase 4: Validation
 
 Before declaring the skill complete:
+
 1. Verify SKILL.md has valid YAML frontmatter with `name` and `description`
 2. Verify the agent definition is internally consistent with the skill
 3. Verify the routing entry matches the specialist's keywords
 4. Verify `_learnings` JSON schemas are documented
-5. Verify cross-references in AGENTS.md and _learnings/README.md are updated
+5. Verify cross-references in AGENTS.md and \_learnings/README.md are updated
 
 ## Learning Protocol
 
 ### Read on Entry
+
 - `.cursor/skills/_learnings/skill_creation_log.json` — prior skill creation history
 
 ### Write on Exit
+
 Append to `skill_creation_log.json`:
+
 ```json
 {
   "discovered_at": "ISO-8601",

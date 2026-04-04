@@ -26,6 +26,7 @@ This skill handles all testing and QA for the productivity-app. The app currentl
 ## Halt and Ask
 
 Stop and confirm with the user if:
+
 - Setting up Vitest for the first time (confirm they want the dependency added)
 - The test requires modifying production code (e.g., adding test IDs to components)
 - Test data setup requires database seeding that could affect their dev data
@@ -119,6 +120,7 @@ test.describe('Feature Name', () => {
 #### Step 4: Update Playwright Config
 
 If adding new spec files, update `frontend/playwright.config.ts` to match them. Currently it only matches `bullet-journal.spec.ts` via `testMatch`. Expand to:
+
 ```typescript
 testMatch: '*.spec.ts',
 ```
@@ -149,6 +151,7 @@ If Vitest is not yet configured, set it up:
 Place test files next to the source files they test, using the `.test.ts` / `.test.tsx` naming convention.
 
 **Shared utilities** (highest unit-test value):
+
 ```typescript
 // shared/src/utils/EisenhowerUtils.test.ts
 import { describe, it, expect } from 'vitest';
@@ -162,29 +165,32 @@ describe('EisenhowerUtils', () => {
 ```
 
 **Backend controllers** (test business logic without Express):
+
 - Extract testable logic or test with supertest
 
 **Frontend hooks** (test with renderHook from testing-library):
+
 - Mock the API service, test hook state transitions
 
 ### Test Priority Matrix
 
 Features ordered by coverage value:
 
-| Priority | Feature | Why |
-|----------|---------|-----|
-| 1 | Auth (login, register, logout) | Gate for all other features |
-| 2 | Todos (CRUD, filtering, Eisenhower) | Core feature with most complexity |
-| 3 | Diary (create, edit, date navigation) | Daily-use feature |
-| 4 | Blog (create, edit, publish, markdown) | Rich editor interactions |
-| 5 | Bullet Journal (already partially tested) | Expand existing coverage |
-| 6 | Analytics (dashboard rendering) | Read-only, lower risk |
-| 7 | Categories/Tags (CRUD) | Simple CRUD, less likely to break |
-| 8 | Eisenhower Matrix (drag, quadrant display) | Complex UI but read-heavy |
+| Priority | Feature                                    | Why                               |
+| -------- | ------------------------------------------ | --------------------------------- |
+| 1        | Auth (login, register, logout)             | Gate for all other features       |
+| 2        | Todos (CRUD, filtering, Eisenhower)        | Core feature with most complexity |
+| 3        | Diary (create, edit, date navigation)      | Daily-use feature                 |
+| 4        | Blog (create, edit, publish, markdown)     | Rich editor interactions          |
+| 5        | Bullet Journal (already partially tested)  | Expand existing coverage          |
+| 6        | Analytics (dashboard rendering)            | Read-only, lower risk             |
+| 7        | Categories/Tags (CRUD)                     | Simple CRUD, less likely to break |
+| 8        | Eisenhower Matrix (drag, quadrant display) | Complex UI but read-heavy         |
 
 ## Output Format
 
 The specialist produces:
+
 - Spec files (`.spec.ts` for E2E, `.test.ts` for unit) following established patterns
 - Config updates (Playwright config, Vitest config) as needed
 - Test helper utilities when patterns are repeated across specs
@@ -192,10 +198,13 @@ The specialist produces:
 ## Learning Protocol
 
 ### Read on Entry
+
 - `.cursor/skills/_learnings/testing_log.json` — prior test patterns, flaky test fixes, coverage observations
 
 ### Write on Exit
+
 Append to `testing_log.json`:
+
 ```json
 {
   "discovered_at": "ISO-8601",

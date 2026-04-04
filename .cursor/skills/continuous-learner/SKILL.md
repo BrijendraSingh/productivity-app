@@ -2,13 +2,13 @@
 name: continuous-learner
 description: Maintains the engineering memory in docs/agent.md — capturing architectural decisions, lessons learned, edge cases, and known gaps after code changes, bug fixes, or significant interactions. Use when someone mentions "update agent.md", "decision log", "lessons learned", "engineering memory", or after any non-trivial code change.
 intent_examples:
-  - "Update the engineering memory"
-  - "Log this architectural decision"
-  - "Add a lessons learned entry"
-  - "Check if this conflicts with prior decisions"
-  - "Record this edge case"
-  - "What does the decision log say about X?"
-  - "Mark this known gap as resolved"
+  - 'Update the engineering memory'
+  - 'Log this architectural decision'
+  - 'Add a lessons learned entry'
+  - 'Check if this conflicts with prior decisions'
+  - 'Record this edge case'
+  - 'What does the decision log say about X?'
+  - 'Mark this known gap as resolved'
 ---
 
 ## Role
@@ -31,6 +31,7 @@ The continuous-learner skill maintains `docs/agent.md` as the project's living e
 ## Halt and Ask
 
 Stop and ask the user if:
+
 - A proposed change contradicts an entry in the Decision Log
 - You're unsure whether a finding is significant enough to log (err on the side of logging)
 - A Known Gap resolution can't be verified from the available context
@@ -40,6 +41,7 @@ Stop and ask the user if:
 ### Step 1: Load Current Memory
 
 Read `docs/agent.md` completely. Locate:
+
 - **Decision Log** — prior architectural decisions and rationale
 - **Lessons Learned** — known edge cases and failure patterns
 - **Known Gaps** — unresolved functional/test limitations
@@ -48,17 +50,20 @@ Read `docs/agent.md` completely. Locate:
 ### Step 2: Assess the Situation
 
 **After a code change:**
+
 1. Review what changed (git diff or conversation context)
 2. Cross-reference against the Decision Log — flag contradictions
 3. Check if the change resolves a Known Gap — mark it done
 4. Check if `docs/agent.md` needs structural updates (new module, new config)
 
 **After a bug fix:**
+
 1. Understand root cause
 2. Determine if systemic (likely to recur) or one-off
 3. If systemic, draft a Lessons Learned entry
 
 **Before an architectural decision:**
+
 1. Search the Decision Log for related prior decisions
 2. Present relevant history to the user
 3. If the proposed change conflicts, explain the conflict and ask for confirmation
@@ -66,6 +71,7 @@ Read `docs/agent.md` completely. Locate:
 ### Step 3: Write Back to `docs/agent.md`
 
 **Lessons Learned** format:
+
 ```
 - **Finding**: [What you observed]
   **Impact**: [What breaks or degrades]
@@ -74,6 +80,7 @@ Read `docs/agent.md` completely. Locate:
 ```
 
 **Decision Log** format:
+
 ```
 | Date | Decision | Rationale | Alternatives Considered |
 ```
@@ -83,6 +90,7 @@ Read `docs/agent.md` completely. Locate:
 ### Step 4: Validate Consistency
 
 After writing back:
+
 1. No duplicate entries in Lessons Learned
 2. Decision Log entries don't contradict each other
 3. Known Gaps marked resolved are actually fixed in code
@@ -95,10 +103,13 @@ Updates to `docs/agent.md` sections. No separate output file.
 ## Learning Protocol
 
 ### Read on Entry
+
 - `.cursor/skills/_learnings/improvement_log.json` — prior improvement history that may contain cross-cutting observations
 
 ### Write on Exit
+
 Append to `improvement_log.json` if the session produced a significant finding:
+
 ```json
 {
   "discovered_at": "ISO-8601",

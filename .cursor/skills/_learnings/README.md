@@ -18,6 +18,7 @@ All entries must conform to `entry.schema.json` in this directory. At minimum, e
 Optional fields: `finding`, `context`, `promoted_to`, `superseded_by`. Individual files may add domain-specific fields.
 
 Example entry:
+
 ```json
 {
   "discovered_at": "2026-04-02T10:30:00Z",
@@ -31,18 +32,19 @@ Example entry:
 
 Only `improvement_log.json` ships with the template. All other files are created on first use by their owning specialist.
 
-| File | What it accumulates | Written by | Ships with template? |
-|------|-------------------|------------|---------------------|
-| `improvement_log.json` | What was improved, when, rationale — prevents re-suggesting the same improvement. Also captures routing misses. | All specialists | Yes |
-| `scan_history.json` | Project scan results, domain proposals, user corrections | project-scanner | No — created on first scan |
-| `skill_creation_log.json` | Skills created, iterations, test prompts, outcomes | skill-factory | No — created on first skill |
-| `maintenance_log.json` | Compaction, promotion, and audit operations on the learning store | manage-learnings | No — created on first audit |
-| `delegation_log.json` | Records of each delegation — specialist, task, outcome, learnings read/written | main-agent | No — created on first delegation |
+| File                      | What it accumulates                                                                                             | Written by       | Ships with template?             |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------- | -------------------------------- |
+| `improvement_log.json`    | What was improved, when, rationale — prevents re-suggesting the same improvement. Also captures routing misses. | All specialists  | Yes                              |
+| `scan_history.json`       | Project scan results, domain proposals, user corrections                                                        | project-scanner  | No — created on first scan       |
+| `skill_creation_log.json` | Skills created, iterations, test prompts, outcomes                                                              | skill-factory    | No — created on first skill      |
+| `maintenance_log.json`    | Compaction, promotion, and audit operations on the learning store                                               | manage-learnings | No — created on first audit      |
+| `delegation_log.json`     | Records of each delegation — specialist, task, outcome, learnings read/written                                  | main-agent       | No — created on first delegation |
 
 | `fullstack_dev_log.json` | Development patterns, cross-package gotchas, feature implementation lessons | fullstack-feature-dev | No — created on first feature task |
 | `testing_log.json` | Test patterns, flaky test fixes, coverage observations, infrastructure setup notes | playwright-qa | No — created on first test task |
 | `debug_log.json` | Bug root causes, fix patterns, debugging discoveries, common failure modes | bug-investigator | No — created on first debug task |
 | `infra_log.json` | Config decisions, tool setup gotchas, CI/CD fixes, Docker changes | code-quality-infra | No — created on first infra task |
+
 <!-- ADD_LEARNINGS_HERE — skill-factory adds new entries as specialists are created -->
 
 ## Metadata

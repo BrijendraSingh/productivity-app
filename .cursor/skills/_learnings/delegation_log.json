@@ -7,5 +7,60 @@
     "files_changed": 16,
     "issues_resolved": 7,
     "notes": "Tier 1 (route params) + Tier 2 (blog_categories, writing_sessions, quadrant_analytics) + Tier 3 (dev credentials gate)"
+  },
+  {
+    "discovered_at": "2026-04-04T17:35:00Z",
+    "tags": ["delegation", "code-quality-infra"],
+    "specialist": "code-quality-infra",
+    "task_summary": "Tier 1: Set up ESLint 9 flat config + Prettier + Husky/lint-staged pre-commit hooks",
+    "complexity": "moderate",
+    "outcome": "success",
+    "learnings_read": [],
+    "learnings_written": ["infra_log.json"],
+    "notes": "ESLint pinned to v9 due to react-hooks plugin incompatibility with v10. 26 warnings (lenient), 0 errors."
+  },
+  {
+    "discovered_at": "2026-04-04T17:35:00Z",
+    "tags": ["delegation", "code-quality-infra"],
+    "specialist": "code-quality-infra",
+    "task_summary": "Tier 4: Standardize backend error handling with AppError class, refactor all 10 controllers",
+    "complexity": "complex",
+    "outcome": "success",
+    "learnings_read": [],
+    "learnings_written": ["infra_log.json"],
+    "notes": "48 handlers refactored. Domain-specific UNIQUE messages preserved. No route file changes needed."
+  },
+  {
+    "discovered_at": "2026-04-04T17:36:00Z",
+    "tags": ["delegation", "playwright-qa"],
+    "specialist": "playwright-qa",
+    "task_summary": "Tier 2a: Set up Vitest with workspace config, write 173 unit tests for shared utils and AppError",
+    "complexity": "moderate",
+    "outcome": "success",
+    "learnings_read": [],
+    "learnings_written": ["testing_log.json"],
+    "notes": "5 test files, 173 tests all passing. Root vitest.config.ts needed explicit include/exclude to avoid picking up dist/ and .spec.ts files."
+  },
+  {
+    "discovered_at": "2026-04-04T17:36:00Z",
+    "tags": ["delegation", "playwright-qa"],
+    "specialist": "playwright-qa",
+    "task_summary": "Tier 2b: Write Playwright E2E specs for auth, todos, diary, blog, matrix, analytics; wire npm scripts",
+    "complexity": "complex",
+    "outcome": "success",
+    "learnings_read": [],
+    "learnings_written": ["testing_log.json"],
+    "notes": "7 spec files (6 new + 1 updated), 48 E2E test cases. Shared helper extracted to frontend/e2e/helpers.ts. Playwright config updated to match all *.spec.ts."
+  },
+  {
+    "discovered_at": "2026-04-04T17:37:00Z",
+    "tags": ["delegation", "code-quality-infra"],
+    "specialist": "code-quality-infra",
+    "task_summary": "Tier 3: Create GitHub Actions CI workflow with 3 jobs (quality, unit-tests, e2e-tests)",
+    "complexity": "moderate",
+    "outcome": "success",
+    "learnings_read": ["infra_log.json"],
+    "learnings_written": ["infra_log.json"],
+    "notes": "CI uses vite dev server (not preview) for E2E because Vite proxy is needed for API calls. wait-on added as devDep."
   }
 ]

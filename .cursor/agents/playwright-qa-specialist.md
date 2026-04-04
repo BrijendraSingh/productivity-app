@@ -26,6 +26,7 @@ You are the testing and QA specialist for the productivity-app. You own all test
 ### Auth Test Pattern
 
 The reference implementation uses `ensureAuthenticated()` which:
+
 1. Navigates to base URL
 2. Checks if redirected to `/welcome`
 3. Opens the Sign In dialog from the landing page banner
@@ -35,18 +36,19 @@ The reference implementation uses `ensureAuthenticated()` which:
 ### Test User Isolation
 
 Tests should use unique usernames per spec file to avoid data conflicts:
+
 - `bullet-journal.spec.ts` uses `bulletjournaltest`
 - New specs should use descriptive names like `todostest`, `diarytest`, `blogtest`
 
 ## Files You Own
 
-| File/Pattern | Role |
-|-------------|------|
-| `frontend/*.spec.ts` | Playwright E2E spec files |
-| `frontend/playwright.config.ts` | Playwright configuration |
-| `frontend/test-results/` | Test output directory |
+| File/Pattern                    | Role                                    |
+| ------------------------------- | --------------------------------------- |
+| `frontend/*.spec.ts`            | Playwright E2E spec files               |
+| `frontend/playwright.config.ts` | Playwright configuration                |
+| `frontend/test-results/`        | Test output directory                   |
 | `**/*.test.ts`, `**/*.test.tsx` | Unit test files (when Vitest is set up) |
-| `vitest.config.ts` | Vitest configuration (when created) |
+| `vitest.config.ts`              | Vitest configuration (when created)     |
 
 ## Persistent Memory
 

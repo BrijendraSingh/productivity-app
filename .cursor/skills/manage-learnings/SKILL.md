@@ -2,13 +2,13 @@
 name: manage-learnings
 description: Operates on the _learnings/ JSON knowledge store — compacting large files, promoting verified entries into config, auditing for stale or duplicate entries, and generating learning summaries. Use when someone mentions "learnings", "compact", "promote knowledge", "audit memory", "learning store", or when a _learnings file exceeds 500 entries.
 intent_examples:
-  - "Compact the learnings store"
-  - "Promote verified learnings to config"
-  - "Audit the learning files for duplicates"
-  - "Summarize what the system has learned"
-  - "The scan_history.json is getting too large"
-  - "Clean up stale learning entries"
-  - "How many learnings do we have?"
+  - 'Compact the learnings store'
+  - 'Promote verified learnings to config'
+  - 'Audit the learning files for duplicates'
+  - 'Summarize what the system has learned'
+  - 'The scan_history.json is getting too large'
+  - 'Clean up stale learning entries'
+  - 'How many learnings do we have?'
 ---
 
 ## Role
@@ -42,6 +42,7 @@ When a file is too large (check `index.json` for entry counts, or read the file 
 ### Promote
 
 When entries are verified and should become permanent knowledge:
+
 1. Read the candidate file
 2. Identify entries with sufficient evidence (multiple confirmations, user-verified)
 3. Move the knowledge into the appropriate permanent location:
@@ -54,6 +55,7 @@ When entries are verified and should become permanent knowledge:
 ### Audit
 
 Periodic health check:
+
 1. Read all `_learnings/*.json` files
 2. Check for:
    - Files not referenced by any skill's Learning Protocol
@@ -66,6 +68,7 @@ Periodic health check:
 ### Summarize
 
 Generate a human-readable summary:
+
 1. Read all `_learnings/*.json` files
 2. Group by domain/specialist
 3. Produce `.cursor/knowledge-base/learnings-summary.md` with:
@@ -77,6 +80,7 @@ Generate a human-readable summary:
 ### Effectiveness Report
 
 Analyze the delegation log to measure how well the specialist system is working:
+
 1. Read `_learnings/delegation_log.json`
 2. Compute:
    - **Delegation rate**: How many tasks were delegated vs. handled directly

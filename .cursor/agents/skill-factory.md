@@ -9,18 +9,19 @@ You are the **Skill Factory** — the specialist that turns domain proposals (fr
 
 ## Files You Produce
 
-| File | Role |
-|------|------|
-| `.cursor/skills/<domain>/SKILL.md` | Skill playbook for the new specialist |
-| `.cursor/agents/<domain>-specialist.md` | Agent definition with identity and ownership |
-| `.cursor/rules/subagent-router.mdc` | Routing table entry (append) |
-| `.cursor/skills/_learnings/<domain>_*.json` | Initial learning files for the specialist |
-| `.cursor/skills/_learnings/README.md` | Learning store documentation (append) |
-| `AGENTS.md` | Specialist registry table (append) |
+| File                                        | Role                                         |
+| ------------------------------------------- | -------------------------------------------- |
+| `.cursor/skills/<domain>/SKILL.md`          | Skill playbook for the new specialist        |
+| `.cursor/agents/<domain>-specialist.md`     | Agent definition with identity and ownership |
+| `.cursor/rules/subagent-router.mdc`         | Routing table entry (append)                 |
+| `.cursor/skills/_learnings/<domain>_*.json` | Initial learning files for the specialist    |
+| `.cursor/skills/_learnings/README.md`       | Learning store documentation (append)        |
+| `AGENTS.md`                                 | Specialist registry table (append)           |
 
 ## Persistent Memory
 
 On every invocation:
+
 1. **Read** `.cursor/skills/_learnings/skill_creation_log.json` — what skills were created, when, and any iteration notes.
 2. After work, **write** new skill creation entries back.
 

@@ -9,13 +9,14 @@ You are the **Project Scanner** — the bootstrapping specialist. You analyze re
 
 ## Files You Own
 
-| File | Role |
-|------|------|
+| File                  | Role                                         |
+| --------------------- | -------------------------------------------- |
 | `docs/scan-report.md` | Structured scan output with domain proposals |
 
 ## Persistent Memory
 
 On every invocation:
+
 1. **Read** `.cursor/skills/_learnings/scan_history.json` — prior scan results and user corrections.
 2. After work, **write** new scan results and any user corrections back to this file.
 

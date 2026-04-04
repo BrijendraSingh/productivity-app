@@ -4,7 +4,10 @@
     "tags": ["fullstack", "frontend", "routing"],
     "finding": "When passing highlight refs through component hierarchies, wrapping the child component in a plain div with the ref is simpler than adding forwardRef to the child. The highlight styling (boxShadow ring) can be passed as a prop instead.",
     "context": "Issue 4: TodoList needed to scroll-to and highlight a specific TodoCard based on the /todos/:id route param. The TodoCard is a non-forwarded function component.",
-    "files_touched": ["frontend/src/components/Todo/TodoList.tsx", "frontend/src/components/Todo/TodoView.tsx"]
+    "files_touched": [
+      "frontend/src/components/Todo/TodoList.tsx",
+      "frontend/src/components/Todo/TodoView.tsx"
+    ]
   },
   {
     "discovered_at": "2026-04-04T00:00:00Z",
@@ -25,14 +28,30 @@
     "tags": ["fullstack", "backend", "crud"],
     "finding": "blog_categories table has a UNIQUE(user_id, slug) constraint. Auto-generating slugs from the name via slugify() prevents manual slug management while still enforcing uniqueness. The blog_posts FK references blog_categories(id) with ON DELETE SET NULL, so deleting a category doesn't break posts.",
     "context": "Issue 1: Created full CRUD for blog_categories — controller, routes, shared DTOs, API_ENDPOINTS, frontend API service.",
-    "files_touched": ["backend/src/controllers/blogCategoryController.ts", "backend/src/routes/blogCategories.ts", "shared/src/types/index.ts", "shared/src/constants/index.ts", "shared/src/index.ts", "backend/src/index.ts", "frontend/src/services/api.ts"]
+    "files_touched": [
+      "backend/src/controllers/blogCategoryController.ts",
+      "backend/src/routes/blogCategories.ts",
+      "shared/src/types/index.ts",
+      "shared/src/constants/index.ts",
+      "shared/src/index.ts",
+      "backend/src/index.ts",
+      "frontend/src/services/api.ts"
+    ]
   },
   {
     "discovered_at": "2026-04-04T00:00:00Z",
     "tags": ["fullstack", "backend", "writing-sessions"],
     "finding": "Writing sessions use a start/end pattern: POST creates with start_time, PATCH sets end_time and computes productivity_score as words_per_minute. The session is validated against blog_post ownership to prevent cross-user session creation.",
     "context": "Issue 2: Created writing session endpoints (POST start, PATCH end) with auto-computed metrics.",
-    "files_touched": ["backend/src/controllers/writingSessionController.ts", "backend/src/routes/writingSessions.ts", "shared/src/types/index.ts", "shared/src/constants/index.ts", "shared/src/index.ts", "backend/src/index.ts", "frontend/src/services/api.ts"]
+    "files_touched": [
+      "backend/src/controllers/writingSessionController.ts",
+      "backend/src/routes/writingSessions.ts",
+      "shared/src/types/index.ts",
+      "shared/src/constants/index.ts",
+      "shared/src/index.ts",
+      "backend/src/index.ts",
+      "frontend/src/services/api.ts"
+    ]
   },
   {
     "discovered_at": "2026-04-04T00:00:00Z",

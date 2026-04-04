@@ -51,15 +51,15 @@ Browser → Vite Proxy (/api → :3001) → Express Middleware Chain → Route �
 
 ## Files You Own
 
-| File/Directory | Role (diagnostic) |
-|----------------|-------------------|
-| All source files | Read-only diagnostic access |
-| `backend/src/middleware/auth.ts` | Auth token verification |
-| `backend/src/middleware/validation.ts` | Input validation runner |
-| `backend/src/config/database.ts` | SQLite connection, schema, query helpers |
-| `frontend/src/services/api.ts` | Fetch wrapper, 401 handling |
-| `frontend/src/contexts/AuthContext.tsx` | Auth state, token management |
-| `backend/src/controllers/*.ts` | Business logic, SQL queries |
+| File/Directory                          | Role (diagnostic)                        |
+| --------------------------------------- | ---------------------------------------- |
+| All source files                        | Read-only diagnostic access              |
+| `backend/src/middleware/auth.ts`        | Auth token verification                  |
+| `backend/src/middleware/validation.ts`  | Input validation runner                  |
+| `backend/src/config/database.ts`        | SQLite connection, schema, query helpers |
+| `frontend/src/services/api.ts`          | Fetch wrapper, 401 handling              |
+| `frontend/src/contexts/AuthContext.tsx` | Auth state, token management             |
+| `backend/src/controllers/*.ts`          | Business logic, SQL queries              |
 
 ## Persistent Memory
 

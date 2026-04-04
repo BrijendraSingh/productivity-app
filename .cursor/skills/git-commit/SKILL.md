@@ -17,19 +17,19 @@ description: Guide the full git commit workflow — staging, crafting Convention
 
 ### Types
 
-| Type | When to use |
-|------|-------------|
-| `feat` | New feature or capability |
-| `fix` | Bug fix |
+| Type       | When to use                                             |
+| ---------- | ------------------------------------------------------- |
+| `feat`     | New feature or capability                               |
+| `fix`      | Bug fix                                                 |
 | `refactor` | Code change that neither fixes a bug nor adds a feature |
-| `docs` | Documentation only |
-| `style` | Formatting, semicolons, etc. (no logic change) |
-| `test` | Adding or updating tests |
-| `chore` | Build, CI, tooling, dependencies |
-| `perf` | Performance improvement |
-| `ci` | CI/CD pipeline changes |
-| `build` | Build system or dependency changes |
-| `revert` | Reverts a previous commit |
+| `docs`     | Documentation only                                      |
+| `style`    | Formatting, semicolons, etc. (no logic change)          |
+| `test`     | Adding or updating tests                                |
+| `chore`    | Build, CI, tooling, dependencies                        |
+| `perf`     | Performance improvement                                 |
+| `ci`       | CI/CD pipeline changes                                  |
+| `build`    | Build system or dependency changes                      |
+| `revert`   | Reverts a previous commit                               |
 
 ### Scope
 
@@ -68,13 +68,13 @@ git log --oneline -5          # recent commit style reference
 
 Scan the diff for breaking-change signals:
 
-| Signal | Examples |
-|--------|----------|
-| Removed or renamed public API | Deleted export, renamed function/class |
-| Changed function signature | New required param, removed param, changed return type |
-| Changed data schema | Renamed DB column, removed field, changed type |
-| Changed config format | Renamed env var, changed config key structure |
-| Removed CLI flag or option | Dropped a previously supported argument |
+| Signal                        | Examples                                               |
+| ----------------------------- | ------------------------------------------------------ |
+| Removed or renamed public API | Deleted export, renamed function/class                 |
+| Changed function signature    | New required param, removed param, changed return type |
+| Changed data schema           | Renamed DB column, removed field, changed type         |
+| Changed config format         | Renamed env var, changed config key structure          |
+| Removed CLI flag or option    | Dropped a previously supported argument                |
 
 If any signal is found:
 
@@ -86,11 +86,13 @@ If any signal is found:
 **Subject line formula**: `<type>(<scope>)!?: <imperative description>`
 
 **Body** (when needed — multi-file changes, non-obvious reasoning):
+
 - Blank line after subject
-- Explain *why*, not *what* (the diff shows what)
+- Explain _why_, not _what_ (the diff shows what)
 - Wrap at 72 characters
 
 **Footer** (when needed):
+
 - `BREAKING CHANGE: <migration instructions>`
 - Issue refs if applicable
 
@@ -129,11 +131,13 @@ git status                      # confirm clean working tree
 ## Examples
 
 **Simple bug fix:**
+
 ```
 fix(parser): prevent crash on empty input array
 ```
 
 **Feature with body:**
+
 ```
 feat(dashboard): add real-time notification bell
 
@@ -142,6 +146,7 @@ in the top nav. Includes visual badge and dropdown panel.
 ```
 
 **Breaking change:**
+
 ```
 feat(api)!: switch authentication from session cookies to JWT
 
@@ -154,11 +159,13 @@ Cookie-based sessions are removed.
 ```
 
 **Chore:**
+
 ```
 chore(deps): upgrade express from 4.18 to 4.21
 ```
 
 **Revert:**
+
 ```
 revert: feat(dashboard): add real-time notification bell
 
@@ -176,5 +183,5 @@ under high concurrency.
 - [ ] Type is correct (`feat` vs `fix` vs `refactor` etc.)
 - [ ] Scope matches the primary area of change
 - [ ] Breaking changes have `!` suffix AND `BREAKING CHANGE:` footer
-- [ ] Body explains *why* when the change is non-obvious
+- [ ] Body explains _why_ when the change is non-obvious
 - [ ] Post-commit `git log` and `git status` confirm success

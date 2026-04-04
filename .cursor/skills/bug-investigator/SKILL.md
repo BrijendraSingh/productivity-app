@@ -26,6 +26,7 @@ This skill systematically debugs issues in the productivity-app by tracing probl
 ## Halt and Ask
 
 Stop and confirm with the user if:
+
 - The fix requires a database migration that could affect existing data
 - The bug is actually a missing feature (e.g., `blog_categories` having no API is by-design incomplete)
 - Multiple valid fixes exist with different tradeoffs
@@ -36,6 +37,7 @@ Stop and confirm with the user if:
 ### Step 1: Reproduce and Classify
 
 Understand the symptom:
+
 - **UI issue**: Component renders wrong data, missing elements, broken layout → start from the component
 - **API error**: Specific HTTP status code → start from the route/controller
 - **Auth issue**: Login fails, 401s, token problems → start from auth middleware
@@ -47,15 +49,18 @@ Understand the symptom:
 For most bugs, trace the full path:
 
 #### Frontend Layer
+
 1. **Component** (`frontend/src/components/`): Check what data it renders and how it gets it (hook or direct API call)
 2. **Hook** (`frontend/src/hooks/`): Check the `useEffect` trigger, the `mountedRef` guard, error handling in `catch` blocks
 3. **API service** (`frontend/src/services/api.ts`): Check the `fetchApi` call — correct method, path, body? Token being sent?
 4. **Auth context** (`frontend/src/contexts/AuthContext.tsx`): On 401, `clearCredentials` is called and user is logged out — is this happening unexpectedly?
 
 #### Network Layer
+
 5. **Vite proxy** (`frontend/vite.config.ts`): `/api` → `http://localhost:3001`. `/health` also proxied. Check if the route matches the proxy config.
 
 #### Backend Layer
+
 6. **Middleware chain** (`backend/src/index.ts`):
    - `helmet()` → security headers
    - `cors()` → allowed origins (localhost:3000, `FRONTEND_URL`)
@@ -81,17 +86,17 @@ For most bugs, trace the full path:
 
 ### Step 3: Common Failure Modes
 
-| Symptom | Likely Cause | Where to Look |
-|---------|-------------|---------------|
-| 401 Unauthorized | Token expired/null, user logged out | `auth.ts` middleware, `api_token` column in DB |
-| 409 Conflict | UNIQUE constraint (duplicate name, slug, etc.) | Controller catch block, DB schema |
-| 500 Internal Server Error | Unhandled exception in controller | Controller try/catch, `console.error` output |
-| Empty data despite DB having rows | User scoping mismatch (`user_id`) | Controller SQL query, `req.user.id` |
-| Feature does nothing on click | Event handler not wired, or error swallowed | Component onClick/onChange, hook error catch |
-| Wrong route param data | URL param not read (`useParams` missing) | Component, `App.tsx` route definition |
-| CORS error | Origin not in allowed list | `backend/src/index.ts` CORS config |
-| Data out of sync | Stale hook state, `mountedRef` race | Hook `useCallback` deps, refresh function |
-| Infinite re-renders | Missing deps in useEffect/useCallback | Hook dependency arrays |
+| Symptom                           | Likely Cause                                   | Where to Look                                  |
+| --------------------------------- | ---------------------------------------------- | ---------------------------------------------- |
+| 401 Unauthorized                  | Token expired/null, user logged out            | `auth.ts` middleware, `api_token` column in DB |
+| 409 Conflict                      | UNIQUE constraint (duplicate name, slug, etc.) | Controller catch block, DB schema              |
+| 500 Internal Server Error         | Unhandled exception in controller              | Controller try/catch, `console.error` output   |
+| Empty data despite DB having rows | User scoping mismatch (`user_id`)              | Controller SQL query, `req.user.id`            |
+| Feature does nothing on click     | Event handler not wired, or error swallowed    | Component onClick/onChange, hook error catch   |
+| Wrong route param data            | URL param not read (`useParams` missing)       | Component, `App.tsx` route definition          |
+| CORS error                        | Origin not in allowed list                     | `backend/src/index.ts` CORS config             |
+| Data out of sync                  | Stale hook state, `mountedRef` race            | Hook `useCallback` deps, refresh function      |
+| Infinite re-renders               | Missing deps in useEffect/useCallback          | Hook dependency arrays                         |
 
 ### Step 4: Known Bugs in the Codebase
 
@@ -115,6 +120,7 @@ These are pre-existing issues discovered during the project scan:
 ## Debugging Toolkit
 
 ### Quick API Testing
+
 ```bash
 # Login and get token
 curl -X POST http://localhost:3001/api/auth/login \
@@ -127,14 +133,17 @@ curl http://localhost:3001/api/todos \
 ```
 
 ### Database Inspection
+
 The SQLite DB is at `data/productivity_app.db`. Docker-compose includes `sqlite-web` on port 8081 for browser-based inspection.
 
 ### Frontend State Inspection
+
 React DevTools can inspect hook state. The `AuthContext` exposes `user` and `token` in context. All API errors are logged to console.
 
 ## Output Format
 
 The specialist produces:
+
 1. Root cause analysis (which layer, which file, which line)
 2. The fix (code changes)
 3. Verification steps
@@ -143,10 +152,13 @@ The specialist produces:
 ## Learning Protocol
 
 ### Read on Entry
+
 - `.cursor/skills/_learnings/debug_log.json` — prior bugs, root causes, and fix patterns
 
 ### Write on Exit
+
 Append to `debug_log.json`:
+
 ```json
 {
   "discovered_at": "ISO-8601",

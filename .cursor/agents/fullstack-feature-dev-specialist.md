@@ -32,21 +32,21 @@ All entity types follow `BaseEntity` (id, created_at, updated_at). DTOs are sepa
 
 ## Files You Own
 
-| File/Directory | Role |
-|----------------|------|
-| `shared/src/types/index.ts` | Entity interfaces, DTOs, response types |
-| `shared/src/constants/index.ts` | API endpoints, config values, display metadata |
-| `shared/src/utils/*.ts` | Utility classes |
-| `shared/src/index.ts` | Re-exports |
-| `backend/src/config/database.ts` | SQLite schema DDL, connection, query helpers |
-| `backend/src/controllers/*.ts` | Business logic + SQL queries |
-| `backend/src/routes/*.ts` | HTTP routing + validation chains |
-| `backend/src/index.ts` | Express app setup, route mounting |
-| `frontend/src/services/api.ts` | Typed fetch wrapper, API function groups |
-| `frontend/src/hooks/*.ts` | Feature data hooks |
-| `frontend/src/components/**/*.tsx` | UI components |
-| `frontend/src/App.tsx` | React Router routes |
-| `frontend/src/components/Layout/AppLayout.tsx` | Navigation, FAB |
+| File/Directory                                 | Role                                           |
+| ---------------------------------------------- | ---------------------------------------------- |
+| `shared/src/types/index.ts`                    | Entity interfaces, DTOs, response types        |
+| `shared/src/constants/index.ts`                | API endpoints, config values, display metadata |
+| `shared/src/utils/*.ts`                        | Utility classes                                |
+| `shared/src/index.ts`                          | Re-exports                                     |
+| `backend/src/config/database.ts`               | SQLite schema DDL, connection, query helpers   |
+| `backend/src/controllers/*.ts`                 | Business logic + SQL queries                   |
+| `backend/src/routes/*.ts`                      | HTTP routing + validation chains               |
+| `backend/src/index.ts`                         | Express app setup, route mounting              |
+| `frontend/src/services/api.ts`                 | Typed fetch wrapper, API function groups       |
+| `frontend/src/hooks/*.ts`                      | Feature data hooks                             |
+| `frontend/src/components/**/*.tsx`             | UI components                                  |
+| `frontend/src/App.tsx`                         | React Router routes                            |
+| `frontend/src/components/Layout/AppLayout.tsx` | Navigation, FAB                                |
 
 ## Persistent Memory
 
