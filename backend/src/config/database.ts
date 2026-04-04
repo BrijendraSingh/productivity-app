@@ -1,5 +1,6 @@
 import path from 'node:path';
 import sqlite3 from 'sqlite3';
+import { DEFAULT_TAGS, DEFAULT_CATEGORIES } from '@productivity-app/shared';
 
 const DATABASE_PATH = process.env.DATABASE_PATH
   ? path.resolve(__dirname, '..', '..', process.env.DATABASE_PATH)
@@ -212,6 +213,44 @@ const CREATE_TABLES_SQL = [
   `CREATE INDEX IF NOT EXISTS idx_quadrant_analytics_user_id ON quadrant_analytics(user_id)`,
 ];
 
+async function seedDefaultsForExistingUsers(): Promise<void> {
+  try {
+    const users = await dbAll<{ id: number }>('SELECT id FROM users');
+    for (const user of users) {
+      const tagRow = await dbGet<{ cnt: number }>(
+        'SELECT COUNT(*) as cnt FROM tags WHERE user_id = ?',
+        [user.id]
+      );
+      if (tagRow && tagRow.cnt === 0) {
+        for (const tag of DEFAULT_TAGS) {
+          await dbRun('INSERT OR IGNORE INTO tags (user_id, name, color) VALUES (?, ?, ?)', [
+            user.id,
+            tag.name,
+            tag.color,
+          ]);
+        }
+        console.log(`Seeded default tags for user ${user.id}`);
+      }
+
+      const catRow = await dbGet<{ cnt: number }>(
+        'SELECT COUNT(*) as cnt FROM categories WHERE user_id = ?',
+        [user.id]
+      );
+      if (catRow && catRow.cnt === 0) {
+        for (const cat of DEFAULT_CATEGORIES) {
+          await dbRun(
+            'INSERT OR IGNORE INTO categories (user_id, name, color, icon, description) VALUES (?, ?, ?, ?, ?)',
+            [user.id, cat.name, cat.color, cat.icon, cat.description]
+          );
+        }
+        console.log(`Seeded default categories for user ${user.id}`);
+      }
+    }
+  } catch (err) {
+    console.error('Failed to seed defaults for existing users:', err);
+  }
+}
+
 export async function initializeDatabase(): Promise<sqlite3.Database> {
   return new Promise((resolve, reject) => {
     const verbose = sqlite3.verbose();
@@ -232,6 +271,9 @@ export async function initializeDatabase(): Promise<sqlite3.Database> {
         }
 
         console.log('All 13 database tables initialized successfully');
+
+        await seedDefaultsForExistingUsers();
+
         resolve(db);
       } catch (initErr) {
         console.error('Failed to initialize database tables:', initErr);

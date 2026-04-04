@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
-import { APP_CONFIG } from '@productivity-app/shared';
+import { APP_CONFIG, DEFAULT_TAGS, DEFAULT_CATEGORIES } from '@productivity-app/shared';
 import type { SafeUser, AuthResponse } from '@productivity-app/shared';
 import { dbGet, dbRun } from '../config/database';
 import { AppError } from '../utils/AppError';
@@ -19,6 +19,25 @@ if (DEV_LOGIN_ENABLED) {
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString('hex');
+}
+
+async function seedDefaultTagsForUser(userId: number): Promise<void> {
+  for (const tag of DEFAULT_TAGS) {
+    await dbRun('INSERT OR IGNORE INTO tags (user_id, name, color) VALUES (?, ?, ?)', [
+      userId,
+      tag.name,
+      tag.color,
+    ]);
+  }
+}
+
+async function seedDefaultCategoriesForUser(userId: number): Promise<void> {
+  for (const cat of DEFAULT_CATEGORIES) {
+    await dbRun(
+      'INSERT OR IGNORE INTO categories (user_id, name, color, icon, description) VALUES (?, ?, ?, ?, ?)',
+      [userId, cat.name, cat.color, cat.icon, cat.description]
+    );
+  }
 }
 
 function toSafeUser(row: Record<string, unknown>): SafeUser {
@@ -64,6 +83,9 @@ export async function register(req: Request, res: Response, next: NextFunction):
       [username, email, passwordHash, apiToken]
     );
 
+    await seedDefaultTagsForUser(result.lastID);
+    await seedDefaultCategoriesForUser(result.lastID);
+
     const user = await dbGet<Record<string, unknown>>('SELECT * FROM users WHERE id = ?', [
       result.lastID,
     ]);
@@ -107,11 +129,13 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
       if (!devUser) {
         const hash = await bcrypt.hash(DEV_PASSWORD, APP_CONFIG.BCRYPT_SALT_ROUNDS);
-        await dbRun(
+        const devResult = await dbRun(
           `INSERT INTO users (username, email, password_hash, api_token)
            VALUES (?, ?, ?, ?)`,
           [DEV_USERNAME, 'dev@productivity.app', hash, DEV_TOKEN]
         );
+        await seedDefaultTagsForUser(devResult.lastID);
+        await seedDefaultCategoriesForUser(devResult.lastID);
         devUser = await dbGet<Record<string, unknown>>('SELECT * FROM users WHERE username = ?', [
           DEV_USERNAME,
         ]);
