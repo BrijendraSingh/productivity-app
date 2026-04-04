@@ -21,6 +21,12 @@ import type {
   BlogPostWithRelations,
   CreateBlogPostRequest,
   UpdateBlogPostRequest,
+  BlogCategory,
+  CreateBlogCategoryRequest,
+  UpdateBlogCategoryRequest,
+  WritingSession,
+  CreateWritingSessionRequest,
+  UpdateWritingSessionRequest,
   CreateEventRequest,
   BulletLog,
   CreateBulletLogRequest,
@@ -268,6 +274,47 @@ export const blogApi = {
 
   publish: (id: number) =>
     request<BlogPost>(API_ENDPOINTS.BLOG_PUBLISH(id), { method: 'PATCH' }),
+};
+
+// ─── Blog Categories ──────────────────────────────────────────────────────
+
+export const blogCategoriesApi = {
+  list: () =>
+    request<(BlogCategory & { post_count: number })[]>(API_ENDPOINTS.BLOG_CATEGORIES),
+
+  get: (id: number) =>
+    request<BlogCategory>(API_ENDPOINTS.BLOG_CATEGORY_BY_ID(id)),
+
+  create: (body: CreateBlogCategoryRequest) =>
+    request<BlogCategory>(API_ENDPOINTS.BLOG_CATEGORIES, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  update: (id: number, body: UpdateBlogCategoryRequest) =>
+    request<BlogCategory>(API_ENDPOINTS.BLOG_CATEGORY_BY_ID(id), {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+
+  delete: (id: number) =>
+    request<void>(API_ENDPOINTS.BLOG_CATEGORY_BY_ID(id), { method: 'DELETE' }),
+};
+
+// ─── Writing Sessions ─────────────────────────────────────────────────────
+
+export const writingSessionsApi = {
+  start: (body: CreateWritingSessionRequest) =>
+    request<WritingSession>(API_ENDPOINTS.WRITING_SESSIONS, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  end: (id: number, body: UpdateWritingSessionRequest) =>
+    request<WritingSession>(API_ENDPOINTS.WRITING_SESSION_BY_ID(id), {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
 };
 
 // ─── Analytics ────────────────────────────────────────────────────────────────
