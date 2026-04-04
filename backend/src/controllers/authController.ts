@@ -5,9 +5,14 @@ import { APP_CONFIG } from '@productivity-app/shared';
 import type { SafeUser, AuthResponse } from '@productivity-app/shared';
 import { dbGet, dbRun } from '../config/database';
 
+const DEV_LOGIN_ENABLED = process.env.NODE_ENV !== 'production';
 const DEV_USERNAME = 'dev';
 const DEV_PASSWORD = 'dev';
 const DEV_TOKEN = 'dev-token';
+
+if (DEV_LOGIN_ENABLED) {
+  console.warn('[AUTH] Dev login shortcut is ACTIVE (username: dev, password: dev). Disable by setting NODE_ENV=production.');
+}
 
 function generateToken(): string {
   return crypto.randomBytes(32).toString('hex');
@@ -108,8 +113,7 @@ export async function login(req: Request, res: Response): Promise<void> {
       password: string;
     };
 
-    // Dev shortcut: auto-create dev user on first login
-    if (username === DEV_USERNAME && password === DEV_PASSWORD) {
+    if (DEV_LOGIN_ENABLED && username === DEV_USERNAME && password === DEV_PASSWORD) {
       let devUser = await dbGet<Record<string, unknown>>(
         'SELECT * FROM users WHERE username = ?',
         [DEV_USERNAME],
