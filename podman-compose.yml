@@ -1,0 +1,34 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - '8080:3001'
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_PATH=/app/data/productivity_app.db
+      - JWT_SECRET=${JWT_SECRET:-local-dev-secret-change-in-production}
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+
+  sqlite-web:
+    image: docker.io/coleifer/sqlite-web
+    ports:
+      - '8081:8080'
+    volumes:
+      - ./data:/data
+    command: sqlite_web -H 0.0.0.0 /data/productivity_app.db
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
