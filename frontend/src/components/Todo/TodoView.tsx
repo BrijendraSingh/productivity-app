@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   Box,
   TextField,
@@ -66,6 +67,8 @@ const QUADRANT_FILTERS: { value: EisenhowerQuadrant; label: string; color: strin
 
 export function TodoView() {
   const theme = useTheme();
+  const { id: idParam } = useParams<{ id: string }>();
+  const highlightId = idParam ? parseInt(idParam, 10) : null;
   const {
     todos,
     loading,
@@ -336,6 +339,7 @@ export function TodoView() {
         loading={loading}
         meta={meta}
         page={page}
+        highlightId={highlightId}
         onPageChange={setPage}
         onToggleComplete={toggleComplete}
         onUpdateStatus={updateTodo}

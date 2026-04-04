@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -38,7 +39,7 @@ import {
   Warning,
   ArrowForward,
 } from '@mui/icons-material';
-import { format, addDays, subDays, isToday } from 'date-fns';
+import { format, addDays, subDays, isToday, parseISO } from 'date-fns';
 import type { Mood, Weather, CreateDiaryEntryRequest } from '@productivity-app/shared';
 import { MOOD_LEVELS } from '@productivity-app/shared';
 import { useDiary } from '../../hooks/useDiary';
@@ -89,6 +90,8 @@ const INITIAL_FORM: DiaryFormState = {
 
 export function DiaryView() {
   const theme = useTheme();
+  const { date: dateParam } = useParams<{ date: string }>();
+  const navigate = useNavigate();
   const {
     currentEntry,
     selectedDate,
@@ -99,6 +102,24 @@ export function DiaryView() {
     upsertEntry,
     deleteEntry,
   } = useDiary();
+
+  // Sync route param → internal date state
+  useEffect(() => {
+    if (dateParam) {
+      const parsed = parseISO(dateParam);
+      if (!isNaN(parsed.getTime())) {
+        setSelectedDate(parsed);
+      }
+    }
+  }, [dateParam, setSelectedDate]);
+
+  const navigateToDate = useCallback(
+    (date: Date) => {
+      setSelectedDate(date);
+      navigate(`/diary/${format(date, 'yyyy-MM-dd')}`, { replace: true });
+    },
+    [setSelectedDate, navigate],
+  );
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<DiaryFormState>(INITIAL_FORM);
@@ -204,7 +225,7 @@ export function DiaryView() {
         }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <IconButton onClick={() => setSelectedDate(subDays(selectedDate, 1))}>
+          <IconButton onClick={() => navigateToDate(subDays(selectedDate, 1))}>
             <ChevronLeft />
           </IconButton>
 
@@ -219,7 +240,7 @@ export function DiaryView() {
           </Stack>
 
           <IconButton
-            onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+            onClick={() => navigateToDate(addDays(selectedDate, 1))}
             disabled={isToday(selectedDate)}
           >
             <ChevronRight />
@@ -228,7 +249,7 @@ export function DiaryView() {
 
         {!isToday(selectedDate) && (
           <Box sx={{ textAlign: 'center', mt: 1 }}>
-            <Button size="small" onClick={() => setSelectedDate(new Date())}>
+            <Button size="small" onClick={() => navigateToDate(new Date())}>
               Go to Today
             </Button>
           </Box>

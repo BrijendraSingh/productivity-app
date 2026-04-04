@@ -100,7 +100,7 @@ export default function App() {
             }
           />
           <Route
-            path="/blog/:slug"
+            path="/blog/:id"
             element={
               <ProtectedRoute>
                 <BlogView />

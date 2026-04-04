@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -44,6 +44,7 @@ interface TodoListProps {
   loading: boolean;
   meta: PaginationMeta | null;
   page: number;
+  highlightId?: number | null;
   onPageChange: (page: number) => void;
   onToggleComplete: (todo: TodoWithRelations) => Promise<boolean>;
   onUpdateStatus: (id: number, data: UpdateTodoRequest) => Promise<boolean>;
@@ -57,12 +58,20 @@ export function TodoList({
   loading,
   meta,
   page,
+  highlightId,
   onPageChange,
   onToggleComplete,
   onUpdateStatus,
   onDelete,
 }: TodoListProps) {
   const [menuAnchor, setMenuAnchor] = useState<{ el: HTMLElement; todoId: number } | null>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (highlightId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [highlightId, todos]);
 
   const totalPages = meta ? Math.ceil(meta.total / meta.limit) : 1;
 
@@ -92,15 +101,20 @@ export function TodoList({
   return (
     <>
       <Stack spacing={1.5}>
-        {todos.map((todo) => (
-          <TodoCard
-            key={todo.id}
-            todo={todo}
-            onToggleComplete={onToggleComplete}
-            onOpenMenu={(el) => setMenuAnchor({ el, todoId: todo.id })}
-            onDelete={onDelete}
-          />
-        ))}
+        {todos.map((todo) => {
+          const isHighlighted = highlightId != null && todo.id === highlightId;
+          return (
+            <div key={todo.id} ref={isHighlighted ? highlightRef : undefined}>
+              <TodoCard
+                todo={todo}
+                highlighted={isHighlighted}
+                onToggleComplete={onToggleComplete}
+                onOpenMenu={(el) => setMenuAnchor({ el, todoId: todo.id })}
+                onDelete={onDelete}
+              />
+            </div>
+          );
+        })}
       </Stack>
 
       {/* Status context menu */}
@@ -161,12 +175,13 @@ export function TodoList({
 
 interface TodoCardProps {
   todo: TodoWithRelations;
+  highlighted?: boolean;
   onToggleComplete: (todo: TodoWithRelations) => Promise<boolean>;
   onOpenMenu: (el: HTMLElement) => void;
   onDelete: (id: number) => Promise<boolean>;
 }
 
-function TodoCard({ todo, onToggleComplete, onOpenMenu, onDelete }: TodoCardProps) {
+function TodoCard({ todo, highlighted, onToggleComplete, onOpenMenu, onDelete }: TodoCardProps) {
   const isCompleted = todo.status === 'completed';
   const statusConfig = TODO_STATUS_CONFIG[todo.status];
   const priorityConfig = PRIORITY_LEVELS[todo.priority];
@@ -183,6 +198,10 @@ function TodoCard({ todo, onToggleComplete, onOpenMenu, onDelete }: TodoCardProp
         opacity: isCompleted ? 0.7 : 1,
         borderLeft: `4px solid ${qColor || '#e0e0e0'}`,
         transition: 'all 0.2s ease',
+        ...(highlighted && {
+          boxShadow: `0 0 0 2px ${qColor || '#1976d2'}`,
+          bgcolor: (theme) => alpha(qColor || '#1976d2', 0.04),
+        }),
       }}
     >
       <CardContent sx={{ pb: 1, '&:last-child': { pb: 1 } }}>

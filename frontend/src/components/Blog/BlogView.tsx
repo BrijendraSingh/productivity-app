@@ -110,8 +110,8 @@ const INITIAL_EDITOR_FORM: EditorFormState = {
 export function BlogView() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { slug } = useParams<{ slug: string }>();
-  const postId = slug ? parseInt(slug, 10) : null;
+  const { id: idParam } = useParams<{ id: string }>();
+  const postId = idParam ? parseInt(idParam, 10) : null;
 
   const {
     posts, currentPost, loading, saving, error, filters,
