@@ -217,24 +217,16 @@ function CustomTooltip({
 
 const RADIAN = Math.PI / 180;
 
-function renderOuterPieLabel({
-  cx,
-  cy,
-  midAngle,
-  outerRadius,
-  shortName,
-  value,
-  fill,
-}: {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  outerRadius: number;
-  shortName?: string;
-  name: string;
-  value: number;
-  fill: string;
-}) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function renderOuterPieLabel(props: any) {
+  const cx = Number(props.cx ?? 0);
+  const cy = Number(props.cy ?? 0);
+  const midAngle = Number(props.midAngle ?? 0);
+  const outerRadius = Number(props.outerRadius ?? 0);
+  const shortName = props.shortName as string | undefined;
+  const value = Number(props.value ?? 0);
+  const fill = String(props.fill ?? '#000');
+
   const radius = outerRadius + 20;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
