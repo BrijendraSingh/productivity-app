@@ -17,6 +17,8 @@ import tagRoutes from './routes/tags';
 import diaryRoutes from './routes/diary';
 import bulletRoutes from './routes/bullet';
 import blogRoutes from './routes/blog';
+import blogCategoryRoutes from './routes/blogCategories';
+import writingSessionRoutes from './routes/writingSessions';
 import analyticsRoutes from './routes/analytics';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -133,6 +135,8 @@ async function startServer(): Promise<void> {
   app.use('/api/diary', diaryRoutes);
   app.use('/api/bullet', bulletRoutes);
   app.use('/api/blog', blogRoutes);
+  app.use('/api/blog-categories', blogCategoryRoutes);
+  app.use('/api/writing-sessions', writingSessionRoutes);
   app.use('/api/analytics', analyticsRoutes);
 
   // ─── Production SPA serving ──────────────────────────────────────────────

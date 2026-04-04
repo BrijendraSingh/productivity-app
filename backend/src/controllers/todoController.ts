@@ -291,6 +291,34 @@ export async function update(req: Request, res: Response): Promise<void> {
       await syncTodoTags(todoId, body.tag_ids);
     }
 
+    // Upsert quadrant_analytics when a todo is newly completed
+    if (body.status === 'completed' && existing.status !== 'completed' && quadrant) {
+      const today = new Date().toISOString().split('T')[0];
+      const timeSpent = (body.time_estimate !== undefined ? body.time_estimate : existing.time_estimate as number | null) ?? 0;
+
+      const analyticsRow = await dbGet<{ id: number; tasks_completed: number; time_spent: number }>(
+        `SELECT id, tasks_completed, time_spent FROM quadrant_analytics
+         WHERE user_id = ? AND date = ? AND quadrant = ?`,
+        [userId, today, quadrant],
+      );
+
+      if (analyticsRow) {
+        const newCompleted = analyticsRow.tasks_completed + 1;
+        const newTime = analyticsRow.time_spent + timeSpent;
+        await dbRun(
+          `UPDATE quadrant_analytics SET tasks_completed = ?, time_spent = ?, productivity_score = ?
+           WHERE id = ?`,
+          [newCompleted, newTime, newCompleted, analyticsRow.id],
+        );
+      } else {
+        await dbRun(
+          `INSERT INTO quadrant_analytics (user_id, date, quadrant, tasks_completed, time_spent, productivity_score)
+           VALUES (?, ?, ?, 1, ?, 1)`,
+          [userId, today, quadrant, timeSpent],
+        );
+      }
+    }
+
     const updated = await dbGet<TodoWithRelations>(
       `SELECT t.*, c.name as category_name, c.color as category_color
        FROM todos t
