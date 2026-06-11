@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -9,6 +10,11 @@ import {
   Tooltip,
   IconButton,
   Divider,
+  Checkbox,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
   alpha,
   useTheme,
   useMediaQuery,
@@ -18,12 +24,19 @@ import {
   Info as InfoIcon,
   ArrowUpward as UrgentIcon,
   Star as ImportantIcon,
+  MoreHoriz as MoreIcon,
+  OpenInNew as OpenIcon,
 } from '@mui/icons-material';
-import type { TodoWithRelations, EisenhowerQuadrant } from '@productivity-app/shared';
-import { EISENHOWER_QUADRANTS } from '@productivity-app/shared';
+import type {
+  TodoWithRelations,
+  EisenhowerQuadrant,
+  TodoStatus,
+  UpdateTodoRequest,
+} from '@productivity-app/shared';
+import { EISENHOWER_QUADRANTS, TODO_STATUS_CONFIG } from '@productivity-app/shared';
 import { EisenhowerUtils } from '@productivity-app/shared';
 import { todosApi } from '../../services/api';
-import { quadrantColors, designTokens, surface } from '../../theme/theme';
+import { quadrantColors, statusColors, designTokens, surface } from '../../theme/theme';
 import { PageHeader } from '../Layout/PageHeader';
 
 // X-axis = Urgency (low → high), Y-axis = Importance (low → high)
@@ -43,17 +56,26 @@ const QUADRANT_GRID: {
 const PEN_COLOR = '#2c4a7c';
 const NOTEBOOK_BG = '#faf6ed';
 const NOTEBOOK_LINE = '#d9d4c8';
-const HAND_FONT = '"Caveat", "Segoe Print", "Bradley Hand", cursive';
+const HAND_FONT = '"Patrick Hand", "Kalam", "Segoe Print", cursive';
+const STATUS_OPTIONS: TodoStatus[] = [
+  'pending',
+  'in_progress',
+  'completed',
+  'cancelled',
+  'deferred',
+];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function EisenhowerMatrixView() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
 
   const [todos, setTodos] = useState<TodoWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<{ el: HTMLElement; todoId: number } | null>(null);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -87,6 +109,42 @@ export function EisenhowerMatrixView() {
   useEffect(() => {
     fetchAllTodos();
   }, [fetchAllTodos]);
+
+  const handleOpenTodo = useCallback(
+    (todoId: number) => {
+      navigate(`/todos/${todoId}`);
+    },
+    [navigate]
+  );
+
+  const handleToggleComplete = useCallback(
+    async (todo: TodoWithRelations) => {
+      const newStatus: TodoStatus = todo.status === 'completed' ? 'pending' : 'completed';
+      try {
+        const response = await todosApi.update(todo.id, { status: newStatus });
+        if (response.success && response.data) {
+          setTodos((prev) => prev.map((t) => (t.id === todo.id ? response.data! : t)));
+        }
+      } catch {
+        fetchAllTodos();
+      }
+    },
+    [fetchAllTodos]
+  );
+
+  const handleUpdateStatus = useCallback(
+    async (id: number, data: UpdateTodoRequest) => {
+      try {
+        const response = await todosApi.update(id, data);
+        if (response.success && response.data) {
+          setTodos((prev) => prev.map((t) => (t.id === id ? response.data! : t)));
+        }
+      } catch {
+        fetchAllTodos();
+      }
+    },
+    [fetchAllTodos]
+  );
 
   const grouped = EisenhowerUtils.groupByQuadrant(todos);
   const counts = EisenhowerUtils.getQuadrantCounts(todos);
@@ -127,7 +185,14 @@ export function EisenhowerMatrixView() {
       >
         {/* Coordinate-plane matrix — left */}
         <Box sx={{ minWidth: 0 }}>
-          <MatrixCoordinatePlane grouped={grouped} counts={counts} isMobile={isMobile} />
+          <MatrixCoordinatePlane
+            grouped={grouped}
+            counts={counts}
+            isMobile={isMobile}
+            onOpenTodo={handleOpenTodo}
+            onToggleComplete={handleToggleComplete}
+            onOpenMenu={(el, todoId) => setMenuAnchor({ el, todoId })}
+          />
         </Box>
 
         {/* Legend — right sidebar (desktop) / below matrix (mobile) */}
@@ -140,9 +205,67 @@ export function EisenhowerMatrixView() {
             alignSelf: 'start',
           }}
         >
-          <MatrixLegend />
+          <MatrixLegend onOpenTodos={() => navigate('/todos')} />
         </Box>
       </Box>
+
+      <Menu
+        anchorEl={menuAnchor?.el}
+        open={Boolean(menuAnchor)}
+        onClose={() => setMenuAnchor(null)}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ px: 2, py: 0.75, color: 'text.secondary', display: 'block', fontWeight: 600 }}
+        >
+          Change status
+        </Typography>
+        {STATUS_OPTIONS.map((status) => {
+          const config = TODO_STATUS_CONFIG[status];
+          return (
+            <MenuItem
+              key={status}
+              onClick={async () => {
+                if (menuAnchor) {
+                  await handleUpdateStatus(menuAnchor.todoId, { status });
+                }
+                setMenuAnchor(null);
+              }}
+            >
+              <ListItemIcon>
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    bgcolor: config.color,
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText primaryTypographyProps={{ fontSize: '0.875rem' }}>
+                {config.label}
+              </ListItemText>
+            </MenuItem>
+          );
+        })}
+        {menuAnchor && (
+          <MenuItem
+            onClick={() => {
+              handleOpenTodo(menuAnchor.todoId);
+              setMenuAnchor(null);
+            }}
+          >
+            <ListItemIcon>
+              <OpenIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primaryTypographyProps={{ fontSize: '0.875rem' }}>
+              Open in Todos
+            </ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
     </Box>
   );
 }
@@ -153,15 +276,26 @@ interface MatrixCoordinatePlaneProps {
   grouped: Record<EisenhowerQuadrant, TodoWithRelations[]>;
   counts: Record<EisenhowerQuadrant, number>;
   isMobile: boolean;
+  onOpenTodo: (todoId: number) => void;
+  onToggleComplete: (todo: TodoWithRelations) => Promise<void>;
+  onOpenMenu: (el: HTMLElement, todoId: number) => void;
 }
 
-function MatrixCoordinatePlane({ grouped, counts, isMobile }: MatrixCoordinatePlaneProps) {
+function MatrixCoordinatePlane({
+  grouped,
+  counts,
+  isMobile,
+  onOpenTodo,
+  onToggleComplete,
+  onOpenMenu,
+}: MatrixCoordinatePlaneProps) {
   const labelSx = {
     fontFamily: HAND_FONT,
-    fontSize: { xs: '0.95rem', sm: '1.05rem' },
+    fontSize: { xs: '1rem', sm: '1.1rem' },
     fontWeight: 600,
-    color: alpha(PEN_COLOR, 0.75),
-    lineHeight: 1.2,
+    color: alpha(PEN_COLOR, 0.8),
+    lineHeight: 1.25,
+    letterSpacing: '0.02em',
     userSelect: 'none' as const,
   };
 
@@ -271,6 +405,9 @@ function MatrixCoordinatePlane({ grouped, counts, isMobile }: MatrixCoordinatePl
               count={count}
               textAlign={textAlign}
               verticalAlign={verticalAlign}
+              onOpenTodo={onOpenTodo}
+              onToggleComplete={onToggleComplete}
+              onOpenMenu={onOpenMenu}
             />
           );
         })}
@@ -297,52 +434,60 @@ function HandDrawnAxes() {
         zIndex: 2,
       }}
     >
-      {/* Y-axis — wobbly vertical through center */}
-      <path
-        d="M 50 96 C 50.9 78, 49.1 62, 50.6 50 C 49.2 36, 51.1 20, 50 5"
-        fill="none"
+      {/* Y-axis — mostly straight with a light sketch shadow */}
+      <line
+        x1="50"
+        y1="96"
+        x2="50"
+        y2="5"
         stroke={PEN_COLOR}
-        strokeWidth="0.7"
+        strokeWidth="0.65"
         strokeLinecap="round"
         opacity="0.9"
       />
-      <path
-        d="M 50.4 96 C 51.2 78, 49.5 62, 50.9 50 C 49.6 36, 51.4 20, 50.4 5"
-        fill="none"
+      <line
+        x1="50.35"
+        y1="96"
+        x2="50.35"
+        y2="5"
         stroke={PEN_COLOR}
-        strokeWidth="0.35"
+        strokeWidth="0.3"
         strokeLinecap="round"
-        opacity="0.3"
+        opacity="0.25"
       />
 
-      {/* X-axis — wobbly horizontal through center */}
-      <path
-        d="M 4 50 C 20 49.2, 34 50.7, 50 49.4 C 66 50.5, 80 49.1, 96 50.2"
-        fill="none"
+      {/* X-axis — mostly straight with a light sketch shadow */}
+      <line
+        x1="4"
+        y1="50"
+        x2="96"
+        y2="50"
         stroke={PEN_COLOR}
-        strokeWidth="0.7"
+        strokeWidth="0.65"
         strokeLinecap="round"
         opacity="0.9"
       />
-      <path
-        d="M 4 50.4 C 20 49.6, 34 51.1, 50 49.8 C 66 50.9, 80 49.5, 96 50.6"
-        fill="none"
+      <line
+        x1="4"
+        y1="50.35"
+        x2="96"
+        y2="50.35"
         stroke={PEN_COLOR}
-        strokeWidth="0.35"
+        strokeWidth="0.3"
         strokeLinecap="round"
-        opacity="0.3"
+        opacity="0.25"
       />
 
-      {/* Arrowheads — sketched pen strokes */}
+      {/* Arrowheads */}
       <path
-        d="M 50 5 L 47.2 11 M 50 5 L 52.8 10.5"
+        d="M 50 5 L 47.5 11 M 50 5 L 52.5 11"
         stroke={PEN_COLOR}
         strokeWidth="0.55"
         strokeLinecap="round"
         fill="none"
       />
       <path
-        d="M 96 50 L 90 47.5 M 96 50 L 90.5 52.8"
+        d="M 96 50 L 90 47.5 M 96 50 L 90 52.5"
         stroke={PEN_COLOR}
         strokeWidth="0.55"
         strokeLinecap="round"
@@ -361,6 +506,9 @@ interface QuadrantZoneProps {
   count: number;
   textAlign: 'left' | 'right';
   verticalAlign: 'top' | 'bottom';
+  onOpenTodo: (todoId: number) => void;
+  onToggleComplete: (todo: TodoWithRelations) => Promise<void>;
+  onOpenMenu: (el: HTMLElement, todoId: number) => void;
 }
 
 function QuadrantZone({
@@ -370,6 +518,9 @@ function QuadrantZone({
   count,
   textAlign,
   verticalAlign,
+  onOpenTodo,
+  onToggleComplete,
+  onOpenMenu,
 }: QuadrantZoneProps) {
   const color = quadrantColors[quadrant];
   const isEmpty = count === 0;
@@ -454,7 +605,15 @@ function QuadrantZone({
             sx={{ alignItems: textAlign === 'left' ? 'flex-start' : 'flex-end' }}
           >
             {todos.map((todo) => (
-              <NotebookTaskItem key={todo.id} todo={todo} color={color} align={textAlign} />
+              <NotebookTaskItem
+                key={todo.id}
+                todo={todo}
+                color={color}
+                align={textAlign}
+                onOpen={() => onOpenTodo(todo.id)}
+                onToggleComplete={() => onToggleComplete(todo)}
+                onOpenMenu={(el) => onOpenMenu(el, todo.id)}
+              />
             ))}
           </Stack>
         )}
@@ -469,43 +628,135 @@ interface NotebookTaskItemProps {
   todo: TodoWithRelations;
   color: string;
   align: 'left' | 'right';
+  onOpen: () => void;
+  onToggleComplete: () => void;
+  onOpenMenu: (el: HTMLElement) => void;
 }
 
-function NotebookTaskItem({ todo, color, align }: NotebookTaskItemProps) {
+function NotebookTaskItem({
+  todo,
+  color,
+  align,
+  onOpen,
+  onToggleComplete,
+  onOpenMenu,
+}: NotebookTaskItemProps) {
   const isCompleted = todo.status === 'completed';
+  const isRightAligned = align === 'right';
 
   return (
-    <Box sx={{ maxWidth: '92%', opacity: isCompleted ? 0.45 : 1 }}>
-      <Typography
+    <Box
+      className="matrix-task-item"
+      sx={{
+        maxWidth: '96%',
+        opacity: isCompleted ? 0.5 : 1,
+        display: 'flex',
+        flexDirection: isRightAligned ? 'row-reverse' : 'row',
+        alignItems: 'flex-start',
+        gap: 0.25,
+        borderRadius: 1,
+        px: 0.25,
+        py: 0.15,
+        transition: 'background-color 0.15s ease',
+        '&:hover': {
+          bgcolor: alpha(PEN_COLOR, 0.05),
+          '& .matrix-task-actions': { opacity: 1 },
+        },
+      }}
+    >
+      <Checkbox
+        checked={isCompleted}
+        onChange={onToggleComplete}
+        size="small"
         sx={{
-          fontFamily: HAND_FONT,
-          fontSize: { xs: '1.05rem', sm: '1.15rem' },
-          fontWeight: 500,
-          color: PEN_COLOR,
-          textDecoration: isCompleted ? 'line-through' : 'none',
-          textAlign: align,
-          lineHeight: 1.3,
+          p: 0.25,
+          mt: 0.1,
+          color: alpha(color, 0.55),
+          '&.Mui-checked': { color: statusColors.completed },
         }}
-      >
-        {todo.bullet_symbol} {todo.title}
-      </Typography>
-      <Typography
-        sx={{
-          fontFamily: HAND_FONT,
-          fontSize: '0.8rem',
-          color: alpha(color, 0.7),
-          textAlign: align,
-        }}
-      >
-        U{todo.urgency_level} · I{todo.importance_level}
-      </Typography>
+        inputProps={{ 'aria-label': `Mark ${todo.title} complete` }}
+      />
+
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: isRightAligned ? 'row-reverse' : 'row',
+            alignItems: 'flex-start',
+            gap: 0.25,
+          }}
+        >
+          <Typography
+            component="button"
+            type="button"
+            onClick={onOpen}
+            sx={{
+              fontFamily: HAND_FONT,
+              fontSize: { xs: '1.1rem', sm: '1.2rem' },
+              fontWeight: 600,
+              color: PEN_COLOR,
+              letterSpacing: '0.02em',
+              textDecoration: isCompleted ? 'line-through' : 'none',
+              textAlign: align,
+              lineHeight: 1.35,
+              cursor: 'pointer',
+              border: 'none',
+              background: 'none',
+              p: 0,
+              m: 0,
+              width: '100%',
+              textAlignLast: align,
+              '&:hover': {
+                textDecoration: isCompleted ? 'line-through' : 'underline',
+                textDecorationColor: alpha(color, 0.6),
+              },
+            }}
+          >
+            {todo.bullet_symbol} {todo.title}
+          </Typography>
+
+          <Tooltip title="More actions">
+            <IconButton
+              className="matrix-task-actions"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenMenu(e.currentTarget);
+              }}
+              sx={{
+                opacity: { xs: 1, sm: 0 },
+                transition: 'opacity 0.15s ease',
+                p: 0.25,
+                color: alpha(PEN_COLOR, 0.55),
+                '&:hover': { color: PEN_COLOR },
+              }}
+              aria-label={`Actions for ${todo.title}`}
+            >
+              <MoreIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
+        <Typography
+          sx={{
+            fontFamily: HAND_FONT,
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            color: alpha(color, 0.75),
+            textAlign: align,
+            letterSpacing: '0.02em',
+          }}
+        >
+          U{todo.urgency_level} · I{todo.importance_level}
+        </Typography>
+      </Box>
     </Box>
   );
 }
 
 // ─── Legend ──────────────────────────────────────────────────────────────────
 
-function MatrixLegend() {
+function MatrixLegend({ onOpenTodos }: { onOpenTodos: () => void }) {
   const allQuadrants = EisenhowerUtils.getAllQuadrants();
 
   return (
@@ -524,9 +775,33 @@ function MatrixLegend() {
         </Typography>
       </Box>
 
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.55 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.55 }}>
         Tasks are automatically assigned to quadrants based on their urgency and importance levels.
         Urgency and importance are rated 1–10; a threshold of 7 determines the split.
+      </Typography>
+
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.55 }}>
+        <strong>Take action:</strong> click a task to open it in{' '}
+        <Box
+          component="button"
+          type="button"
+          onClick={onOpenTodos}
+          sx={{
+            border: 'none',
+            background: 'none',
+            p: 0,
+            m: 0,
+            color: 'primary.main',
+            font: 'inherit',
+            fontWeight: 600,
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            textUnderlineOffset: '2px',
+          }}
+        >
+          Todos
+        </Box>
+        . Use the checkbox to mark complete, or the ⋯ menu to change status.
       </Typography>
 
       <Stack spacing={1.5}>
