@@ -1,4 +1,5 @@
 name = "productivity-app"
+account_id = "6fdc4d7409114fdb5871a695028f4f30"
 compatibility_date = "2026-06-11"
 main = "worker/index.ts"
 
