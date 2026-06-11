@@ -117,9 +117,9 @@ npm run start
 
 ## Deployment
 
-### Cloudflare (free tier — frontend)
+### Cloudflare (free tier — full stack)
 
-Host the static SPA on **Cloudflare Workers & Pages** and proxy API calls to a separate backend via `BACKEND_URL`. See **[CLOUDFLARE.md](CLOUDFLARE.md)** for dashboard settings and troubleshooting.
+Host the **SPA + API + D1 database** on **Cloudflare Workers**. See **[CLOUDFLARE.md](CLOUDFLARE.md)** for D1 setup, build settings, and troubleshooting.
 
 ### Oracle Cloud (full stack)
 

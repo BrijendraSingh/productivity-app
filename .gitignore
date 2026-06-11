@@ -49,3 +49,7 @@ coverage/
 # Temporary files
 tmp/
 temp/
+
+# Wrangler local state
+.wrangler/
+frontend/.wrangler/

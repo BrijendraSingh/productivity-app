@@ -26,6 +26,7 @@
     "dotenv": "16.6.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250611.0",
     "nodemon": "3.1.11",
     "ts-node": "10.9.2",
     "typescript": "5.9.3",

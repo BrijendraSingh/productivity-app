@@ -38,6 +38,8 @@ services:
       - PORT=3001
       - DATABASE_PATH=/app/data/productivity_app.db
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - ALLOW_REGISTRATION=${ALLOW_REGISTRATION:-false}
     networks:
       - productivity-network
     restart: unless-stopped

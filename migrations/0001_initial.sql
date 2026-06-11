@@ -1,0 +1,182 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  api_token TEXT,
+  is_active INTEGER DEFAULT 1,
+  profile_data TEXT,
+  preferences TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS categories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  color TEXT DEFAULT '#1976d2',
+  icon TEXT,
+  description TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, name)
+);
+CREATE INDEX IF NOT EXISTS idx_categories_user_id ON categories(user_id);
+
+CREATE TABLE IF NOT EXISTS tags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  color TEXT DEFAULT '#757575',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, name)
+);
+CREATE INDEX IF NOT EXISTS idx_tags_user_id ON tags(user_id);
+
+CREATE TABLE IF NOT EXISTS todos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  status TEXT DEFAULT 'pending',
+  priority TEXT DEFAULT 'medium',
+  due_date TEXT,
+  category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  urgency_level INTEGER DEFAULT 5,
+  importance_level INTEGER DEFAULT 5,
+  eisenhower_quadrant TEXT,
+  quadrant_auto_assigned INTEGER DEFAULT 1,
+  bullet_symbol TEXT DEFAULT '•',
+  time_estimate INTEGER,
+  energy_required TEXT,
+  completed_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_todos_user_id ON todos(user_id);
+
+CREATE TABLE IF NOT EXISTS todo_tags (
+  todo_id INTEGER NOT NULL REFERENCES todos(id) ON DELETE CASCADE,
+  tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (todo_id, tag_id)
+);
+
+CREATE TABLE IF NOT EXISTS diary_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  date TEXT NOT NULL,
+  content TEXT,
+  mood TEXT,
+  weather TEXT,
+  energy_level INTEGER,
+  gratitude TEXT,
+  highlights TEXT,
+  challenges TEXT,
+  tomorrow_focus TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, date)
+);
+CREATE INDEX IF NOT EXISTS idx_diary_entries_user_id ON diary_entries(user_id);
+
+CREATE TABLE IF NOT EXISTS events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  event_date TEXT NOT NULL,
+  event_time TEXT,
+  duration INTEGER,
+  location TEXT,
+  category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  bullet_symbol TEXT DEFAULT '○',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_events_user_id ON events(user_id);
+
+CREATE TABLE IF NOT EXISTS bullet_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  date TEXT NOT NULL,
+  type TEXT NOT NULL,
+  content TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_bullet_logs_user_id ON bullet_logs(user_id);
+
+CREATE TABLE IF NOT EXISTS blog_categories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  description TEXT,
+  color TEXT,
+  icon TEXT,
+  parent_id INTEGER REFERENCES blog_categories(id) ON DELETE SET NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, slug)
+);
+CREATE INDEX IF NOT EXISTS idx_blog_categories_user_id ON blog_categories(user_id);
+
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  content TEXT,
+  content_type TEXT DEFAULT 'markdown',
+  status TEXT DEFAULT 'draft',
+  excerpt TEXT,
+  featured_image_path TEXT,
+  category_id INTEGER REFERENCES blog_categories(id) ON DELETE SET NULL,
+  reading_time INTEGER,
+  word_count INTEGER,
+  seo_title TEXT,
+  seo_description TEXT,
+  seo_keywords TEXT,
+  view_count INTEGER DEFAULT 0,
+  published_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, slug)
+);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_user_id ON blog_posts(user_id);
+
+CREATE TABLE IF NOT EXISTS blog_post_tags (
+  blog_post_id INTEGER NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+  tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (blog_post_id, tag_id)
+);
+
+CREATE TABLE IF NOT EXISTS writing_sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  blog_post_id INTEGER NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+  start_time DATETIME,
+  end_time DATETIME,
+  words_written INTEGER,
+  productivity_score REAL,
+  notes TEXT,
+  session_type TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_writing_sessions_user_id ON writing_sessions(user_id);
+
+CREATE TABLE IF NOT EXISTS quadrant_analytics (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  date TEXT NOT NULL,
+  quadrant TEXT NOT NULL,
+  tasks_completed INTEGER DEFAULT 0,
+  time_spent INTEGER DEFAULT 0,
+  productivity_score REAL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_quadrant_analytics_user_id ON quadrant_analytics(user_id);

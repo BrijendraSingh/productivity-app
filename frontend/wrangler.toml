@@ -1,10 +1,20 @@
 name = "productivity-app"
 account_id = "6fdc4d7409114fdb5871a695028f4f30"
 compatibility_date = "2026-06-11"
+compatibility_flags = ["nodejs_compat"]
 main = "worker/index.ts"
+
+[vars]
+ALLOW_REGISTRATION = "true"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "productivity-app-db"
+database_id = "PLACEHOLDER"
+migrations_dir = "../migrations"
 
 [assets]
 directory = "./dist"
 not_found_handling = "single-page-application"
 binding = "ASSETS"
-run_worker_first = ["/api/*", "/health"]
+run_worker_first = ["/api", "/api/*", "/health"]

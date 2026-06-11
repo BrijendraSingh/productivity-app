@@ -1,3 +1,5 @@
+import { useD1 } from './database.api';
+
 /**
  * Production security configuration helpers.
  */
@@ -14,7 +16,7 @@ export function isDevLoginEnabled(): boolean {
 }
 
 export function validateProductionConfig(): void {
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' || useD1()) {
     return;
   }
 
