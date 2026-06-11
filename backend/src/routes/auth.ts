@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import { APP_CONFIG } from '@productivity-app/shared';
 import { authMiddleware } from '../middleware/auth';
+import { registrationGate } from '../middleware/registrationGate';
 import { validate } from '../middleware/validation';
 import * as authController from '../controllers/authController';
 
@@ -10,6 +11,7 @@ const router = Router();
 // POST /api/auth/register (public)
 router.post(
   '/register',
+  registrationGate,
   validate([
     body('username')
       .trim()

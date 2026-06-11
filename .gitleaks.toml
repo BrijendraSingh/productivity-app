@@ -1,0 +1,20 @@
+title = "productivity-app gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow known example placeholders"
+paths = [
+  '''\.env\.example$''',
+  '''deploy/\.env\.production\.example$''',
+  '''DEPLOY\.md$''',
+  '''README\.md$''',
+]
+
+regexes = [
+  '''<change-this-in-production>''',
+  '''<change-me-in-production>''',
+  '''dev-secret-do-not-use-in-production''',
+  '''example\.com''',
+]

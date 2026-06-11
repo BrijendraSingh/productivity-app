@@ -115,6 +115,19 @@ npm run build
 npm run start
 ```
 
+## Deployment
+
+Production deploy uses **Oracle Cloud** (ARM VM) + **GHCR** + **Cloudflare Tunnel** with a secured webhook trigger from GitHub Actions.
+
+See **[DEPLOY.md](DEPLOY.md)** for the full setup guide, security checklist, and troubleshooting.
+
+**Security highlights:**
+
+- Registration disabled in production by default (`ALLOW_REGISTRATION=false`)
+- Deploy webhook protected by Cloudflare Access + HMAC signature
+- App binds to localhost; only Cloudflare Tunnel exposes HTTPS
+- CI runs gitleaks + Trivy image scan before deploy
+
 ## Docker
 
 | Command                  | Description                            |
@@ -145,17 +158,18 @@ All endpoints under `/api/*` (except auth) require a bearer token in the `Author
 
 ## Environment Variables
 
-| Variable                  | Default                       | Description                                                 |
-| ------------------------- | ----------------------------- | ----------------------------------------------------------- |
-| `PORT`                    | `3001`                        | Backend server port                                         |
-| `NODE_ENV`                | `development`                 | Environment mode                                            |
-| `FRONTEND_URL`            | `http://localhost:3000`       | Allowed CORS origin                                         |
-| `DATABASE_PATH`           | `../data/productivity_app.db` | SQLite database file path                                   |
-| `JWT_SECRET`              | --                            | Secret key for signing auth tokens (required in production) |
-| `LOG_LEVEL`               | `info`                        | Logging verbosity                                           |
-| `RATE_LIMIT_WINDOW_MS`    | `900000`                      | Rate limit window in milliseconds (production only)         |
-| `RATE_LIMIT_MAX_REQUESTS` | `100`                         | Max requests per rate limit window (production only)        |
-| `VITE_API_URL`            | `http://localhost:3001`       | API base URL used by the frontend                           |
+| Variable                       | Default                       | Description                                             |
+| ------------------------------ | ----------------------------- | ------------------------------------------------------- |
+| `PORT`                         | `3001`                        | Backend server port                                     |
+| `NODE_ENV`                     | `development`                 | Environment mode                                        |
+| `FRONTEND_URL`                 | `http://localhost:3000`       | Allowed CORS origin                                     |
+| `DATABASE_PATH`                | `../data/productivity_app.db` | SQLite database file path                               |
+| `ALLOW_REGISTRATION`           | `false` in production         | Set `true` to allow new user signups on a public deploy |
+| `AUTH_RATE_LIMIT_MAX_REQUESTS` | `10`                          | Auth endpoint rate limit per IP (production only)       |
+| `LOG_LEVEL`                    | `info`                        | Logging verbosity                                       |
+| `RATE_LIMIT_WINDOW_MS`         | `900000`                      | Rate limit window in milliseconds (production only)     |
+| `RATE_LIMIT_MAX_REQUESTS`      | `100`                         | Max requests per rate limit window (production only)    |
+| `VITE_API_URL`                 | `http://localhost:3001`       | API base URL used by the frontend                       |
 
 ## Available Scripts
 
@@ -206,9 +220,12 @@ E2E specs cover auth, todos, diary, blog, matrix, analytics, and bullet journal.
 
 GitHub Actions runs automatically on push/PR to `main`/`master`:
 
-1. **Quality** -- lint, format check, build
-2. **Unit Tests** -- Vitest (parallelized after quality)
-3. **E2E Tests** -- Playwright with server startup (parallelized after quality)
+1. **Secret Scan** -- gitleaks
+2. **Quality** -- lint, format check, build
+3. **Unit Tests** -- Vitest (parallelized after quality)
+4. **E2E Tests** -- Playwright with server startup (parallelized after quality)
+
+On push to `main` after CI passes, the **Deploy** workflow builds an ARM64 image, scans with Trivy, pushes to GHCR, and triggers the production webhook.
 
 ## Code Quality
 

@@ -21,18 +21,40 @@ import blogRoutes from './routes/blog';
 import blogCategoryRoutes from './routes/blogCategories';
 import writingSessionRoutes from './routes/writingSessions';
 import analyticsRoutes from './routes/analytics';
+import { validateProductionConfig } from './config/security';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 async function startServer(): Promise<void> {
+  validateProductionConfig();
   await initializeDatabase();
 
   const app = express();
 
+  if (NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+  }
+
   // 1. Helmet — security headers
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy:
+        NODE_ENV === 'production'
+          ? {
+              directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'", "'unsafe-inline'"],
+                styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+                fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+                imgSrc: ["'self'", 'data:', 'blob:'],
+                connectSrc: ["'self'"],
+              },
+            }
+          : false,
+    })
+  );
 
   // 2. CORS — allow frontend origin
   app.use(
@@ -42,10 +64,27 @@ async function startServer(): Promise<void> {
     })
   );
 
-  // 3. Rate limiting — production only (100 requests per 15 min window)
+  // 3. Rate limiting — production only
   if (NODE_ENV === 'production') {
     const windowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10);
     const maxRequests = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10);
+    const authMaxRequests = parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || '10', 10);
+
+    const rateLimitMessage = {
+      success: false,
+      message: 'Too many requests. Please try again later.',
+    };
+
+    const authLimiter = rateLimit({
+      windowMs,
+      max: authMaxRequests,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: rateLimitMessage,
+    });
+
+    app.use('/api/auth/login', authLimiter);
+    app.use('/api/auth/register', authLimiter);
 
     app.use(
       rateLimit({
@@ -53,10 +92,7 @@ async function startServer(): Promise<void> {
         max: maxRequests,
         standardHeaders: true,
         legacyHeaders: false,
-        message: {
-          success: false,
-          message: 'Too many requests. Please try again later.',
-        },
+        message: rateLimitMessage,
       })
     );
   }

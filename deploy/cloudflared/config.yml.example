@@ -1,0 +1,17 @@
+# Copy to ~/.cloudflared/config.yml after: cloudflared tunnel create productivity-app
+#
+# Replace:
+#   <TUNNEL_ID>       — from `cloudflared tunnel list`
+#   <TUNNEL_UUID>     — credentials file name
+#   app.example.com   — your app hostname (APP_HOSTNAME)
+#   deploy.example.com — your deploy webhook hostname (DEPLOY_HOSTNAME)
+
+tunnel: <TUNNEL_ID>
+credentials-file: /home/ubuntu/.cloudflared/<TUNNEL_UUID>.json
+
+ingress:
+  - hostname: app.example.com
+    service: http://127.0.0.1:3001
+  - hostname: deploy.example.com
+    service: http://127.0.0.1:9000
+  - service: http_status:404

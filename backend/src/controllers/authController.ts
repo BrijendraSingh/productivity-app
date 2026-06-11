@@ -5,8 +5,9 @@ import { APP_CONFIG, DEFAULT_TAGS, DEFAULT_CATEGORIES } from '@productivity-app/
 import type { SafeUser, AuthResponse } from '@productivity-app/shared';
 import { dbGet, dbRun } from '../config/database';
 import { AppError } from '../utils/AppError';
+import { isDevLoginEnabled } from '../config/security';
 
-const DEV_LOGIN_ENABLED = process.env.NODE_ENV !== 'production';
+const DEV_LOGIN_ENABLED = isDevLoginEnabled();
 const DEV_USERNAME = 'dev';
 const DEV_PASSWORD = 'dev';
 const DEV_TOKEN = 'dev-token';

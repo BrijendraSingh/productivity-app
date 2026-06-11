@@ -13,7 +13,7 @@ This project uses a **ReAct-style agent loop** with a specialist subagent model.
 
 ## Key Constraints & Safety
 
-- **Required Env Vars**: `PORT` (3001), `DATABASE_PATH` (SQLite file), `JWT_SECRET` (token generation), `FRONTEND_URL` (CORS origin). See `.env.example` for full list.
+- **Required Env Vars**: `PORT` (3001), `DATABASE_PATH` (SQLite file), `FRONTEND_URL` (CORS origin), `ALLOW_REGISTRATION` (production). See `.env.example` for full list.
 - **External Data Policy**: All data stays local — SQLite file at `data/productivity_app.db`. No external API calls, no telemetry, no cloud storage. User data is scoped by `user_id` on every query.
 - **Continuous Learning**: After every non-trivial interaction (success or failure), the learning store MUST be updated. This is not optional — accumulated knowledge is what makes the system improve over time.
 

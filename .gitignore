@@ -15,6 +15,10 @@ data/
 .env
 .env.local
 .env.*.local
+deploy/.env
+
+# Rendered deploy configs (contain secrets on VM)
+deploy/webhook/hooks.json
 
 # Editor / IDE
 .vscode/
