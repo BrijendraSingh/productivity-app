@@ -74,6 +74,16 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<ApiRe
     onUnauthorized?.();
   }
 
+  const contentType = response.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) {
+    const text = await response.text();
+    throw new Error(
+      text.startsWith('<!')
+        ? 'Server returned HTML instead of JSON. Try signing in again.'
+        : text || `Request failed with status ${response.status}`
+    );
+  }
+
   const data: ApiResponse<T> = await response.json();
 
   if (!response.ok && !data.message) {

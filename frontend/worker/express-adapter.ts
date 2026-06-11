@@ -3,7 +3,13 @@ import type { Request, Response, NextFunction } from 'express';
 
 type ExpressHandler = (req: Request, res: Response, next: NextFunction) => unknown;
 
-function createMockResponse(c: Context, onDone: () => void): Response {
+declare module 'hono' {
+  interface ContextVariableMap {
+    expressReq: Request;
+  }
+}
+
+function createMockResponse(c: Context, onRespond: () => void): Response {
   let statusCode = 200;
   const headers = new Headers();
 
@@ -19,7 +25,7 @@ function createMockResponse(c: Context, onDone: () => void): Response {
     json(body: unknown) {
       headers.set('content-type', 'application/json; charset=utf-8');
       c.res = new Response(JSON.stringify(body), { status: statusCode, headers });
-      onDone();
+      onRespond();
       return res;
     },
     send(body?: unknown) {
@@ -27,14 +33,14 @@ function createMockResponse(c: Context, onDone: () => void): Response {
         return res.json(body);
       }
       c.res = new Response(body == null ? '' : String(body), { status: statusCode, headers });
-      onDone();
+      onRespond();
       return res;
     },
     end() {
       if (!c.res) {
         c.res = new Response(null, { status: statusCode, headers });
       }
-      onDone();
+      onRespond();
       return res;
     },
   } as unknown as Response;
@@ -42,20 +48,45 @@ function createMockResponse(c: Context, onDone: () => void): Response {
   return res;
 }
 
-async function createMockRequest(c: Context): Promise<Request> {
+async function readBody(c: Context): Promise<unknown> {
+  if (c.req.method === 'GET' || c.req.method === 'HEAD' || c.req.method === 'DELETE') {
+    return {};
+  }
+  try {
+    return await c.req.json();
+  } catch {
+    return {};
+  }
+}
+
+async function getOrCreateRequest(c: Context): Promise<Request> {
   const url = new URL(c.req.url);
   const headers: Record<string, string> = {};
   c.req.raw.headers.forEach((value, key) => {
     headers[key] = value;
   });
 
-  let body: unknown = {};
-  if (c.req.method !== 'GET' && c.req.method !== 'HEAD' && c.req.method !== 'DELETE') {
-    try {
-      body = await c.req.json();
-    } catch {
-      body = {};
-    }
+  const existing = c.get('expressReq');
+  if (existing) {
+    const mutable = existing as Request & {
+      method: string;
+      url: string;
+      originalUrl: string;
+      path: string;
+      headers: Record<string, string>;
+      query: Record<string, string>;
+      params: Record<string, string>;
+      body: unknown;
+    };
+    mutable.method = c.req.method;
+    mutable.url = url.pathname + url.search;
+    mutable.originalUrl = url.pathname + url.search;
+    mutable.path = url.pathname;
+    mutable.headers = headers;
+    mutable.query = Object.fromEntries(url.searchParams.entries());
+    mutable.params = c.req.param();
+    mutable.body = await readBody(c);
+    return existing;
   }
 
   const req = {
@@ -72,10 +103,11 @@ async function createMockRequest(c: Context): Promise<Request> {
     },
     query: Object.fromEntries(url.searchParams.entries()),
     params: c.req.param(),
-    body,
+    body: await readBody(c),
     user: undefined as unknown,
   } as unknown as Request;
 
+  c.set('expressReq', req);
   return req;
 }
 
@@ -99,49 +131,73 @@ function errorResponse(err: unknown): Response {
   );
 }
 
+function runExpressHandlers(
+  req: Request,
+  c: Context,
+  handlers: ExpressHandler[]
+): Promise<Response | null> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value: Response | null) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+
+    const res = createMockResponse(c, () => {
+      finish(c.res as Response);
+    });
+
+    let index = 0;
+
+    const expressNext: NextFunction = (err?: unknown) => {
+      if (err) {
+        finish(errorResponse(err));
+        return;
+      }
+
+      index += 1;
+      if (index >= handlers.length) {
+        finish(null);
+        return;
+      }
+
+      runHandler(handlers[index]!);
+    };
+
+    const runHandler = (handler: ExpressHandler) => {
+      try {
+        const result = handler(req, res, expressNext);
+        if (result && typeof (result as Promise<unknown>).then === 'function') {
+          (result as Promise<unknown>).catch(expressNext);
+        }
+      } catch (err) {
+        expressNext(err);
+      }
+    };
+
+    runHandler(handlers[0]!);
+  });
+}
+
 /**
- * Runs one or more Express-style handlers in sequence (middleware chain).
+ * Runs one or more Express-style handlers in sequence.
+ * When the chain finishes without writing a response, continues the Hono middleware chain.
  */
 export function fromExpress(...handlers: ExpressHandler[]) {
-  return async (c: Context) => {
-    const req = await createMockRequest(c);
+  return async (c: Context, honoNext?: () => Promise<void>) => {
+    const req = await getOrCreateRequest(c);
+    const response = await runExpressHandlers(req, c, handlers);
 
-    return new Promise<Response>((resolve) => {
-      const res = createMockResponse(c, () => {
-        resolve(c.res ?? new Response(null, { status: 204 }));
-      });
+    if (response) {
+      return response;
+    }
 
-      let index = 0;
+    if (honoNext) {
+      await honoNext();
+      return;
+    }
 
-      const next: NextFunction = (err?: unknown) => {
-        if (err) {
-          resolve(errorResponse(err));
-          return;
-        }
-
-        index += 1;
-        if (index >= handlers.length) {
-          if (!c.res) {
-            resolve(new Response(null, { status: 204 }));
-          }
-          return;
-        }
-
-        runHandler(handlers[index]!);
-      };
-
-      const runHandler = (handler: ExpressHandler) => {
-        try {
-          const result = handler(req, res, next);
-          if (result && typeof (result as Promise<unknown>).then === 'function') {
-            (result as Promise<unknown>).catch((err) => next(err));
-          }
-        } catch (err) {
-          next(err);
-        }
-      };
-
-      runHandler(handlers[0]!);
-    });
+    return c.res ?? new Response(null, { status: 204 });
   };
 }
