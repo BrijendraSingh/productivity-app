@@ -15,6 +15,8 @@
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:backend": "npm run dev --workspace=backend",
     "build": "npm run build --workspace=shared && npm run build --workspace=backend && npm run build --workspace=frontend",
+    "build:cloudflare": "npm run build --workspace=shared && npm run build --workspace=frontend",
+    "deploy:cloudflare": "npm run build:cloudflare && npm run deploy --workspace=frontend",
     "build:shared": "npm run build --workspace=shared",
     "build:frontend": "npm run build --workspace=frontend",
     "build:backend": "npm run build --workspace=backend",

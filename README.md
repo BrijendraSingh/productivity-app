@@ -117,6 +117,12 @@ npm run start
 
 ## Deployment
 
+### Cloudflare (free tier — frontend)
+
+Host the static SPA on **Cloudflare Workers & Pages** and proxy API calls to a separate backend via `BACKEND_URL`. See **[CLOUDFLARE.md](CLOUDFLARE.md)** for dashboard settings and troubleshooting.
+
+### Oracle Cloud (full stack)
+
 Production deploy uses **Oracle Cloud** (ARM VM) + **GHCR** + **Cloudflare Tunnel** with a secured webhook trigger from GitHub Actions.
 
 See **[DEPLOY.md](DEPLOY.md)** for the full setup guide, security checklist, and troubleshooting.
