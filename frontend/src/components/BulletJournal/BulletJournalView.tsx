@@ -95,6 +95,15 @@ const SHORTCUT_MAP: Record<string, string> = {
   '/p': '! ',
 };
 
+const SYMBOL_BUTTON_LABELS: Record<string, string> = {
+  '•': 'Task',
+  '×': 'Done',
+  '→': 'Migrated',
+  '○': 'Event',
+  '–': 'Note',
+  '!': 'Priority',
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function BulletJournalView() {
@@ -120,6 +129,7 @@ export function BulletJournalView() {
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [eventForm, setEventForm] = useState<EventFormState>(INITIAL_EVENT_FORM);
   const textFieldRef = useRef<HTMLTextAreaElement>(null);
+  const cursorPosRef = useRef(0);
 
   // Listen for FAB click
   useJournalDialogEvent(
@@ -227,22 +237,32 @@ export function BulletJournalView() {
 
   // ─── Symbol insertion helpers ───────────────────────────────────────────
 
+  const syncCursorPosition = () => {
+    const el = textFieldRef.current;
+    if (el) {
+      cursorPosRef.current = el.selectionStart ?? logContent.length;
+    }
+  };
+
   const handleInsertSymbol = (symbol: string) => {
     const el = textFieldRef.current;
-    if (!el) return;
-    const start = el.selectionStart ?? logContent.length;
+    const start = el?.selectionStart ?? cursorPosRef.current ?? logContent.length;
+    const end = el?.selectionEnd ?? start;
     const before = logContent.slice(0, start);
-    const after = logContent.slice(start);
-    const atLineStart = start === 0 || before.endsWith('\n');
-    const prefix = atLineStart ? '' : '\n';
-    const insertion = `${prefix}${symbol} `;
+    const after = logContent.slice(end);
+    const insertion = `${symbol} `;
     const newContent = before + insertion + after;
+    const newCursor = start + insertion.length;
+
     setLogContent(newContent);
     setDirty(true);
+    cursorPosRef.current = newCursor;
+
     requestAnimationFrame(() => {
-      el.focus();
-      const cursorPos = start + insertion.length;
-      el.setSelectionRange(cursorPos, cursorPos);
+      if (el) {
+        el.focus();
+        el.setSelectionRange(newCursor, newCursor);
+      }
     });
   };
 
@@ -268,6 +288,10 @@ export function BulletJournalView() {
     }
     setLogContent(value);
     setDirty(true);
+    requestAnimationFrame(() => {
+      const el = textFieldRef.current;
+      if (el) cursorPosRef.current = el.selectionStart ?? value.length;
+    });
   };
 
   return (
@@ -342,52 +366,6 @@ export function BulletJournalView() {
         </Alert>
       )}
 
-      {/* ─── Symbol Toolbar ──────────────────────────────────────────── */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 1.5,
-          mb: 2,
-          border: `1px solid ${theme.palette.divider}`,
-          borderRadius: 2,
-        }}
-      >
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ fontWeight: 600, mb: 0.5, display: 'block' }}
-        >
-          Insert Symbol
-        </Typography>
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          {BULLET_SYMBOLS.map((bs) => (
-            <Tooltip key={bs.symbol} title={bs.description} arrow>
-              <Chip
-                label={`${bs.symbol} ${bs.label}`}
-                size="small"
-                onClick={() => handleInsertSymbol(bs.symbol)}
-                sx={{
-                  fontWeight: 600,
-                  bgcolor: alpha(bulletSymbolColors[bs.symbol] ?? '#757575', 0.1),
-                  color: bulletSymbolColors[bs.symbol] ?? '#757575',
-                  fontFamily: 'monospace',
-                  cursor: 'pointer',
-                  transition: 'transform 0.1s, box-shadow 0.1s',
-                  '&:hover': {
-                    bgcolor: alpha(bulletSymbolColors[bs.symbol] ?? '#757575', 0.2),
-                    transform: 'scale(1.05)',
-                    boxShadow: 1,
-                  },
-                }}
-              />
-            </Tooltip>
-          ))}
-        </Stack>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block' }}>
-          Tip: Type /t /d /m /e /n /p at the start of a line for quick entry
-        </Typography>
-      </Paper>
-
       {/* ─── Main Content ─────────────────────────────────────────────── */}
       {loading ? (
         <JournalLoadingSkeleton />
@@ -424,10 +402,55 @@ export function BulletJournalView() {
                 </Stack>
               </Stack>
 
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                Use bullet symbols for rapid logging: • Task, × Done, → Migrated, ○ Event, – Note, !
-                Priority
-              </Typography>
+              <Box sx={{ mb: 1.5 }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ fontWeight: 600, mb: 1, display: 'block' }}
+                >
+                  Insert at cursor
+                </Typography>
+                <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+                  {BULLET_SYMBOLS.map((bs) => {
+                    const color = bulletSymbolColors[bs.symbol] ?? '#757575';
+                    const label = SYMBOL_BUTTON_LABELS[bs.symbol] ?? bs.label;
+                    return (
+                      <Tooltip key={bs.symbol} title={bs.description} arrow>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => handleInsertSymbol(bs.symbol)}
+                          sx={{
+                            minWidth: 'auto',
+                            px: 1.25,
+                            py: 0.5,
+                            fontFamily: 'monospace',
+                            fontWeight: 600,
+                            fontSize: '0.8125rem',
+                            borderColor: alpha(color, 0.35),
+                            color,
+                            bgcolor: alpha(color, 0.06),
+                            '&:hover': {
+                              borderColor: color,
+                              bgcolor: alpha(color, 0.12),
+                            },
+                          }}
+                        >
+                          {bs.symbol} {label}
+                        </Button>
+                      </Tooltip>
+                    );
+                  })}
+                </Stack>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ mt: 0.75, display: 'block' }}
+                >
+                  Click a button to insert at your cursor, or type /t /d /m /e /n /p at line start
+                </Typography>
+              </Box>
 
               <TextField
                 multiline
@@ -437,6 +460,10 @@ export function BulletJournalView() {
                 inputRef={textFieldRef}
                 value={logContent}
                 onChange={handleLogChange}
+                onSelect={syncCursorPosition}
+                onKeyUp={syncCursorPosition}
+                onClick={syncCursorPosition}
+                onBlur={syncCursorPosition}
                 placeholder={getPlaceholder(activeTab)}
                 sx={{
                   '& .MuiInputBase-input': {

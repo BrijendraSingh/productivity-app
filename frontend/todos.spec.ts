@@ -14,17 +14,15 @@ test.describe('Todo Management', () => {
     await expect(page.getByText(/Total/)).toBeVisible();
     await expect(page.getByText(/Pending/)).toBeVisible();
 
-    // Search field is visible
+    // Search field and Add Todo button are visible
     await expect(page.getByPlaceholder('Search todos...')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Add Todo' })).toBeVisible();
   });
 
-  test('create new todo via FAB and dialog', async ({ page }) => {
+  test('create new todo via Add Todo button and dialog', async ({ page }) => {
     const todoTitle = `Test Todo ${Date.now()}`;
 
-    // Click the FAB (floating action button)
-    const fab = page.locator('button[aria-label="New Todo"]');
-    await expect(fab).toBeVisible();
-    await fab.click();
+    await page.getByRole('button', { name: 'Add Todo' }).click();
 
     // Dialog should appear
     const dialog = page.locator('[role="dialog"]');
@@ -34,20 +32,9 @@ test.describe('Todo Management', () => {
     // Fill in the title
     await dialog.getByLabel('Title').fill(todoTitle);
 
-    // Set urgency slider (defaults to 5, drag to high ~8 for Q1)
-    const urgencySlider = dialog.locator('text=Urgency').locator('..').locator('[role="slider"]');
-    if (await urgencySlider.isVisible()) {
-      await urgencySlider.fill('8');
-    }
-
-    // Set importance slider
-    const importanceSlider = dialog
-      .locator('text=Importance')
-      .locator('..')
-      .locator('[role="slider"]');
-    if (await importanceSlider.isVisible()) {
-      await importanceSlider.fill('8');
-    }
+    // Expand details and pick Q1 on the matrix placement grid
+    await dialog.getByRole('button', { name: 'Add details' }).click();
+    await dialog.getByRole('button', { name: 'Q1 Do First', exact: true }).click();
 
     // Click Create Todo
     await dialog.getByRole('button', { name: 'Create Todo' }).click();
@@ -63,8 +50,7 @@ test.describe('Todo Management', () => {
   test('toggle todo completion status', async ({ page }) => {
     // Create a todo first
     const todoTitle = `Toggle Test ${Date.now()}`;
-    const fab = page.locator('button[aria-label="New Todo"]');
-    await fab.click();
+    await page.getByRole('button', { name: 'Add Todo' }).click();
 
     const dialog = page.locator('[role="dialog"]');
     await expect(dialog).toBeVisible();
@@ -90,8 +76,7 @@ test.describe('Todo Management', () => {
     const todoTitle = `Delete Test ${Date.now()}`;
 
     // Create a todo
-    const fab = page.locator('button[aria-label="New Todo"]');
-    await fab.click();
+    await page.getByRole('button', { name: 'Add Todo' }).click();
     const dialog = page.locator('[role="dialog"]');
     await dialog.getByLabel('Title').fill(todoTitle);
     await dialog.getByRole('button', { name: 'Create Todo' }).click();
@@ -124,8 +109,7 @@ test.describe('Todo Management', () => {
     const todoTitle = `${uniqueToken} Todo`;
 
     // Create a todo with a unique name
-    const fab = page.locator('button[aria-label="New Todo"]');
-    await fab.click();
+    await page.getByRole('button', { name: 'Add Todo' }).click();
     const dialog = page.locator('[role="dialog"]');
     await dialog.getByLabel('Title').fill(todoTitle);
     await dialog.getByRole('button', { name: 'Create Todo' }).click();

@@ -12,14 +12,19 @@ import {
   IconButton,
   Tooltip,
   Collapse,
+  Button,
   alpha,
   useTheme,
+  ToggleButtonGroup,
+  ToggleButton,
+  Divider,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   FilterList as FilterIcon,
   Clear as ClearIcon,
   Refresh as RefreshIcon,
+  Add as AddIcon,
   CheckCircle as CompletedIcon,
   HourglassEmpty as PendingIcon,
   PlayArrow as InProgressIcon,
@@ -31,7 +36,7 @@ import {
   PRIORITY_LEVELS,
   TODO_STATUS_CONFIG,
 } from '@productivity-app/shared';
-import { quadrantColors, statusColors, priorityColors } from '../../theme/theme';
+import { quadrantColors, statusColors, priorityColors, designTokens } from '../../theme/theme';
 import { useTodos } from '../../hooks/useTodos';
 import { TodoList } from './TodoList';
 import { AddTodoDialog } from './AddTodoDialog';
@@ -57,6 +62,15 @@ const QUADRANT_FILTERS: { value: EisenhowerQuadrant; label: string; color: strin
   { value: 'Q2', label: `Q2 ${EISENHOWER_QUADRANTS.Q2.label}`, color: quadrantColors.Q2 },
   { value: 'Q3', label: `Q3 ${EISENHOWER_QUADRANTS.Q3.label}`, color: quadrantColors.Q3 },
   { value: 'Q4', label: `Q4 ${EISENHOWER_QUADRANTS.Q4.label}`, color: quadrantColors.Q4 },
+];
+
+type StatusTab = '' | TodoStatus;
+
+const STATUS_TABS: { value: StatusTab; label: string }[] = [
+  { value: '', label: 'All' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'in_progress', label: 'In progress' },
+  { value: 'completed', label: 'Done' },
 ];
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -90,7 +104,6 @@ export function TodoView() {
   const [searchInput, setSearchInput] = useState('');
   const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
-  // Listen for FAB click dispatched from AppLayout
   useTodoDialogEvent(useCallback(() => setDialogOpen(true), []));
 
   const handleSearchChange = useCallback(
@@ -112,235 +125,315 @@ export function TodoView() {
     filters.category_id !== '' ||
     filters.search !== '';
 
+  const activeFilterCount = [
+    filters.status,
+    filters.priority,
+    filters.quadrant,
+    filters.category_id,
+  ].filter(Boolean).length;
+
   const handleOpenDialog = useCallback(() => setDialogOpen(true), []);
   const handleCloseDialog = useCallback(() => setDialogOpen(false), []);
 
+  const handleStatusTab = (_: React.MouseEvent<HTMLElement>, value: StatusTab | null) => {
+    if (value !== null) setFilters({ status: value });
+  };
+
   return (
     <Box>
-      {/* ─── Quick Stats ─────────────────────────────────────────────────── */}
-      <Stack direction="row" spacing={1.5} sx={{ mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
-        <StatChip
-          icon={<TotalIcon sx={{ fontSize: 16 }} />}
-          label={`${stats.total} Total`}
-          color={theme.palette.primary.main}
+      {/* ─── KPI strip (Celigo-style metric cards) ───────────────────────── */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+          gap: 1.5,
+          mb: 2.5,
+        }}
+      >
+        <MetricCard
+          icon={<TotalIcon sx={{ fontSize: 18 }} />}
+          label="Total"
+          value={stats.total}
+          color={designTokens.colors.primary}
+          active={filters.status === ''}
+          onClick={() => setFilters({ status: '' })}
         />
-        <StatChip
-          icon={<PendingIcon sx={{ fontSize: 16 }} />}
-          label={`${stats.pending} Pending`}
+        <MetricCard
+          icon={<PendingIcon sx={{ fontSize: 18 }} />}
+          label="Pending"
+          value={stats.pending}
           color={statusColors.pending}
+          active={filters.status === 'pending'}
+          onClick={() => setFilters({ status: filters.status === 'pending' ? '' : 'pending' })}
         />
-        <StatChip
-          icon={<InProgressIcon sx={{ fontSize: 16 }} />}
-          label={`${stats.in_progress} In Progress`}
+        <MetricCard
+          icon={<InProgressIcon sx={{ fontSize: 18 }} />}
+          label="In progress"
+          value={stats.in_progress}
           color={statusColors.in_progress}
+          active={filters.status === 'in_progress'}
+          onClick={() =>
+            setFilters({ status: filters.status === 'in_progress' ? '' : 'in_progress' })
+          }
         />
-        <StatChip
-          icon={<CompletedIcon sx={{ fontSize: 16 }} />}
-          label={`${stats.completed} Done`}
+        <MetricCard
+          icon={<CompletedIcon sx={{ fontSize: 18 }} />}
+          label="Done"
+          value={stats.completed}
           color={statusColors.completed}
+          active={filters.status === 'completed'}
+          onClick={() => setFilters({ status: filters.status === 'completed' ? '' : 'completed' })}
         />
-      </Stack>
+      </Box>
 
-      {/* ─── Search Bar + Controls ───────────────────────────────────────── */}
+      {/* ─── Main panel (Apple grouped container) ────────────────────────── */}
       <Paper
         elevation={0}
         sx={{
-          p: 2,
-          mb: 2,
           border: `1px solid ${theme.palette.divider}`,
-          borderRadius: 2,
+          borderRadius: `${designTokens.radius.md}px`,
+          overflow: 'hidden',
         }}
       >
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <TextField
-            placeholder="Search todos..."
-            value={searchInput}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            size="small"
-            fullWidth
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" color="action" />
-                  </InputAdornment>
-                ),
-                endAdornment: searchInput ? (
-                  <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setSearchInput('');
-                        setFilters({ search: '' });
+        {/* Toolbar */}
+        <Box sx={{ px: { xs: 1.5, sm: 2 }, py: 1.5 }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            alignItems={{ xs: 'stretch', sm: 'center' }}
+          >
+            <TextField
+              placeholder="Search todos…"
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              size="small"
+              fullWidth
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchInput ? (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setSearchInput('');
+                          setFilters({ search: '' });
+                        }}
+                        aria-label="Clear search"
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : null,
+                  sx: {
+                    bgcolor: designTokens.colors.canvas,
+                    '& fieldset': { borderColor: 'transparent' },
+                    '&:hover fieldset': { borderColor: designTokens.colors.border },
+                    '&.Mui-focused fieldset': { borderColor: 'primary.main' },
+                  },
+                },
+              }}
+            />
+
+            <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
+              <Tooltip title="Filters">
+                <IconButton
+                  onClick={() => setShowFilters(!showFilters)}
+                  size="small"
+                  sx={{
+                    bgcolor: showFilters || activeFilterCount > 0 ? 'primary.main' : 'transparent',
+                    color: showFilters || activeFilterCount > 0 ? '#fff' : 'text.secondary',
+                    '&:hover': {
+                      bgcolor:
+                        showFilters || activeFilterCount > 0
+                          ? 'primary.dark'
+                          : alpha(theme.palette.primary.main, 0.08),
+                    },
+                  }}
+                >
+                  <FilterIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              {activeFilterCount > 0 && (
+                <Typography variant="caption" color="primary" fontWeight={600}>
+                  {activeFilterCount} active
+                </Typography>
+              )}
+              <Tooltip title="Refresh">
+                <IconButton onClick={refresh} size="small">
+                  <RefreshIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleOpenDialog}
+                sx={{ ml: 0.5, whiteSpace: 'nowrap' }}
+              >
+                Add todo
+              </Button>
+            </Stack>
+          </Stack>
+
+          {/* Status tabs (Google-style segmented nav) */}
+          <Box sx={{ mt: 1.5, overflowX: 'auto' }}>
+            <ToggleButtonGroup
+              value={filters.status}
+              exclusive
+              onChange={handleStatusTab}
+              size="small"
+              sx={{
+                '& .MuiToggleButton-root': {
+                  border: 'none',
+                  borderRadius: `${designTokens.radius.pill}px !important`,
+                  px: 2,
+                  py: 0.5,
+                  mx: 0.25,
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                  color: 'text.secondary',
+                  textTransform: 'none',
+                  '&.Mui-selected': {
+                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    color: 'primary.main',
+                    fontWeight: 600,
+                  },
+                },
+              }}
+            >
+              {STATUS_TABS.map((tab) => (
+                <ToggleButton key={tab.value || 'all'} value={tab.value}>
+                  {tab.label}
+                  {tab.value === '' && stats.total > 0 && (
+                    <Box
+                      component="span"
+                      sx={{
+                        ml: 0.75,
+                        px: 0.75,
+                        py: 0.125,
+                        borderRadius: 1,
+                        bgcolor: alpha(theme.palette.text.secondary, 0.1),
+                        fontSize: '0.6875rem',
+                        fontWeight: 600,
                       }}
                     >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ) : null,
-              },
-            }}
-          />
-          <Tooltip title="Toggle filters">
-            <IconButton
-              onClick={() => setShowFilters(!showFilters)}
-              color={showFilters || hasActiveFilters ? 'primary' : 'default'}
-            >
-              <FilterIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Refresh">
-            <IconButton onClick={refresh}>
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
-        </Stack>
+                      {stats.total}
+                    </Box>
+                  )}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          </Box>
+        </Box>
 
-        {/* ─── Filter Chips ──────────────────────────────────────────────── */}
+        {/* Advanced filters */}
         <Collapse in={showFilters}>
-          <Box sx={{ mt: 2 }}>
-            {/* Status */}
+          <Divider />
+          <Box
+            sx={{ px: { xs: 1.5, sm: 2 }, py: 2, bgcolor: alpha(designTokens.colors.canvas, 0.5) }}
+          >
             <FilterSection label="Status">
               {STATUS_FILTERS.map((s) => (
-                <Chip
+                <FilterChip
                   key={s.value}
                   label={s.label}
-                  size="small"
+                  color={s.color}
+                  selected={filters.status === s.value}
                   onClick={() => setFilters({ status: filters.status === s.value ? '' : s.value })}
-                  sx={{
-                    fontWeight: 500,
-                    ...(filters.status === s.value
-                      ? { bgcolor: s.color, color: '#fff' }
-                      : {
-                          bgcolor: alpha(s.color, 0.1),
-                          color: s.color,
-                          '&:hover': { bgcolor: alpha(s.color, 0.2) },
-                        }),
-                  }}
                 />
               ))}
             </FilterSection>
 
-            {/* Priority */}
             <FilterSection label="Priority">
               {PRIORITY_FILTERS.map((p) => (
-                <Chip
+                <FilterChip
                   key={p.value}
                   label={p.label}
-                  size="small"
+                  color={p.color}
+                  selected={filters.priority === p.value}
                   onClick={() =>
                     setFilters({ priority: filters.priority === p.value ? '' : p.value })
                   }
-                  sx={{
-                    fontWeight: 500,
-                    ...(filters.priority === p.value
-                      ? { bgcolor: p.color, color: '#fff' }
-                      : {
-                          bgcolor: alpha(p.color, 0.1),
-                          color: p.color,
-                          '&:hover': { bgcolor: alpha(p.color, 0.2) },
-                        }),
-                  }}
                 />
               ))}
             </FilterSection>
 
-            {/* Quadrant */}
             <FilterSection label="Quadrant">
               {QUADRANT_FILTERS.map((q) => (
-                <Chip
+                <FilterChip
                   key={q.value}
                   label={q.label}
-                  size="small"
+                  color={q.color}
+                  selected={filters.quadrant === q.value}
                   onClick={() =>
                     setFilters({ quadrant: filters.quadrant === q.value ? '' : q.value })
                   }
-                  sx={{
-                    fontWeight: 500,
-                    ...(filters.quadrant === q.value
-                      ? { bgcolor: q.color, color: '#fff' }
-                      : {
-                          bgcolor: alpha(q.color, 0.1),
-                          color: q.color,
-                          '&:hover': { bgcolor: alpha(q.color, 0.2) },
-                        }),
-                  }}
                 />
               ))}
             </FilterSection>
 
-            {/* Category */}
             {categories.length > 0 && (
               <FilterSection label="Category">
                 {categories.map((cat) => (
-                  <Chip
+                  <FilterChip
                     key={cat.id}
                     label={`${cat.name} (${cat.todo_count})`}
-                    size="small"
+                    color={cat.color}
+                    selected={filters.category_id === cat.id}
                     onClick={() =>
                       setFilters({
                         category_id: filters.category_id === cat.id ? '' : cat.id,
                       })
                     }
-                    sx={{
-                      fontWeight: 500,
-                      ...(filters.category_id === cat.id
-                        ? { bgcolor: cat.color, color: '#fff' }
-                        : {
-                            bgcolor: alpha(cat.color, 0.1),
-                            color: cat.color,
-                            '&:hover': { bgcolor: alpha(cat.color, 0.2) },
-                          }),
-                    }}
                   />
                 ))}
               </FilterSection>
             )}
 
-            {/* Clear all */}
             {hasActiveFilters && (
-              <Box sx={{ mt: 1 }}>
-                <Chip
-                  label="Clear all filters"
-                  size="small"
-                  onDelete={() => {
-                    resetFilters();
-                    setSearchInput('');
-                  }}
-                  onClick={() => {
-                    resetFilters();
-                    setSearchInput('');
-                  }}
-                  color="default"
-                  variant="outlined"
-                />
-              </Box>
+              <Button
+                size="small"
+                onClick={() => {
+                  resetFilters();
+                  setSearchInput('');
+                }}
+                sx={{ mt: 0.5, textTransform: 'none' }}
+              >
+                Clear all filters
+              </Button>
             )}
           </Box>
         </Collapse>
+
+        <Divider />
+
+        {/* Error */}
+        {error && (
+          <Alert severity="error" sx={{ m: 2, borderRadius: 1 }} onClose={() => {}}>
+            {error}
+          </Alert>
+        )}
+
+        {/* List */}
+        <TodoList
+          todos={todos}
+          loading={loading}
+          meta={meta}
+          page={page}
+          highlightId={highlightId}
+          onPageChange={setPage}
+          onToggleComplete={toggleComplete}
+          onUpdateStatus={updateTodo}
+          onDelete={deleteTodo}
+          onAddTodo={handleOpenDialog}
+          embedded
+        />
       </Paper>
 
-      {/* ─── Error ───────────────────────────────────────────────────────── */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => {}}>
-          {error}
-        </Alert>
-      )}
-
-      {/* ─── Todo List ───────────────────────────────────────────────────── */}
-      <TodoList
-        todos={todos}
-        loading={loading}
-        meta={meta}
-        page={page}
-        highlightId={highlightId}
-        onPageChange={setPage}
-        onToggleComplete={toggleComplete}
-        onUpdateStatus={updateTodo}
-        onDelete={deleteTodo}
-      />
-
-      {/* ─── Add Todo Dialog ─────────────────────────────────────────────── */}
       <AddTodoDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
@@ -352,20 +445,87 @@ export function TodoView() {
   );
 }
 
-// ─── Small sub-components ─────────────────────────────────────────────────────
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
-function StatChip({ icon, label, color }: { icon: React.ReactNode; label: string; color: string }) {
+function MetricCard({
+  icon,
+  label,
+  value,
+  color,
+  active,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  color: string;
+  active?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <Paper
+      elevation={0}
+      onClick={onClick}
+      sx={{
+        p: 1.75,
+        cursor: onClick ? 'pointer' : 'default',
+        border: `1px solid ${active ? alpha(color, 0.4) : designTokens.colors.borderLight}`,
+        borderRadius: `${designTokens.radius.md}px`,
+        bgcolor: active ? alpha(color, 0.06) : 'background.paper',
+        transition: 'all 0.15s ease',
+        '&:hover': onClick
+          ? {
+              borderColor: alpha(color, 0.5),
+              bgcolor: alpha(color, 0.08),
+              transform: 'translateY(-1px)',
+            }
+          : undefined,
+      }}
+    >
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.75 }}>
+        <Box sx={{ color, display: 'flex', opacity: 0.85 }}>{icon}</Box>
+        <Typography variant="caption" color="text.secondary" fontWeight={500}>
+          {label}
+        </Typography>
+      </Stack>
+      <Typography
+        variant="h5"
+        sx={{ fontWeight: 700, color: active ? color : 'text.primary', lineHeight: 1 }}
+      >
+        {value}
+      </Typography>
+    </Paper>
+  );
+}
+
+function FilterChip({
+  label,
+  color,
+  selected,
+  onClick,
+}: {
+  label: string;
+  color: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
   return (
     <Chip
-      icon={<>{icon}</>}
       label={label}
       size="small"
+      onClick={onClick}
       sx={{
-        bgcolor: alpha(color, 0.1),
-        color,
-        fontWeight: 600,
-        fontSize: '0.8rem',
-        '& .MuiChip-icon': { color },
+        fontWeight: 500,
+        fontSize: '0.75rem',
+        height: 26,
+        ...(selected
+          ? { bgcolor: color, color: '#fff', '&:hover': { bgcolor: color } }
+          : {
+              bgcolor: alpha(color, 0.08),
+              color,
+              border: `1px solid ${alpha(color, 0.2)}`,
+              '&:hover': { bgcolor: alpha(color, 0.15) },
+            }),
       }}
     />
   );
@@ -377,7 +537,7 @@ function FilterSection({ label, children }: { label: string; children: React.Rea
       <Typography
         variant="caption"
         color="text.secondary"
-        sx={{ mb: 0.5, display: 'block', fontWeight: 600 }}
+        sx={{ mb: 0.75, display: 'block', fontWeight: 600, letterSpacing: '0.02em' }}
       >
         {label}
       </Typography>
@@ -388,9 +548,6 @@ function FilterSection({ label, children }: { label: string; children: React.Rea
   );
 }
 
-// Re-export for convenience — allows AppLayout to open the dialog via ref or context.
-// For now, TodoView manages its own dialog state internally and the FAB in AppLayout
-// dispatches a custom event.
 export function useTodoDialogEvent(onOpen: () => void) {
   React.useEffect(() => {
     const handler = () => onOpen();

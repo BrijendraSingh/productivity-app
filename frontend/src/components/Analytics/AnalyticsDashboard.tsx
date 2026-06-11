@@ -87,7 +87,7 @@ function StatCard({
             sx={{
               p: 1,
               borderRadius: 2,
-              bgcolor: alpha(color, theme.palette.mode === 'dark' ? 0.2 : 0.1),
+              bgcolor: alpha(color, 0.1),
               color,
             }}
           >
@@ -150,7 +150,7 @@ function ProductivityGauge({ score }: { score: number }) {
         size={140}
         thickness={4}
         sx={{
-          color: alpha(color, theme.palette.mode === 'dark' ? 0.15 : 0.1),
+          color: alpha(color, 0.1),
           position: 'absolute',
         }}
       />

@@ -1,0 +1,63 @@
+/* Google canvas + Apple typography + Celigo structure */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5;
+}
+
+/* App shell */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.app-shell-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-main-scroll {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background-color: #f0f2f5;
+}
+
+/* Page typography */
+.display-heading {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1a1d21;
+}
+
+.section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1a73e8;
+}
+
+/* Feed list dividers */
+.feed-divider > * + * {
+  border-top: 1px solid #eef0f3;
+}
+
+/* Softer focus rings (accessibility) */
+:focus-visible {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+}

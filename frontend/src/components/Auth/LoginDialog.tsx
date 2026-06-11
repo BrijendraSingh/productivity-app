@@ -9,6 +9,7 @@ import {
   Tab,
   Tabs,
   Box,
+  Typography,
   Alert,
   IconButton,
   InputAdornment,
@@ -125,13 +126,24 @@ export function LoginDialog({ open, onClose, initialTab = 0 }: LoginDialogProps)
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           pb: 0,
         }}
       >
-        Welcome
-        <IconButton onClick={handleClose} size="small">
-          <Close />
+        <Box>
+          <Typography component="span" className="section-label" sx={{ display: 'block', mb: 0.5 }}>
+            Account
+          </Typography>
+          <Typography
+            component="span"
+            variant="h6"
+            sx={{ fontFamily: '"Source Serif 4", serif', fontWeight: 600 }}
+          >
+            Welcome
+          </Typography>
+        </Box>
+        <IconButton onClick={handleClose} size="small" aria-label="Close">
+          <Close fontSize="small" />
         </IconButton>
       </DialogTitle>
 

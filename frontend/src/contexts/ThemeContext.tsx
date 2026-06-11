@@ -1,50 +1,28 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useMemo,
-  type ReactNode,
-} from 'react';
+import React, { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material';
 import { APP_CONFIG } from '@productivity-app/shared';
-import { lightTheme, darkTheme } from '../theme/theme';
+import { lightTheme } from '../theme/theme';
 
-type ThemeMode = 'light' | 'dark';
+// One-time: clear legacy dark-mode preference (dark theme removed)
+try {
+  localStorage.removeItem(APP_CONFIG.THEME_STORAGE_KEY);
+} catch {
+  /* ignore */
+}
 
 interface ThemeContextValue {
-  mode: ThemeMode;
-  toggleTheme: () => void;
-  isDark: boolean;
+  mode: 'light';
+  isDark: false;
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-function getInitialMode(): ThemeMode {
-  const stored = localStorage.getItem(APP_CONFIG.THEME_STORAGE_KEY);
-  if (stored === 'light' || stored === 'dark') return stored;
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
 export function AppThemeProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<ThemeMode>(getInitialMode);
-
-  useEffect(() => {
-    localStorage.setItem(APP_CONFIG.THEME_STORAGE_KEY, mode);
-  }, [mode]);
-
-  const toggleTheme = () => setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
-
-  const value = useMemo<ThemeContextValue>(
-    () => ({ mode, toggleTheme, isDark: mode === 'dark' }),
-    [mode]
-  );
-
-  const theme = mode === 'dark' ? darkTheme : lightTheme;
+  const value = useMemo<ThemeContextValue>(() => ({ mode: 'light', isDark: false }), []);
 
   return (
     <ThemeContext.Provider value={value}>
-      <MuiThemeProvider theme={theme}>
+      <MuiThemeProvider theme={lightTheme}>
         <CssBaseline />
         {children}
       </MuiThemeProvider>

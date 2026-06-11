@@ -56,32 +56,18 @@ test.describe('Eisenhower Matrix', () => {
 
     const todoTitle = `Matrix Q1 ${Date.now()}`;
 
-    const fab = page.locator('button[aria-label="New Todo"]');
-    await expect(fab).toBeVisible();
-    await fab.click();
+    await page.getByRole('button', { name: 'Add Todo' }).click();
 
     const dialog = page.locator('[role="dialog"]');
     await expect(dialog).toBeVisible();
     await dialog.getByLabel('Title').fill(todoTitle);
 
-    // Set high urgency (>=7 → urgent)
-    const urgencySlider = dialog.locator('[role="slider"]').first();
-    await urgencySlider.focus();
-    // Set value to 8 via keyboard
-    for (let i = 0; i < 3; i++) {
-      await urgencySlider.press('ArrowRight');
-    }
-
-    // Set high importance (>=7 → important)
-    const importanceSlider = dialog.locator('[role="slider"]').nth(1);
-    await importanceSlider.focus();
-    for (let i = 0; i < 3; i++) {
-      await importanceSlider.press('ArrowRight');
-    }
+    // Expand details and pick Q1 (Do First) on the matrix placement grid
+    await dialog.getByRole('button', { name: 'Add details' }).click();
+    await dialog.getByRole('button', { name: 'Q1 Do First', exact: true }).click();
 
     // Quadrant preview should show Q1
-    const quadrantPreview = dialog.getByText(/Q1/);
-    await expect(quadrantPreview).toBeVisible();
+    await expect(dialog.getByText(/Q1/)).toBeVisible();
 
     await dialog.getByRole('button', { name: 'Create Todo' }).click();
     await expect(dialog).not.toBeVisible({ timeout: 5000 });
