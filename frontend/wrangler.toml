@@ -10,7 +10,7 @@ ALLOW_REGISTRATION = "true"
 [[d1_databases]]
 binding = "DB"
 database_name = "productivity-app-db"
-database_id = "PLACEHOLDER"
+database_id = "745ed25d-ba7b-4d4d-81b4-0dc975e09552"
 migrations_dir = "../migrations"
 
 [assets]
