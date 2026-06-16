@@ -45,6 +45,8 @@ interface TodoListProps {
   meta: PaginationMeta | null;
   page: number;
   highlightId?: number | null;
+  selectedId?: number | null;
+  onSelectTodo?: (id: number) => void;
   onPageChange: (page: number) => void;
   onToggleComplete: (todo: TodoWithRelations) => Promise<boolean>;
   onUpdateStatus: (id: number, data: UpdateTodoRequest) => Promise<boolean>;
@@ -67,6 +69,8 @@ export function TodoList({
   meta,
   page,
   highlightId,
+  selectedId,
+  onSelectTodo,
   onPageChange,
   onToggleComplete,
   onUpdateStatus,
@@ -161,16 +165,18 @@ export function TodoList({
       <Box>
         {todos.map((todo, index) => {
           const isHighlighted = highlightId != null && todo.id === highlightId;
+          const isSelected = selectedId != null && todo.id === selectedId;
           const isLast = index === todos.length - 1;
           return (
             <div key={todo.id} ref={isHighlighted ? highlightRef : undefined}>
               <TodoRow
                 todo={todo}
-                highlighted={isHighlighted}
+                highlighted={isHighlighted || isSelected}
                 isLast={isLast && totalPages <= 1}
                 onToggleComplete={onToggleComplete}
                 onOpenMenu={(el) => setMenuAnchor({ el, todoId: todo.id })}
                 onDelete={onDelete}
+                onSelect={onSelectTodo ? () => onSelectTodo(todo.id) : undefined}
               />
             </div>
           );
@@ -254,6 +260,7 @@ interface TodoRowProps {
   onToggleComplete: (todo: TodoWithRelations) => Promise<boolean>;
   onOpenMenu: (el: HTMLElement) => void;
   onDelete: (id: number) => Promise<boolean>;
+  onSelect?: () => void;
 }
 
 function TodoRow({
@@ -263,6 +270,7 @@ function TodoRow({
   onToggleComplete,
   onOpenMenu,
   onDelete,
+  onSelect,
 }: TodoRowProps) {
   const theme = useTheme();
   const isCompleted = todo.status === 'completed';
@@ -322,6 +330,7 @@ function TodoRow({
   return (
     <Box
       className="todo-row"
+      onClick={onSelect}
       sx={{
         display: { xs: 'flex', md: 'grid' },
         gridTemplateColumns: { md: '40px 1fr 100px 90px 110px 72px' },
@@ -332,6 +341,7 @@ function TodoRow({
         borderBottom: isLast ? 'none' : `1px solid ${theme.palette.divider}`,
         bgcolor: highlighted ? alpha(qColor || theme.palette.primary.main, 0.06) : 'transparent',
         transition: 'background-color 0.15s ease',
+        cursor: onSelect ? 'pointer' : 'default',
         '&:hover': {
           bgcolor: highlighted
             ? alpha(qColor || theme.palette.primary.main, 0.08)
@@ -356,6 +366,7 @@ function TodoRow({
       <Checkbox
         checked={isCompleted}
         onChange={() => onToggleComplete(todo)}
+        onClick={(e) => e.stopPropagation()}
         size="small"
         sx={{
           p: 0.5,
@@ -477,7 +488,13 @@ function TodoRow({
         }}
       >
         <Tooltip title="Change status">
-          <IconButton size="small" onClick={(e) => onOpenMenu(e.currentTarget)}>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenMenu(e.currentTarget);
+            }}
+          >
             <MoreIcon sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>

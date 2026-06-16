@@ -11,6 +11,7 @@ import type {
   PaginationMeta,
 } from '@productivity-app/shared';
 import { todosApi, categoriesApi, tagsApi } from '../services/api';
+import { dispatchTodosChanged } from '../utils/events';
 
 // ─── Filter state ─────────────────────────────────────────────────────────────
 
@@ -160,6 +161,7 @@ export function useTodos(): UseTodosReturn {
         if (response.success) {
           await fetchTodos();
           await fetchMetadata();
+          dispatchTodosChanged();
           return true;
         }
         setError(response.message || 'Failed to create todo');
@@ -178,6 +180,7 @@ export function useTodos(): UseTodosReturn {
         const response = await todosApi.update(id, data);
         if (response.success) {
           await fetchTodos();
+          dispatchTodosChanged();
           return true;
         }
         setError(response.message || 'Failed to update todo');
@@ -197,6 +200,7 @@ export function useTodos(): UseTodosReturn {
         if (response.success) {
           await fetchTodos();
           await fetchMetadata();
+          dispatchTodosChanged();
           return true;
         }
         setError(response.message || 'Failed to delete todo');

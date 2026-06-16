@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Box,
@@ -38,6 +38,7 @@ import {
 } from '@productivity-app/shared';
 import { quadrantColors, statusColors, priorityColors, designTokens } from '../../theme/theme';
 import { useTodos } from '../../hooks/useTodos';
+import { useFocusRail } from '../../contexts/FocusRailContext';
 import { TodoList } from './TodoList';
 import { AddTodoDialog } from './AddTodoDialog';
 
@@ -79,6 +80,7 @@ export function TodoView() {
   const theme = useTheme();
   const { id: idParam } = useParams<{ id: string }>();
   const highlightId = idParam ? parseInt(idParam, 10) : null;
+  const { setSelectedTodoId, selectedTodoId } = useFocusRail();
   const {
     todos,
     loading,
@@ -105,6 +107,23 @@ export function TodoView() {
   const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   useTodoDialogEvent(useCallback(() => setDialogOpen(true), []));
+
+  useEffect(() => {
+    if (highlightId && !Number.isNaN(highlightId)) {
+      setSelectedTodoId(highlightId);
+    }
+  }, [highlightId, setSelectedTodoId]);
+
+  useEffect(() => {
+    return () => setSelectedTodoId(null);
+  }, [setSelectedTodoId]);
+
+  const handleSelectTodo = useCallback(
+    (id: number) => {
+      setSelectedTodoId(selectedTodoId === id ? null : id);
+    },
+    [selectedTodoId, setSelectedTodoId]
+  );
 
   const handleSearchChange = useCallback(
     (value: string) => {
@@ -425,6 +444,8 @@ export function TodoView() {
           meta={meta}
           page={page}
           highlightId={highlightId}
+          selectedId={selectedTodoId}
+          onSelectTodo={handleSelectTodo}
           onPageChange={setPage}
           onToggleComplete={toggleComplete}
           onUpdateStatus={updateTodo}

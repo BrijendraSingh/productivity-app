@@ -21,9 +21,6 @@ import {
 } from '@mui/material';
 import {
   Refresh as RefreshIcon,
-  Info as InfoIcon,
-  ArrowUpward as UrgentIcon,
-  Star as ImportantIcon,
   MoreHoriz as MoreIcon,
   OpenInNew as OpenIcon,
 } from '@mui/icons-material';
@@ -38,6 +35,10 @@ import { EisenhowerUtils } from '@productivity-app/shared';
 import { todosApi } from '../../services/api';
 import { quadrantColors, statusColors, designTokens, surface } from '../../theme/theme';
 import { PageHeader } from '../Layout/PageHeader';
+import { useFocusRail } from '../../contexts/FocusRailContext';
+import { MatrixLegend, MatrixLegendPanel } from './MatrixLegend';
+import { Q1ActionQueue } from '../Layout/FocusRail/widgets/Q1ActionQueue';
+import { dispatchTodosChanged } from '../../utils/events';
 
 // X-axis = Urgency (low → high), Y-axis = Importance (low → high)
 const QUADRANT_GRID: {
@@ -70,7 +71,9 @@ const STATUS_OPTIONS: TodoStatus[] = [
 export function EisenhowerMatrixView() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isRailVisible = useMediaQuery(theme.breakpoints.up('lg'));
   const navigate = useNavigate();
+  const { setPageWidgets } = useFocusRail();
 
   const [todos, setTodos] = useState<TodoWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,6 +127,7 @@ export function EisenhowerMatrixView() {
         const response = await todosApi.update(todo.id, { status: newStatus });
         if (response.success && response.data) {
           setTodos((prev) => prev.map((t) => (t.id === todo.id ? response.data! : t)));
+          dispatchTodosChanged();
         }
       } catch {
         fetchAllTodos();
@@ -150,6 +154,24 @@ export function EisenhowerMatrixView() {
   const counts = EisenhowerUtils.getQuadrantCounts(todos);
   const totalTasks = todos.length;
 
+  useEffect(() => {
+    if (!isRailVisible) {
+      setPageWidgets(null);
+      return;
+    }
+
+    setPageWidgets(
+      <Box>
+        <Divider sx={{ my: 2 }} />
+        <MatrixLegend onOpenTodos={() => navigate('/todos')} />
+        <Divider sx={{ my: 2 }} />
+        <Q1ActionQueue todos={todos} onToggleComplete={handleToggleComplete} />
+      </Box>
+    );
+
+    return () => setPageWidgets(null);
+  }, [todos, isRailVisible, navigate, setPageWidgets, handleToggleComplete]);
+
   if (loading) {
     return <MatrixSkeleton isMobile={isMobile} />;
   }
@@ -175,39 +197,22 @@ export function EisenhowerMatrixView() {
         </Alert>
       )}
 
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) 272px' },
-          gap: { xs: 2.5, lg: 3 },
-          alignItems: 'start',
-        }}
-      >
-        {/* Coordinate-plane matrix — left */}
-        <Box sx={{ minWidth: 0 }}>
-          <MatrixCoordinatePlane
-            grouped={grouped}
-            counts={counts}
-            isMobile={isMobile}
-            onOpenTodo={handleOpenTodo}
-            onToggleComplete={handleToggleComplete}
-            onOpenMenu={(el, todoId) => setMenuAnchor({ el, todoId })}
-          />
-        </Box>
-
-        {/* Legend — right sidebar (desktop) / below matrix (mobile) */}
-        <Box
-          sx={{
-            minWidth: 0,
-            order: { xs: 2, lg: 0 },
-            position: { lg: 'sticky' },
-            top: { lg: 16 },
-            alignSelf: 'start',
-          }}
-        >
-          <MatrixLegend onOpenTodos={() => navigate('/todos')} />
-        </Box>
+      <Box sx={{ minWidth: 0 }}>
+        <MatrixCoordinatePlane
+          grouped={grouped}
+          counts={counts}
+          isMobile={isMobile}
+          onOpenTodo={handleOpenTodo}
+          onToggleComplete={handleToggleComplete}
+          onOpenMenu={(el, todoId) => setMenuAnchor({ el, todoId })}
+        />
       </Box>
+
+      {!isRailVisible && (
+        <Box sx={{ mt: 2.5 }}>
+          <MatrixLegendPanel onOpenTodos={() => navigate('/todos')} />
+        </Box>
+      )}
 
       <Menu
         anchorEl={menuAnchor?.el}
@@ -754,121 +759,6 @@ function NotebookTaskItem({
   );
 }
 
-// ─── Legend ──────────────────────────────────────────────────────────────────
-
-function MatrixLegend({ onOpenTodos }: { onOpenTodos: () => void }) {
-  const allQuadrants = EisenhowerUtils.getAllQuadrants();
-
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        ...surface.panel,
-        p: 2.5,
-        borderRadius: `${designTokens.radius.md}px`,
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-        <InfoIcon fontSize="small" sx={{ color: 'primary.main' }} />
-        <Typography variant="subtitle2" fontWeight={600}>
-          How the Eisenhower Matrix Works
-        </Typography>
-      </Box>
-
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.55 }}>
-        Tasks are automatically assigned to quadrants based on their urgency and importance levels.
-        Urgency and importance are rated 1–10; a threshold of 7 determines the split.
-      </Typography>
-
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.55 }}>
-        <strong>Take action:</strong> click a task to open it in{' '}
-        <Box
-          component="button"
-          type="button"
-          onClick={onOpenTodos}
-          sx={{
-            border: 'none',
-            background: 'none',
-            p: 0,
-            m: 0,
-            color: 'primary.main',
-            font: 'inherit',
-            fontWeight: 600,
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            textUnderlineOffset: '2px',
-          }}
-        >
-          Todos
-        </Box>
-        . Use the checkbox to mark complete, or the ⋯ menu to change status.
-      </Typography>
-
-      <Stack spacing={1.5}>
-        {allQuadrants.map((info) => (
-          <Box
-            key={info.id}
-            sx={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 1.25,
-              p: 1.25,
-              borderRadius: `${designTokens.radius.sm}px`,
-              bgcolor: alpha(info.color, 0.04),
-              border: `1px solid ${alpha(info.color, 0.15)}`,
-            }}
-          >
-            <Box
-              sx={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                bgcolor: info.color,
-                mt: 0.6,
-                flexShrink: 0,
-              }}
-            />
-            <Box sx={{ minWidth: 0 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ color: info.color }}>
-                {info.id}: {info.label}
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ display: 'block', mt: 0.25 }}
-              >
-                {info.description}
-              </Typography>
-            </Box>
-          </Box>
-        ))}
-      </Stack>
-
-      <Divider sx={{ my: 2 }} />
-
-      <Stack spacing={1}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <UrgentIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-          <Typography variant="caption" color="text.secondary">
-            Urgency level (1–10)
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <ImportantIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-          <Typography variant="caption" color="text.secondary">
-            Importance level (1–10)
-          </Typography>
-        </Box>
-        <Typography variant="caption" color="text.secondary" sx={{ pl: 0.25 }}>
-          Threshold: &ge;7 = high
-        </Typography>
-      </Stack>
-    </Paper>
-  );
-}
-
-// ─── Loading skeleton ───────────────────────────────────────────────────────
-
 function MatrixSkeleton({ isMobile }: { isMobile: boolean }) {
   return (
     <Box sx={{ pb: 4 }}>
@@ -876,19 +766,10 @@ function MatrixSkeleton({ isMobile }: { isMobile: boolean }) {
         <Skeleton variant="text" width={260} height={40} />
         <Skeleton variant="text" width={180} height={20} />
       </Box>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) 272px' },
-          gap: 3,
-        }}
-      >
-        <Skeleton
-          variant="rounded"
-          sx={{ height: isMobile ? 440 : 500, borderRadius: `${designTokens.radius.sm}px` }}
-        />
-        <Skeleton variant="rounded" height={420} />
-      </Box>
+      <Skeleton
+        variant="rounded"
+        sx={{ height: isMobile ? 440 : 500, borderRadius: `${designTokens.radius.sm}px` }}
+      />
     </Box>
   );
 }
