@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { AppThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { FocusRailProvider } from './contexts/FocusRailContext';
 import App from './App';
 import './styles/global.css';
 
@@ -13,7 +14,9 @@ root.render(
     <BrowserRouter>
       <AppThemeProvider>
         <AuthProvider>
-          <App />
+          <FocusRailProvider>
+            <App />
+          </FocusRailProvider>
         </AuthProvider>
       </AppThemeProvider>
     </BrowserRouter>
