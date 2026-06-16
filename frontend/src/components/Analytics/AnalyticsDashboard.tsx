@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Card,
@@ -49,6 +49,19 @@ import {
 import { EISENHOWER_QUADRANTS, TODO_STATUS_CONFIG } from '@productivity-app/shared';
 import { quadrantColors, statusColors, priorityColors } from '../../theme/theme';
 import { useAnalytics, TIME_RANGE_OPTIONS, type TimeRange } from '../../hooks/useAnalytics';
+import { useFocusRail, type AnalyticsTimeRange } from '../../contexts/FocusRailContext';
+
+const RAIL_RANGE_MAP: Record<AnalyticsTimeRange, TimeRange> = {
+  '7d': '7',
+  '30d': '30',
+  '90d': '90',
+};
+
+const ANALYTICS_RANGE_MAP: Partial<Record<TimeRange, AnalyticsTimeRange>> = {
+  '7': '7d',
+  '30': '30d',
+  '90': '90d',
+};
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
@@ -250,8 +263,21 @@ function renderOuterPieLabel(props: any) {
 
 export function AnalyticsDashboard() {
   const theme = useTheme();
+  const { analyticsRange, setAnalyticsRange } = useFocusRail();
   const { matrix, trends, writing, diary, loading, error, timeRange, setTimeRange, refresh } =
     useAnalytics();
+
+  useEffect(() => {
+    setTimeRange(RAIL_RANGE_MAP[analyticsRange]);
+  }, [analyticsRange, setTimeRange]);
+
+  const handleTimeRangeChange = (range: TimeRange) => {
+    setTimeRange(range);
+    const railRange = ANALYTICS_RANGE_MAP[range];
+    if (railRange) {
+      setAnalyticsRange(railRange);
+    }
+  };
 
   if (loading && !matrix && !trends) {
     return (
@@ -362,7 +388,7 @@ export function AnalyticsDashboard() {
             exclusive
             value={timeRange}
             onChange={(_, v: TimeRange | null) => {
-              if (v) setTimeRange(v);
+              if (v) handleTimeRangeChange(v);
             }}
           >
             {TIME_RANGE_OPTIONS.map((opt) => (
