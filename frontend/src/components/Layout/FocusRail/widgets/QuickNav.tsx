@@ -14,10 +14,10 @@ export function QuickNav() {
   const navigate = useNavigate();
 
   const items = [
-    { label: 'Todos', path: '/todos', icon: <TodoIcon fontSize="small" /> },
-    { label: 'Matrix', path: '/matrix', icon: <MatrixIcon fontSize="small" /> },
-    { label: 'Diary', path: '/diary', icon: <DiaryIcon fontSize="small" /> },
-    { label: 'Blog', path: '/blog', icon: <BlogIcon fontSize="small" /> },
+    { label: 'Todos', path: '/todos', icon: <TodoIcon sx={{ fontSize: 18 }} /> },
+    { label: 'Matrix', path: '/matrix', icon: <MatrixIcon sx={{ fontSize: 18 }} /> },
+    { label: 'Diary', path: '/diary', icon: <DiaryIcon sx={{ fontSize: 18 }} /> },
+    { label: 'Blog', path: '/blog', icon: <BlogIcon sx={{ fontSize: 18 }} /> },
   ];
 
   return (
@@ -25,7 +25,7 @@ export function QuickNav() {
       <Typography component="span" sx={railSectionTitle}>
         Quick navigation
       </Typography>
-      <Stack spacing={0} className="feed-divider">
+      <Stack spacing={0} className="feed-divider" sx={{ width: '100%' }}>
         {items.map((item) => (
           <Box
             key={item.label}
@@ -33,10 +33,12 @@ export function QuickNav() {
             type="button"
             onClick={() => navigate(item.path)}
             sx={{
-              py: 1.25,
-              display: 'flex',
+              py: 1,
+              px: 0,
+              display: 'grid',
+              gridTemplateColumns: '20px 1fr 16px',
               alignItems: 'center',
-              gap: 1.5,
+              columnGap: 1,
               cursor: 'pointer',
               color: 'text.secondary',
               border: 'none',
@@ -47,11 +49,13 @@ export function QuickNav() {
               '&:hover': { color: 'primary.main' },
             }}
           >
-            {item.icon}
-            <Typography variant="body2" fontWeight={500} sx={{ flex: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {item.icon}
+            </Box>
+            <Typography variant="body2" fontWeight={500} noWrap>
               {item.label}
             </Typography>
-            <ChevronRight sx={{ fontSize: 16, opacity: 0.5 }} />
+            <ChevronRight sx={{ fontSize: 16, opacity: 0.45, justifySelf: 'end' }} />
           </Box>
         ))}
       </Stack>

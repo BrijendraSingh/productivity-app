@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Divider } from '@mui/material';
+import { Box } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { useFocusRail } from '../../../contexts/FocusRailContext';
 import { useFocusRailData } from '../../../hooks/useFocusRailData';
@@ -19,10 +19,11 @@ import { railContent } from './railStyles';
 
 function RailSection({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <Divider sx={{ my: 2 }} />
+    <Box
+      sx={{ width: '100%', minWidth: 0, pt: 1.5, mt: 1.5, borderTop: 1, borderColor: 'divider' }}
+    >
       {children}
-    </>
+    </Box>
   );
 }
 
@@ -30,7 +31,9 @@ function DashboardWidgets() {
   const { stats, upcomingTodos, loading } = useFocusRailData();
   return (
     <>
-      <DailyProgress stats={stats} loading={loading} />
+      <RailSection>
+        <DailyProgress stats={stats} loading={loading} />
+      </RailSection>
       <RailSection>
         <UpcomingDeadlines todos={upcomingTodos} loading={loading} />
       </RailSection>
@@ -47,7 +50,9 @@ function TodosWidgets() {
 
   return (
     <>
-      <QuickCapture />
+      <RailSection>
+        <QuickCapture />
+      </RailSection>
       {selectedTodoId ? (
         <RailSection>
           <TodoInspector todoId={selectedTodoId} />
@@ -126,7 +131,13 @@ export function RouteWidgets() {
       <RailSection>
         <QuadrantPulse stats={stats} loading={loading} />
       </RailSection>
-      {pageWidgets ?? routeContent}
+      {pageWidgets ??
+        (routeContent &&
+          (['diary', 'journal', 'blog', 'analytics'].includes(route) ? (
+            <RailSection>{routeContent}</RailSection>
+          ) : (
+            routeContent
+          )))}
     </Box>
   );
 }

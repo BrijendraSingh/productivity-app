@@ -24,7 +24,7 @@ export function UpcomingDeadlines({ todos, loading }: UpcomingDeadlinesProps) {
         Upcoming deadlines
       </Typography>
       {todos.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" sx={{ py: 1, lineHeight: 1.5 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5, m: 0 }}>
           No due dates in the next 7 days.
         </Typography>
       ) : (
