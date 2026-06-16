@@ -73,38 +73,53 @@ export function FocusRail() {
         }}
       >
         {!collapsed && (
-          <>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                px: 1,
-                pt: 1,
-                flexShrink: 0,
-              }}
-            >
-              <Tooltip title="Collapse panel" placement="left">
-                <IconButton
-                  size="small"
-                  onClick={toggleCollapsed}
-                  aria-label="Collapse focus panel"
-                >
-                  <CollapseIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
+          <Box
+            sx={{
+              flex: 1,
+              minHeight: 0,
+              minWidth: 0,
+              width: '100%',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Tooltip title="Collapse panel" placement="left">
+              <IconButton
+                size="small"
+                onClick={toggleCollapsed}
+                aria-label="Collapse focus panel"
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  zIndex: 2,
+                  bgcolor: 'background.paper',
+                  border: 1,
+                  borderColor: 'divider',
+                  boxShadow: 1,
+                }}
+              >
+                <CollapseIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
             <Box
               sx={{
                 flex: 1,
                 overflowY: 'auto',
-                px: 2.5,
+                overflowX: 'hidden',
+                px: 2,
+                pt: 4.5,
                 pb: 3,
                 minHeight: 0,
+                minWidth: 0,
+                width: '100%',
+                boxSizing: 'border-box',
               }}
             >
               <RouteWidgets />
             </Box>
-          </>
+          </Box>
         )}
       </Box>
 

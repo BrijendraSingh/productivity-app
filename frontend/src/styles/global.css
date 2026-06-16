@@ -37,6 +37,13 @@ body {
 
 .focus-rail {
   -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+.focus-rail *,
+.focus-rail *::before,
+.focus-rail *::after {
+  box-sizing: border-box;
 }
 
 .focus-rail::-webkit-scrollbar,
