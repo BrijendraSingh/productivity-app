@@ -40,6 +40,7 @@ import { APP_CONFIG } from '@productivity-app/shared';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginDialog } from '../Auth/LoginDialog';
 import { designTokens } from '../../theme/theme';
+import { FocusRail } from './FocusRail/FocusRail';
 
 const DRAWER_WIDTH = 248;
 const APP_TAGLINE = 'Focus on what matters';
@@ -300,18 +301,20 @@ export function AppLayout() {
             </Toolbar>
           </AppBar>
 
-          <Box
-            component="main"
-            className="app-main-scroll"
-            sx={{
-              flex: 1,
-              px: { xs: 2, sm: 3, lg: 4 },
-              py: { xs: 2.5, sm: 3 },
-              maxWidth: 1200,
-              width: '100%',
-            }}
-          >
-            <Outlet />
+          <Box sx={{ flex: 1, display: 'flex', minHeight: 0, minWidth: 0 }}>
+            <Box
+              component="main"
+              className="app-main-scroll"
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                px: { xs: 2, sm: 3, lg: 4 },
+                py: { xs: 2.5, sm: 3 },
+              }}
+            >
+              <Outlet />
+            </Box>
+            <FocusRail />
           </Box>
         </Box>
       </Box>
@@ -332,7 +335,7 @@ export function AppLayout() {
               window.dispatchEvent(new CustomEvent(eventName));
             }
           }}
-          sx={{ position: 'fixed', bottom: 28, right: 28 }}
+          sx={{ position: 'fixed', bottom: 28, right: 'calc(28px + var(--focus-rail-width, 0px))' }}
         >
           <AddIcon />
         </Fab>

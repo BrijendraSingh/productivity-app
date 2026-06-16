@@ -35,6 +35,21 @@ body {
   background-color: #f0f2f5;
 }
 
+.focus-rail {
+  -webkit-overflow-scrolling: touch;
+}
+
+.focus-rail::-webkit-scrollbar,
+.app-main-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.focus-rail::-webkit-scrollbar-thumb,
+.app-main-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
 /* Page typography */
 .display-heading {
   font-family: "Source Serif 4", Georgia, serif;
