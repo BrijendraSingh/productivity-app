@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, Skeleton, CircularProgress } from '@mui/material';
 import type { DashboardStats } from '@productivity-app/shared';
 import { designTokens } from '../../../../theme/theme';
+import { railContent } from '../railStyles';
 
 interface DailyProgressProps {
   stats: DashboardStats | null;
@@ -10,7 +11,7 @@ interface DailyProgressProps {
 
 export function DailyProgress({ stats, loading }: DailyProgressProps) {
   if (loading || !stats) {
-    return <Skeleton variant="rounded" height={100} />;
+    return <Skeleton variant="rounded" height={100} sx={{ width: '100%' }} />;
   }
 
   const total = stats.todos.total;
@@ -18,7 +19,7 @@ export function DailyProgress({ stats, loading }: DailyProgressProps) {
   const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+    <Box sx={{ ...railContent, display: 'flex', alignItems: 'center', gap: 2 }}>
       <Box sx={{ position: 'relative', display: 'inline-flex' }}>
         <CircularProgress
           variant="determinate"

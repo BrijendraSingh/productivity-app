@@ -8,6 +8,7 @@ import {
   ChevronRight,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { railContent, railSectionTitle } from '../railStyles';
 
 export function QuickNav() {
   const navigate = useNavigate();
@@ -20,8 +21,8 @@ export function QuickNav() {
   ];
 
   return (
-    <Box>
-      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
+    <Box sx={railContent}>
+      <Typography component="span" sx={railSectionTitle}>
         Quick navigation
       </Typography>
       <Stack spacing={0} className="feed-divider">

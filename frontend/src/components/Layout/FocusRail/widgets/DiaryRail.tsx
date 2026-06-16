@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import type { DashboardStats, DiaryEntry } from '@productivity-app/shared';
 import { diaryApi } from '../../../../services/api';
 import { designTokens } from '../../../../theme/theme';
+import { railCard, railContent, railFullWidthButton } from '../railStyles';
 
 interface DiaryRailProps {
   stats: DashboardStats | null;
@@ -28,27 +29,27 @@ export function DiaryRail({ stats, loading }: DiaryRailProps) {
   }, []);
 
   if (loading) {
-    return <Skeleton variant="rounded" height={120} />;
+    return <Skeleton variant="rounded" height={120} sx={{ width: '100%' }} />;
   }
 
   const streak = stats?.diary.streak ?? 0;
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <Box>
+    <Box sx={railContent}>
       <Box
         sx={{
+          ...railCard,
           display: 'flex',
           alignItems: 'center',
           gap: 1,
-          p: 1.5,
           mb: 2,
-          borderRadius: 1,
           bgcolor: designTokens.colors.primarySoft,
+          border: `1px solid ${designTokens.colors.borderLight}`,
         }}
       >
-        <StreakIcon sx={{ color: '#7c3aed' }} />
-        <Box>
+        <StreakIcon sx={{ color: '#7c3aed', flexShrink: 0 }} />
+        <Box sx={{ minWidth: 0 }}>
           <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1 }}>
             {streak}
           </Typography>
@@ -62,14 +63,14 @@ export function DiaryRail({ stats, loading }: DiaryRailProps) {
         variant="contained"
         startIcon={<EditIcon />}
         onClick={() => navigate(`/diary/${today}`)}
-        sx={{ mb: 2 }}
+        sx={{ ...railFullWidthButton, mb: 2 }}
       >
         Write today
       </Button>
       {entryLoading ? (
         <Skeleton variant="text" width="80%" />
       ) : lastEntry ? (
-        <Box>
+        <Box sx={railContent}>
           <Typography variant="caption" color="text.secondary" fontWeight={600}>
             Last entry
           </Typography>
@@ -95,7 +96,7 @@ export function DiaryRail({ stats, loading }: DiaryRailProps) {
           )}
         </Box>
       ) : (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5 }}>
           Start your diary to build a streak.
         </Typography>
       )}

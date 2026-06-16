@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { useAuth } from '../../../../contexts/AuthContext';
+import { railContent } from '../railStyles';
 
 export function RailHeader() {
   const { user } = useAuth();
@@ -20,7 +21,7 @@ export function RailHeader() {
   });
 
   return (
-    <Box>
+    <Box sx={railContent}>
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>
         {dateStr}
       </Typography>

@@ -4,6 +4,7 @@ import { Warning as WarningIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import type { TodoWithRelations } from '@productivity-app/shared';
 import { designTokens, surface, quadrantColors } from '../../../../theme/theme';
+import { railContent, railSectionTitle } from '../railStyles';
 
 interface OverdueUrgentProps {
   todos: TodoWithRelations[];
@@ -14,17 +15,17 @@ export function OverdueUrgent({ todos }: OverdueUrgentProps) {
 
   if (todos.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5 }}>
         No overdue or urgent tasks. You&apos;re on track.
       </Typography>
     );
   }
 
   return (
-    <Box>
+    <Box sx={railContent}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.5 }}>
         <WarningIcon sx={{ fontSize: 18, color: designTokens.colors.error }} />
-        <Typography variant="subtitle2" fontWeight={600}>
+        <Typography component="span" sx={railSectionTitle}>
           Overdue &amp; urgent
         </Typography>
       </Box>

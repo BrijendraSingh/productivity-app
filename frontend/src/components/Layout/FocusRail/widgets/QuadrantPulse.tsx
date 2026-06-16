@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { DashboardStats } from '@productivity-app/shared';
 import { EISENHOWER_QUADRANTS, type EisenhowerQuadrant } from '@productivity-app/shared';
 import { quadrantColors } from '../../../../theme/theme';
+import { railContent, railGrid4, railSectionTitle } from '../railStyles';
 
 interface QuadrantPulseProps {
   stats: DashboardStats | null;
@@ -17,10 +18,15 @@ export function QuadrantPulse({ stats, loading }: QuadrantPulseProps) {
 
   if (loading || !stats) {
     return (
-      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
-        {QUADRANTS.map((q) => (
-          <Skeleton key={q} variant="rounded" width={56} height={48} />
-        ))}
+      <Box sx={railContent}>
+        <Typography component="span" sx={railSectionTitle}>
+          Quadrant pulse
+        </Typography>
+        <Box sx={railGrid4}>
+          {QUADRANTS.map((q) => (
+            <Skeleton key={q} variant="rounded" height={56} sx={{ width: '100%' }} />
+          ))}
+        </Box>
       </Box>
     );
   }
@@ -33,69 +39,69 @@ export function QuadrantPulse({ stats, loading }: QuadrantPulseProps) {
   };
 
   return (
-    <Box>
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        fontWeight={600}
-        sx={{ mb: 1, display: 'block' }}
-      >
+    <Box sx={railContent}>
+      <Typography component="span" sx={railSectionTitle}>
         Quadrant pulse
       </Typography>
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0.75 }}>
+      <Box sx={railGrid4}>
         {QUADRANTS.map((q) => {
           const color = quadrantColors[q];
           const count = counts[q];
           const label = EISENHOWER_QUADRANTS[q].label;
           return (
             <Tooltip key={q} title={`${q}: ${label} (${count})`} arrow>
-              <Box
-                component="button"
-                type="button"
-                onClick={() => navigate(`/todos?quadrant=${q}`)}
-                sx={{
-                  border: `1px solid ${alpha(color, 0.25)}`,
-                  borderRadius: 1,
-                  bgcolor: alpha(color, 0.06),
-                  py: 1,
-                  px: 0.5,
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  transition: 'all 0.15s ease',
-                  '&:hover': {
-                    bgcolor: alpha(color, 0.12),
-                    borderColor: alpha(color, 0.45),
-                  },
-                }}
-              >
+              <Box sx={{ width: '100%', minWidth: 0 }}>
                 <Box
+                  component="button"
+                  type="button"
+                  onClick={() => navigate(`/todos?quadrant=${q}`)}
                   sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    bgcolor: color,
-                    mx: 'auto',
-                    mb: 0.5,
-                  }}
-                />
-                <Typography
-                  variant="caption"
-                  fontWeight={700}
-                  sx={{ color, display: 'block', lineHeight: 1 }}
-                >
-                  {q}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  fontWeight={700}
-                  sx={{
-                    fontFamily: '"Source Serif 4", serif',
-                    color: 'text.primary',
-                    lineHeight: 1.2,
+                    width: '100%',
+                    minWidth: 0,
+                    boxSizing: 'border-box',
+                    border: `1px solid ${alpha(color, 0.25)}`,
+                    borderRadius: 1,
+                    bgcolor: alpha(color, 0.06),
+                    py: 1,
+                    px: 0.5,
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.15s ease',
+                    '&:hover': {
+                      bgcolor: alpha(color, 0.12),
+                      borderColor: alpha(color, 0.45),
+                    },
                   }}
                 >
-                  {count}
-                </Typography>
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      bgcolor: color,
+                      mx: 'auto',
+                      mb: 0.5,
+                    }}
+                  />
+                  <Typography
+                    variant="caption"
+                    fontWeight={700}
+                    sx={{ color, display: 'block', lineHeight: 1 }}
+                  >
+                    {q}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    fontWeight={700}
+                    sx={{
+                      fontFamily: '"Source Serif 4", serif',
+                      color: 'text.primary',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {count}
+                  </Typography>
+                </Box>
               </Box>
             </Tooltip>
           );

@@ -15,6 +15,7 @@ import { DiaryRail } from './widgets/DiaryRail';
 import { JournalRail } from './widgets/JournalRail';
 import { BlogRail } from './widgets/BlogRail';
 import { AnalyticsRail } from './widgets/AnalyticsRail';
+import { railContent } from './railStyles';
 
 function RailSection({ children }: { children: React.ReactNode }) {
   return (
@@ -120,7 +121,7 @@ export function RouteWidgets() {
   }
 
   return (
-    <Box>
+    <Box sx={railContent}>
       <RailHeader />
       <RailSection>
         <QuadrantPulse stats={stats} loading={loading} />

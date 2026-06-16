@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useFocusRail, type AnalyticsTimeRange } from '../../../../contexts/FocusRailContext';
+import { railContent, railFullWidthButton, railSectionTitle } from '../railStyles';
 
 const RANGES: { value: AnalyticsTimeRange; label: string }[] = [
   { value: '7d', label: '7 days' },
@@ -12,8 +13,8 @@ export function AnalyticsRail() {
   const { analyticsRange, setAnalyticsRange } = useFocusRail();
 
   return (
-    <Box>
-      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
+    <Box sx={railContent}>
+      <Typography component="span" sx={railSectionTitle}>
         Date range
       </Typography>
       <ToggleButtonGroup
@@ -26,11 +27,18 @@ export function AnalyticsRail() {
         fullWidth
         size="small"
         sx={{
+          ...railFullWidthButton,
+          '& .MuiToggleButtonGroup-grouped': {
+            width: '100%',
+            boxSizing: 'border-box',
+          },
           '& .MuiToggleButton-root': {
             textTransform: 'none',
             fontWeight: 500,
             justifyContent: 'flex-start',
             px: 2,
+            width: '100%',
+            boxSizing: 'border-box',
           },
         }}
       >

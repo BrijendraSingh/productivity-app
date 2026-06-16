@@ -5,6 +5,7 @@ import type { Priority, CreateTodoRequest } from '@productivity-app/shared';
 import { priorityColors } from '../../../../theme/theme';
 import { todosApi } from '../../../../services/api';
 import { dispatchTodosChanged } from '../../../../utils/events';
+import { railContent, railSectionTitle } from '../railStyles';
 
 interface QuickCaptureProps {
   onCreate?: (body: CreateTodoRequest) => Promise<boolean>;
@@ -39,8 +40,8 @@ export function QuickCapture({ onCreate }: QuickCaptureProps) {
   };
 
   return (
-    <Box>
-      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
+    <Box sx={railContent}>
+      <Typography component="span" sx={railSectionTitle}>
         Quick capture
       </Typography>
       <TextField
@@ -70,9 +71,15 @@ export function QuickCapture({ onCreate }: QuickCaptureProps) {
             ),
           },
         }}
-        sx={{ mb: 1.25 }}
+        sx={{ mb: 1.25, width: '100%' }}
       />
-      <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+      <Stack
+        direction="row"
+        spacing={0.75}
+        flexWrap="wrap"
+        useFlexGap
+        sx={{ width: '100%', minWidth: 0 }}
+      >
         {PRIORITIES.map((p) => (
           <Chip
             key={p}

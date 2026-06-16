@@ -11,6 +11,7 @@ import {
 import { todosApi } from '../../../../services/api';
 import { quadrantColors, statusColors } from '../../../../theme/theme';
 import { dispatchTodosChanged } from '../../../../utils/events';
+import { railContent, railSectionTitle } from '../railStyles';
 
 interface TodoInspectorProps {
   todoId: number | null;
@@ -72,8 +73,8 @@ export function TodoInspector({ todoId }: TodoInspectorProps) {
   };
 
   return (
-    <Box>
-      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+    <Box sx={railContent}>
+      <Typography component="span" sx={railSectionTitle}>
         Task inspector
       </Typography>
       <Typography variant="body1" fontWeight={600} sx={{ mb: 1, lineHeight: 1.4 }}>
@@ -120,7 +121,7 @@ export function TodoInspector({ todoId }: TodoInspectorProps) {
         </Typography>
       )}
       <Divider sx={{ my: 1.5 }} />
-      <Stack direction="row" spacing={1}>
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ width: '100%' }}>
         {!isCompleted && (
           <Button
             size="small"
