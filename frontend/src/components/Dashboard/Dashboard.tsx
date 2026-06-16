@@ -438,51 +438,6 @@ function RecentActivity({ loading }: { loading: boolean }) {
   );
 }
 
-function QuickNav() {
-  const navigate = useNavigate();
-
-  const items = [
-    { label: 'Todos', path: '/todos', icon: <TodoIcon fontSize="small" /> },
-    { label: 'Matrix', path: '/matrix', icon: <MatrixIcon fontSize="small" /> },
-    { label: 'Diary', path: '/diary', icon: <DiaryIcon fontSize="small" /> },
-    { label: 'Blog', path: '/blog', icon: <BlogIcon fontSize="small" /> },
-  ];
-
-  return (
-    <Card>
-      <CardContent sx={{ p: 2.5 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
-          Quick navigation
-        </Typography>
-        <Stack spacing={0} className="feed-divider">
-          {items.map((item) => (
-            <Box
-              key={item.label}
-              onClick={() => navigate(item.path)}
-              sx={{
-                py: 1.25,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                cursor: 'pointer',
-                color: 'text.secondary',
-                transition: 'color 0.15s',
-                '&:hover': { color: 'primary.main' },
-              }}
-            >
-              {item.icon}
-              <Typography variant="body2" fontWeight={500} sx={{ flex: 1 }}>
-                {item.label}
-              </Typography>
-              <ChevronRight sx={{ fontSize: 16, opacity: 0.5 }} />
-            </Box>
-          ))}
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-}
-
 export function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -595,14 +550,11 @@ export function Dashboard() {
       </Box>
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <SimpleAnalytics stats={stats} loading={loading} />
         </Grid>
-        <Grid size={{ xs: 12, md: 5 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <RecentActivity loading={loading} />
-        </Grid>
-        <Grid size={{ xs: 12, md: 3 }}>
-          <QuickNav />
         </Grid>
       </Grid>
     </Box>
