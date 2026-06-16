@@ -44,3 +44,11 @@ export const railFullWidthButton: SxProps<Theme> = {
   maxWidth: '100%',
   boxSizing: 'border-box',
 };
+
+/** Matches main content vertical rhythm in AppLayout. */
+export const railPanelPadding: SxProps<Theme> = {
+  px: { xs: 2, sm: 2.5 },
+  py: { xs: 2.5, sm: 3 },
+};
+
+export const railToolbarHeight = { xs: 56, sm: 60 } as const;
