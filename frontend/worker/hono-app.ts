@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { body, param } from 'express-validator';
-import { APP_CONFIG, API_ENDPOINTS } from '@productivity-app/shared';
+import { APP_CONFIG, API_ENDPOINTS, EMAIL_NORMALIZE_OPTIONS } from '@productivity-app/shared';
 import { authMiddleware } from '../../backend/src/middleware/auth';
 import { registrationGate } from '../../backend/src/middleware/registrationGate';
 import { validate } from '../../backend/src/middleware/validation';
@@ -58,7 +58,7 @@ export function createHonoApp(nodeEnv = 'production'): Hono {
         body('email')
           .trim()
           .isEmail()
-          .normalizeEmail()
+          .normalizeEmail(EMAIL_NORMALIZE_OPTIONS)
           .withMessage('A valid email address is required.'),
         body('password')
           .isLength({ min: APP_CONFIG.PASSWORD_MIN_LENGTH })

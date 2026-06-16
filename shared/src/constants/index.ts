@@ -259,3 +259,15 @@ export const APP_CONFIG = {
   USER_STORAGE_KEY: 'user',
   THEME_STORAGE_KEY: 'productivity_app_theme',
 } as const;
+
+/**
+ * express-validator normalizeEmail options.
+ * Preserve plus-addressing (user+tag@gmail.com) and Gmail dots so aliases stay distinct.
+ */
+export const EMAIL_NORMALIZE_OPTIONS = {
+  gmail_remove_subaddress: false,
+  gmail_remove_dots: false,
+  outlookdotcom_remove_subaddress: false,
+  yahoo_remove_subaddress: false,
+  icloud_remove_subaddress: false,
+} as const;

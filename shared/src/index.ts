@@ -91,6 +91,7 @@ export {
   DEFAULT_TAGS,
   TODO_STATUS_CONFIG,
   APP_CONFIG,
+  EMAIL_NORMALIZE_OPTIONS,
 } from './constants/index.js';
 
 // Utilities

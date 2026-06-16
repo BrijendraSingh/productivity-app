@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { APP_CONFIG } from '@productivity-app/shared';
+import { APP_CONFIG, EMAIL_NORMALIZE_OPTIONS } from '@productivity-app/shared';
 import { authMiddleware } from '../middleware/auth';
 import { registrationGate } from '../middleware/registrationGate';
 import { validate } from '../middleware/validation';
@@ -20,7 +20,7 @@ router.post(
     body('email')
       .trim()
       .isEmail()
-      .normalizeEmail()
+      .normalizeEmail(EMAIL_NORMALIZE_OPTIONS)
       .withMessage('A valid email address is required.'),
     body('password')
       .isLength({ min: APP_CONFIG.PASSWORD_MIN_LENGTH })
