@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Box, IconButton, Tooltip, useMediaQuery, useTheme } from '@mui/material';
+import { Box, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { ChevronRight as CollapseIcon, ChevronLeft as ExpandIcon } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { APP_CONFIG } from '@productivity-app/shared';
 import { useAuth } from '../../../contexts/AuthContext';
 import { designTokens } from '../../../theme/theme';
 import { RouteWidgets } from './RouteWidgets';
+import { railPanelPadding, railToolbarHeight } from './railStyles';
 
 const RAIL_COLLAPSED_KEY = `${APP_CONFIG.TOKEN_STORAGE_KEY}_focus_rail_collapsed`;
 const RAIL_WIDTH_LG = 280;
@@ -73,53 +74,54 @@ export function FocusRail() {
         }}
       >
         {!collapsed && (
-          <Box
-            sx={{
-              flex: 1,
-              minHeight: 0,
-              minWidth: 0,
-              width: '100%',
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <Tooltip title="Collapse panel" placement="left">
-              <IconButton
-                size="small"
-                onClick={toggleCollapsed}
-                aria-label="Collapse focus panel"
-                sx={{
-                  position: 'absolute',
-                  top: 8,
-                  right: 8,
-                  zIndex: 2,
-                  bgcolor: 'background.paper',
-                  border: 1,
-                  borderColor: 'divider',
-                  boxShadow: 1,
-                }}
+          <>
+            <Box
+              sx={{
+                height: railToolbarHeight,
+                minHeight: railToolbarHeight,
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                px: 2,
+                borderBottom: 1,
+                borderColor: 'divider',
+                boxSizing: 'border-box',
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={600}
+                sx={{ letterSpacing: '0.04em', textTransform: 'uppercase' }}
               >
-                <CollapseIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+                Focus
+              </Typography>
+              <Tooltip title="Collapse panel" placement="left">
+                <IconButton
+                  size="small"
+                  onClick={toggleCollapsed}
+                  aria-label="Collapse focus panel"
+                >
+                  <CollapseIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
             <Box
               sx={{
                 flex: 1,
                 overflowY: 'auto',
                 overflowX: 'hidden',
-                px: 2,
-                pt: 4.5,
-                pb: 3,
                 minHeight: 0,
                 minWidth: 0,
                 width: '100%',
                 boxSizing: 'border-box',
+                ...railPanelPadding,
               }}
             >
               <RouteWidgets />
             </Box>
-          </Box>
+          </>
         )}
       </Box>
 

@@ -221,7 +221,7 @@ export function AppLayout() {
           </SwipeableDrawer>
         )}
 
-        {/* Right column: header + content */}
+        {/* Center: header + main */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0 }}>
           <AppBar
             position="static"
@@ -301,22 +301,22 @@ export function AppLayout() {
             </Toolbar>
           </AppBar>
 
-          <Box sx={{ flex: 1, display: 'flex', minHeight: 0, minWidth: 0 }}>
-            <Box
-              component="main"
-              className="app-main-scroll"
-              sx={{
-                flex: 1,
-                minWidth: 0,
-                px: { xs: 2, sm: 3, lg: 4 },
-                py: { xs: 2.5, sm: 3 },
-              }}
-            >
-              <Outlet />
-            </Box>
-            <FocusRail />
+          <Box
+            component="main"
+            className="app-main-scroll"
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              minHeight: 0,
+              px: { xs: 2, sm: 3, lg: 4 },
+              py: { xs: 2.5, sm: 3 },
+            }}
+          >
+            <Outlet />
           </Box>
         </Box>
+
+        <FocusRail />
       </Box>
 
       {isAuthenticated && fabLabel && (
