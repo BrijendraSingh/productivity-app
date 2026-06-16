@@ -119,7 +119,7 @@ npm run start
 
 ### Cloudflare (free tier — full stack)
 
-Host the **SPA + API + D1 database** on **Cloudflare Workers**. See **[CLOUDFLARE.md](CLOUDFLARE.md)** for D1 setup, build settings, and troubleshooting.
+Host the **SPA + API + D1 database** on **Cloudflare Workers** (no separate backend). See **[CLOUDFLARE.md](CLOUDFLARE.md)** for the full runbook: one-time setup, deploy commands, verification checklist, and debugging guide.
 
 ### Oracle Cloud (full stack)
 
@@ -179,23 +179,25 @@ All endpoints under `/api/*` (except auth) require a bearer token in the `Author
 
 ## Available Scripts
 
-| Script                   | Description                                        |
-| ------------------------ | -------------------------------------------------- |
-| `npm run dev`            | Start all workspaces in development mode           |
-| `npm run build`          | Build shared, backend, and frontend for production |
-| `npm run start`          | Start the production backend server                |
-| `npm run clean`          | Remove all `node_modules` and `dist` directories   |
-| `npm run lint`           | Run ESLint across all workspaces                   |
-| `npm run lint:fix`       | Run ESLint with auto-fix                           |
-| `npm run format`         | Format all files with Prettier                     |
-| `npm run format:check`   | Check formatting without writing                   |
-| `npm run test:unit`      | Run Vitest unit tests                              |
-| `npm test`               | Run tests across all workspaces                    |
-| `npm run docker:build`   | Build the Docker image                             |
-| `npm run docker:up`      | Start production container                         |
-| `npm run docker:up:all`  | Start app + SQLite web UI                          |
-| `npm run docker:down`    | Stop all containers                                |
-| `npm run docker:rebuild` | Rebuild and start containers                       |
+| Script                      | Description                                        |
+| --------------------------- | -------------------------------------------------- |
+| `npm run dev`               | Start all workspaces in development mode           |
+| `npm run build`             | Build shared, backend, and frontend for production |
+| `npm run start`             | Start the production backend server                |
+| `npm run clean`             | Remove all `node_modules` and `dist` directories   |
+| `npm run lint`              | Run ESLint across all workspaces                   |
+| `npm run lint:fix`          | Run ESLint with auto-fix                           |
+| `npm run format`            | Format all files with Prettier                     |
+| `npm run format:check`      | Check formatting without writing                   |
+| `npm run test:unit`         | Run Vitest unit tests                              |
+| `npm test`                  | Run tests across all workspaces                    |
+| `npm run docker:build`      | Build the Docker image                             |
+| `npm run docker:up`         | Start production container                         |
+| `npm run docker:up:all`     | Start app + SQLite web UI                          |
+| `npm run docker:down`       | Stop all containers                                |
+| `npm run docker:rebuild`    | Rebuild and start containers                       |
+| `npm run build:cloudflare`  | Build shared + frontend for Cloudflare Workers     |
+| `npm run deploy:cloudflare` | Build, migrate D1, and deploy to Cloudflare        |
 
 ## Testing
 
